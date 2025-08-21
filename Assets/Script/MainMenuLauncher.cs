@@ -51,6 +51,7 @@ public class MainMenuLauncher : MonoBehaviourPunCallbacks
     public override void OnConnectedToMaster()
     {
         Debug.Log(nickname + " connected to master");
+        PhotonNetwork.JoinRandomOrCreateRoom();
         SceneManager.LoadScene(gameSceneName);
        
     }

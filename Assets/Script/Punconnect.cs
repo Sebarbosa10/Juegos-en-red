@@ -11,24 +11,21 @@ public class Punconnect : MonoBehaviourPunCallbacks
 
     private int currentSpawnIndex = 0;
 
-    void Start()
-    {
-        PhotonNetwork.JoinRandomOrCreateRoom();
-    }
 
     public override void OnJoinedRoom()
     {
-     
-
-       
-        GameObject player = PhotonNetwork.Instantiate(
-            playerPrefab.name,
-            GetPlayerSpawnPosition().position,
-            playerSpawn.rotation,
-            0);
+        Debug.Log("[Photon] OnJoinedRoom");
+        var prefabName = "Player"; 
+        var pos = Vector3.zero;
+        var rot = Quaternion.identity;
 
         
+        if (playerSpawn != null) { pos = playerSpawn.position; rot = playerSpawn.rotation; }
+
+        GameObject go = PhotonNetwork.Instantiate(prefabName, pos, rot);
+        if (go == null) Debug.LogError("[Photon] No se pudo instanciar el Player (revisá Resources y nombre).");
     }
+
 
     private Transform GetPlayerSpawnPosition()
     {
