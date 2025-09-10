@@ -12,7 +12,6 @@ GameObject:
   - component: {fileID: 277459233311075502}
   - component: {fileID: 2019816808381961875}
   - component: {fileID: 4625866269111613864}
-  - component: {fileID: 7177261368864049564}
   - component: {fileID: -2886576116896669277}
   - component: {fileID: 913842864554160270}
   - component: {fileID: 155246616422037295}
@@ -104,23 +103,6 @@ BoxCollider:
   serializedVersion: 2
   m_Size: {x: 1, y: 1, z: 1}
   m_Center: {x: 0, y: 0, z: 0}
---- !u!114 &7177261368864049564
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 659907106617431138}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 004f833ec19769f49aa9c4b873abab22, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  renderersToTint: []
-  yellowMat: {fileID: 2100000, guid: 0c9aa51301ad37b40b9eb9137cc62ff8, type: 2}
-  purpleMat: {fileID: 2100000, guid: cfcd6325ddee86945a2a8c0bc783fae8, type: 2}
-  fallbackYellow: {r: 1, g: 0.85, b: 0.1, a: 1}
-  fallbackPurple: {r: 0.5, g: 0.2, b: 0.8, a: 1}
 --- !u!114 &-2886576116896669277
 MonoBehaviour:
   m_ObjectHideFlags: 0
