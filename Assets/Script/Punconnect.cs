@@ -4,58 +4,38 @@ using UnityEngine;
 using Photon.Pun;
 using ExitGames.Client.Photon;
 
+
+
 public class Punconnect : MonoBehaviourPunCallbacks
 {
-    [Header("Spawn")]
-    [SerializeField] private string playerPrefabName = "Player"; 
-    [SerializeField] private List<Transform> spawnPoints = new List<Transform>();
-    [SerializeField] private Transform fallbackSpawn;
+    [SerializeField] private PhotonView playerPrefab;
+    [SerializeField] private Transform playerSpawn;
+    [SerializeField] private List<Transform> playerSpawnPositions = new List<Transform>();
 
-    private const string TEAM_KEY = "team";
+    private int currentSpawnIndex = 0;
 
     public override void OnJoinedRoom()
     {
         Debug.Log("[Photon] OnJoinedRoom");
-        StartCoroutine(WaitTeamAndSpawn());
+        var prefabName = "Player";
+        var pos = Vector3.zero;
+        var rot = Quaternion.identity;
+
+        if (playerSpawn != null) { pos = playerSpawn.position; rot = playerSpawn.rotation; }
+
+        GameObject go = PhotonNetwork.Instantiate(prefabName, pos, rot);
+        if (go == null) Debug.LogError("[Photon] No se pudo instanciar el Player (revisá Resources y nombre).");
     }
 
-    private IEnumerator WaitTeamAndSpawn()
+    private Transform GetPlayerSpawnPosition()
     {
-        // Esperar hasta que el Master nos asigne el equipo
-        while (!PhotonNetwork.LocalPlayer.CustomProperties.ContainsKey(TEAM_KEY))
-            yield return null;
+        if (playerSpawnPositions.Count == 0)
+            return playerSpawn;
 
-        int teamInt = (int)PhotonNetwork.LocalPlayer.CustomProperties[TEAM_KEY];
-        Team team = (Team)teamInt;
-
-        Transform p = GetSpawnFor(team);
-        Vector3 pos = p ? p.position : Vector3.zero;
-        Quaternion rot = p ? p.rotation : Quaternion.identity;
-
-        // Pasamos el team en instantiationData[0]
-        object[] data = new object[] { teamInt };
-
-        GameObject go = PhotonNetwork.Instantiate(playerPrefabName, pos, rot, 0, data);
-        if (go == null)
-        {
-            Debug.LogError("[Spawn] No se pudo instanciar Player (revisá Resources/nombre).");
-            yield break;
-        }
-
-        Debug.Log($"[Spawn] Player local instanciado en {team}.");
-    }
-
-    private Transform GetSpawnFor(Team team)
-    {
-        // Opción simple: usar índices distintos según equipo
-        // p.ej. primeros N puntos para Yellow, segundos N para Purple
-        if (spawnPoints != null && spawnPoints.Count > 0)
-        {
-            // reparto estable por ActorNumber para que no se apilen
-            int idx = (PhotonNetwork.LocalPlayer.ActorNumber - 1) % spawnPoints.Count;
-            return spawnPoints[idx];
-        }
-        return fallbackSpawn;
+        Transform spawnPoint = playerSpawnPositions[currentSpawnIndex];
+        currentSpawnIndex = (currentSpawnIndex + 1) % playerSpawnPositions.Count;
+        return spawnPoint;
     }
 }
+
 
