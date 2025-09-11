@@ -9,28 +9,24 @@ using ExitGames.Client.Photon;
 public class Punconnect : MonoBehaviourPunCallbacks
 {
     [Header("Spawn")]
-    [SerializeField] private string playerPrefabName = "Player"; // Debe existir en Resources/Player.prefab
-    [SerializeField] private Transform fallbackSpawn;            // opcional
+    [SerializeField] private string playerPrefabName = "Player"; 
+    [SerializeField] private Transform fallbackSpawn;            
     [SerializeField] private List<Transform> spawnPoints = new List<Transform>();
 
-    void Awake()
-    {
-        Debug.Log("[Spawn] Awake - InRoom=" + PhotonNetwork.InRoom +
-                  " TagObject? " + (PhotonNetwork.LocalPlayer != null && PhotonNetwork.LocalPlayer.TagObject != null));
-    }
+    
 
 
 
     void Start()
     {
-        Debug.Log("[Spawn] Start - intentando spawn si ya estoy en sala");
+    
         TrySpawnIfInRoom();
     }
 
-    // Fallback: si por timing OnJoinedRoom llega en esta escena, también intentamos spawnear
+    
     public override void OnJoinedRoom()
     {
-        Debug.Log("[Spawn] OnJoinedRoom (en escena de juego) - intentando spawn");
+       
         TrySpawnIfInRoom();
     }
 
@@ -73,7 +69,7 @@ public class Punconnect : MonoBehaviourPunCallbacks
             return;
         }
 
-        // Marca local para evitar spawns repetidos
+        
         PhotonNetwork.LocalPlayer.TagObject = go;
 
         Debug.Log("[Spawn] Player local instanciado correctamente.");
@@ -92,11 +88,5 @@ public class Punconnect : MonoBehaviourPunCallbacks
         return fallbackSpawn;
     }
 
-    public override void OnLeftRoom()
-    {
-        // Limpiar TagObject al salir de la sala
-        if (PhotonNetwork.LocalPlayer != null)
-            PhotonNetwork.LocalPlayer.TagObject = null;
-        Debug.Log("[Spawn] OnLeftRoom - limpiado TagObject local.");
-    }
+  
 }
