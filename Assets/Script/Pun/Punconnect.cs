@@ -1,78 +1,96 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using Photon.Pun;
-using ExitGames.Client.Photon;
-
 
 
 public class Punconnect : MonoBehaviourPunCallbacks
 {
     [Header("Spawn")]
-    [SerializeField] private string playerPrefabName = "Player"; 
-    [SerializeField] private Transform fallbackSpawn;            
-    [SerializeField] private List<Transform> spawnPoints = new List<Transform>();
+    [SerializeField] private string playerPrefabName = "Player";
+    [SerializeField] private Transform fallbackSpawn;
+    [SerializeField] private List<Transform> spawnPoints = new();
 
-    
+    [Header("Escenas")]
+    [Tooltip("Si usás PhotonNetwork.AutomaticallySyncScene = true, habilitá esto para respawnear al cargar la escena sincronizada.")]
+    [SerializeField] private bool respawnOnSceneLoaded = true;
 
-
-
-    void Start()
+    private void OnEnable()
     {
-    
-        TrySpawnIfInRoom();
+        if (respawnOnSceneLoaded)
+            SceneManager.sceneLoaded += OnSceneLoaded;
     }
 
-    
+    private void OnDisable()
+    {
+        if (respawnOnSceneLoaded)
+            SceneManager.sceneLoaded -= OnSceneLoaded;
+    }
+
+    private void Start()
+    {
+        TrySpawnIfInRoom("[Start]");
+    }
+
     public override void OnJoinedRoom()
     {
-       
-        TrySpawnIfInRoom();
+        TrySpawnIfInRoom("[OnJoinedRoom]");
     }
 
-    private void TrySpawnIfInRoom()
+    public override void OnLeftRoom()
+    {
+   
+        PhotonNetwork.LocalPlayer.TagObject = null;
+    }
+
+    private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        if (!respawnOnSceneLoaded) return;
+        TrySpawnIfInRoom($"[OnSceneLoaded:{scene.name}]");
+    }
+
+    private void TrySpawnIfInRoom(string from)
     {
         if (!PhotonNetwork.InRoom)
         {
-            Debug.LogWarning("[Spawn] No estoy en una sala aún, no spawneo.");
+            Debug.LogWarning($"{from} [Spawn] No estoy en una sala aún, no spawneo.");
             return;
         }
 
-        if (PhotonNetwork.LocalPlayer.TagObject != null)
+        var existing = PhotonNetwork.LocalPlayer.TagObject as GameObject;
+        if (existing != null) 
         {
-            Debug.Log("[Spawn] Ya existe TagObject local (ya spawneado). No hago nada.");
+            Debug.Log($"{from} [Spawn] Ya existe TagObject local (ya spawneado): {existing.name}. No hago nada.");
             return;
         }
 
-        SpawnLocalPlayer();
+        SpawnLocalPlayer(from);
     }
 
-    private void SpawnLocalPlayer()
+    private void SpawnLocalPlayer(string from)
     {
         if (string.IsNullOrEmpty(playerPrefabName))
         {
-            Debug.LogError("[Spawn] Nombre de prefab vacío.");
+            Debug.LogError($"{from} [Spawn] Nombre de prefab vacío.");
             return;
         }
 
-        // Elegir punto de spawn estable por jugador (evita superposición)
         Transform p = GetPlayerSpawnPosition();
         Vector3 pos = p ? p.position : Vector3.zero;
         Quaternion rot = p ? p.rotation : Quaternion.identity;
 
-        Debug.Log($"[Spawn] Instanciando '{playerPrefabName}' en {pos} rot {rot.eulerAngles} (ActorNumber={PhotonNetwork.LocalPlayer.ActorNumber})");
+        Debug.Log($"{from} [Spawn] Instanciando '{playerPrefabName}' en {pos} rot {rot.eulerAngles} (ActorNumber={PhotonNetwork.LocalPlayer.ActorNumber})");
 
         GameObject go = PhotonNetwork.Instantiate(playerPrefabName, pos, rot);
         if (go == null)
         {
-            Debug.LogError("[Spawn] PhotonNetwork.Instantiate devolvió null. Revisá que Resources/" + playerPrefabName + ".prefab exista y tenga PhotonView.");
+            Debug.LogError($"{from} [Spawn] PhotonNetwork.Instantiate devolvió null. Revisá Resources/{playerPrefabName}.prefab y su PhotonView.");
             return;
         }
 
-        
         PhotonNetwork.LocalPlayer.TagObject = go;
 
-        Debug.Log("[Spawn] Player local instanciado correctamente.");
+        Debug.Log($"{from} [Spawn] Player local instanciado correctamente: {go.name}");
     }
 
     private Transform GetPlayerSpawnPosition()
@@ -84,9 +102,14 @@ public class Punconnect : MonoBehaviourPunCallbacks
             Debug.Log($"[Spawn] Usando spawnPoints[{idx}] -> {t.name}");
             return t;
         }
-        Debug.Log("[Spawn] Usando fallbackSpawn (o Vector3.zero si es null).");
-        return fallbackSpawn;
-    }
 
-  
+        if (fallbackSpawn != null)
+        {
+            Debug.Log("[Spawn] Usando fallbackSpawn.");
+            return fallbackSpawn;
+        }
+
+        Debug.Log("[Spawn] Sin puntos definidos: usando Vector3.zero.");
+        return null;
+    }
 }

@@ -1,6 +1,8 @@
-using Unity.VisualScripting;
 using UnityEngine;
+using Photon.Pun;
 
+
+[RequireComponent(typeof(PhotonView))]
 public class PlayerController : MonoBehaviour
 {
     private PlayerModel _playerModel;
@@ -8,6 +10,9 @@ public class PlayerController : MonoBehaviour
 
     private PlayerView _playerView;
     private Rigidbody _rb;
+
+    private PhotonView _pv;           
+    private bool _isLocal;           
 
     private float _xRotation = 0f;
     private float _currentYRotation;
@@ -22,27 +27,44 @@ public class PlayerController : MonoBehaviour
         _playerModel = GetComponent<PlayerModel>();
         _playerView = GetComponent<PlayerView>();
         _rb = GetComponent<Rigidbody>();
+        _pv = GetComponent<PhotonView>();
 
+        _isLocal = (_pv == null) ? true : _pv.IsMine;
     }
 
     private void Start()
     {
-        _rb.freezeRotation = true;
-        Cursor.lockState = CursorLockMode.Locked;
+        if (_rb != null) _rb.freezeRotation = true;
 
-        //DialogueEvents.OnDialogueStateChange += SetPaused;
+
+        _playerView?.SetLocalCameraActive(_isLocal);
+
+        if (_isLocal)
+        {
+            Cursor.lockState = CursorLockMode.Locked;
+            Cursor.visible = false;
+        }
+        else
+        {
+
+            if (_rb != null) _rb.isKinematic = true;
+        }
     }
 
     private void Update()
     {
+        if (!_isLocal) return;    
         if (!_canMove) return;
+
         HandleMouseLook();
         HandleInteraction();
     }
 
     private void FixedUpdate()
     {
+        if (!_isLocal) return;     
         if (!_canMove) return;
+
         HandleMovement();
     }
 
@@ -60,9 +82,7 @@ public class PlayerController : MonoBehaviour
             _xRotation,
             ref _xRotationVelocity,
             0.05f);
-
         if (float.IsNaN(smoothX)) smoothX = 0f;
-
         _playerView.RotateCamera(smoothX);
 
         _currentYRotation += mouseX;
@@ -71,15 +91,13 @@ public class PlayerController : MonoBehaviour
             _currentYRotation,
             ref _yRotationVelocity,
             0.05f);
-
         if (float.IsNaN(smoothY)) smoothY = 0f;
-
         _playerView.transform.rotation = Quaternion.Euler(0f, smoothY, 0f);
     }
+
     private void HandleMovement()
     {
         float playerSpeed = Input.GetKey(KeyCode.LeftShift) ? _playerModel.SprintSpeed : _playerModel.Speed;
-
         float x = Input.GetAxis("Horizontal") * playerSpeed * Time.fixedDeltaTime;
         float z = Input.GetAxis("Vertical") * playerSpeed * Time.fixedDeltaTime;
 
@@ -89,25 +107,24 @@ public class PlayerController : MonoBehaviour
 
     private void HandleInteraction()
     {
-        var hit = _playerModel.DetectInteractive(_playerView.playerCamera.transform);
+        var cam = _playerView.playerCamera != null ? _playerView.playerCamera.transform : null;
+        if (cam == null) return;
+
+        var hit = _playerModel.DetectInteractive(cam);
 
         if (hit.HasValue)
         {
             IInteractive interactive = hit.Value.collider.GetComponent<IInteractive>();
 
-          
             bool canShowHand = true;
-
             var conditional = hit.Value.collider.GetComponent<ConditionalItem>();
-            if (conditional != null && !conditional.CanInteract())
-            {
-                canShowHand = false;
-            }
+            if (conditional != null && !conditional.CanInteract()) canShowHand = false;
 
             _playerView.ShowHandIcon(canShowHand);
 
             if (canShowHand && Input.GetMouseButtonDown(0) && interactive != null)
             {
+
                 interactive.Interact();
                 _playerView.ShowHandIcon(false);
             }
@@ -118,17 +135,16 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-
     public void SetPaused(bool isPaused)
     {
-        _isPaused = isPaused;
+        if (!_isLocal) return;
 
+        _isPaused = isPaused;
         Cursor.lockState = isPaused ? CursorLockMode.None : CursorLockMode.Locked;
         Cursor.visible = isPaused;
 
         if (!isPaused)
         {
-           
             _xRotation = _playerView.playerCamera.transform.localEulerAngles.x;
             _currentYRotation = _playerView.transform.eulerAngles.y;
         }
@@ -136,37 +152,16 @@ public class PlayerController : MonoBehaviour
 
     public void SetCanMove(bool canMove)
     {
-        _canMove = canMove;
+        if (!_isLocal) return;
 
+        _canMove = canMove;
         Cursor.lockState = canMove ? CursorLockMode.Locked : CursorLockMode.None;
         Cursor.visible = !canMove;
 
         if (canMove)
         {
-            
             _xRotation = _playerView.playerCamera.transform.localEulerAngles.x;
             _currentYRotation = _playerView.transform.eulerAngles.y;
         }
-    }
-
-    //private void OnEnable()
-    //{
-    //    DialogueEvents.OnDialogueStateChange += HandleDialogueStateChange;
-    //}
-
-    //private void OnDisable()
-    //{
-    //    DialogueEvents.OnDialogueStateChange -= HandleDialogueStateChange;
-    //}
-
-    private void HandleDialogueStateChange(bool isInDialogue)
-    {
-        _canMove = !isInDialogue;
-    }
-
-    public void UpdateMouseSensitivity(float newSensitivityX, float newSensitivityY)
-    {
-        _playerModel.MouseSensivityX = newSensitivityX;
-        _playerModel.MouseSensivityY = newSensitivityY;
     }
 }
