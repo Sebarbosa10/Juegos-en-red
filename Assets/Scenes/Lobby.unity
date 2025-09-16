@@ -463,6 +463,8 @@ MonoBehaviour:
   speed: 2
   isActive: 0
   stepCount: 0
+  initialLocalPos: {x: 0, y: 0, z: 0}
+  initialLocalRot: {x: 0, y: 0, z: 0, w: 0}
 --- !u!1 &919719978
 GameObject:
   m_ObjectHideFlags: 0
@@ -507,6 +509,37 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 79cfbc048fc9a6347ab03ef43aeb85f3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!1 &1388042383
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1388042384}
+  m_Layer: 0
+  m_Name: SP2
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1388042384
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1388042383}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 17.1, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 7
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1742533710
 GameObject:
   m_ObjectHideFlags: 0
@@ -517,7 +550,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1742533711}
   m_Layer: 0
-  m_Name: GameObject (1)
+  m_Name: SP1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -569,7 +602,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   playerPrefabName: Player
   fallbackSpawn: {fileID: 1742533711}
-  spawnPoints: []
+  spawnPoints:
+  - {fileID: 1742533711}
+  - {fileID: 1388042384}
+  respawnOnSceneLoaded: 0
 --- !u!4 &2065874064
 Transform:
   m_ObjectHideFlags: 0
