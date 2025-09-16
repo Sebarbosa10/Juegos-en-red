@@ -55,7 +55,7 @@ public class Punconnect : MonoBehaviourPunCallbacks
             return;
         }
 
-        // Elegir punto de spawn estable por jugador (evita superposición)
+        // Elegir punto de spawn estable por jugador 
         Transform p = GetPlayerSpawnPosition();
         Vector3 pos = p ? p.position : Vector3.zero;
         Quaternion rot = p ? p.rotation : Quaternion.identity;

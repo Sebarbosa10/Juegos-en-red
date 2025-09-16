@@ -1,4 +1,4 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
@@ -6,94 +6,80 @@ using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using Photon.Pun;
 using Photon.Realtime;
+using System.Linq;
+
+using PhotonHashtable = ExitGames.Client.Photon.Hashtable;
 
 
 public class MainMenuLauncher : MonoBehaviourPunCallbacks
 {
-    public string gameSceneName;
+    [Header("UI")]
     public TMP_InputField inputField;
-    public Button connectionButton;
-    [SerializeField] private byte maxPlayers = 4;
+    public Button connectButton;
 
-    private const string nicknameKey = "playerNickname";
+    [Header("Rooms")]
+    [SerializeField] private byte maxPlayers = 4;
+    [SerializeField] private string lobbySceneName = "Lobby";     
+    [SerializeField] private string fixedRoomName = "EgyptLobby";
+
     private string nickname;
+    private const string nicknameKey = "playerNickname";
 
     void Start()
     {
-        connectionButton.onClick.AddListener(HandleConnectButton);
-        inputField.onValueChanged.AddListener(VerifyName);
-        PhotonNetwork.AutomaticallySyncScene = true;
+        PhotonNetwork.AutomaticallySyncScene = true; 
+        PhotonNetwork.GameVersion = "0.1";
 
+        connectButton.onClick.AddListener(Connect);
+        inputField.onValueChanged.AddListener(n => {
+            nickname = n;
+            connectButton.interactable = !string.IsNullOrWhiteSpace(n);
+        });
+
+        if (PlayerPrefs.HasKey(nicknameKey))
+        {
+            inputField.text = PlayerPrefs.GetString(nicknameKey);
+            nickname = inputField.text;
+            connectButton.interactable = !string.IsNullOrWhiteSpace(nickname);
+        }
     }
 
-    private void VerifyName(string newName)
+    void Connect()
     {
-        if (inputField.text.Length == 0)
-        {
-            connectionButton.interactable = false;
-        }
+        if (string.IsNullOrWhiteSpace(nickname)) return;
 
-        if (inputField.text.Length >= 1 && !connectionButton.interactable)
-        {
-            connectionButton.interactable = true;
-        }
-
-        nickname = newName;
-    }
-
-    public void HandleConnectButton()
-    {
         PlayerPrefs.SetString(nicknameKey, nickname);
-
         PhotonNetwork.NickName = nickname.ToUpper();
-        print(nickname + " is trying to connect...");
 
+        connectButton.interactable = false;
         PhotonNetwork.ConnectUsingSettings();
-
-        connectionButton.interactable = false;
     }
 
     public override void OnConnectedToMaster()
     {
-        Debug.Log(nickname + " connected to master");
-        QuickMatch();
-
-
+        
+        var opts = new RoomOptions { MaxPlayers = maxPlayers, IsOpen = true, IsVisible = true };
+        PhotonNetwork.JoinOrCreateRoom(fixedRoomName, opts, TypedLobby.Default);
+        
     }
 
-
-
-    public void QuickMatch()
+    public override void OnJoinRandomFailed(short code, string msg)
     {
-        Debug.Log("[Photon] Intentando unirse a una sala aleatoria...");
-        PhotonNetwork.JoinRandomRoom();
-    }
-
-    public override void OnJoinRandomFailed(short returnCode, string message)
-    {
-        Debug.LogWarning($"[Photon] No se encontró ninguna sala disponible ({message}). Creando una nueva...");
-
-        RoomOptions roomOptions = new RoomOptions
-        {
-            MaxPlayers = maxPlayers,
-            IsOpen = true,
-            IsVisible = true
-        };
-
-        PhotonNetwork.CreateRoom(null, roomOptions, null);
+        var opts = new RoomOptions { MaxPlayers = maxPlayers, IsOpen = true, IsVisible = true };
+        PhotonNetwork.CreateRoom(null, opts, null);
     }
 
     public override void OnJoinedRoom()
     {
-        Debug.Log($"[Photon] Entraste a: {PhotonNetwork.CurrentRoom.Name} " +
-                  $"({PhotonNetwork.CurrentRoom.PlayerCount}/{PhotonNetwork.CurrentRoom.MaxPlayers})");
+        Debug.Log($"[MainMenu] Entraste a sala {PhotonNetwork.CurrentRoom.Name} ({PhotonNetwork.CurrentRoom.PlayerCount}/{PhotonNetwork.CurrentRoom.MaxPlayers})");
 
+        
         if (PhotonNetwork.IsMasterClient)
-        {
-            Debug.Log("[Photon] Soy el MasterClient, cargando escena...");
-            PhotonNetwork.LoadLevel(gameSceneName); 
-        }
+            PhotonNetwork.LoadLevel(lobbySceneName);
     }
 
-
+    public override void OnDisconnected(DisconnectCause cause)
+    {
+        connectButton.interactable = true;
+    }
 }
