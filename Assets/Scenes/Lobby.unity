@@ -604,7 +604,7 @@ MonoBehaviour:
   fixedRegion: sa
   useFixedRoomName: 1
   roomName: ROOM_DEV
-  maxPlayers: 8
+  maxPlayers: 4
   respawnOnSceneLoaded: 1
   playerPrefabName: Player
   fallbackSpawn: {fileID: 1742533711}
