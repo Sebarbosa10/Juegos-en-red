@@ -600,12 +600,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cc42e1fa9ee96d140b6ff8113b4aca26, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  gameVersion: dev-0.1
+  fixedRegion: sa
+  useFixedRoomName: 1
+  roomName: ROOM_DEV
+  maxPlayers: 4
+  respawnOnSceneLoaded: 1
   playerPrefabName: Player
   fallbackSpawn: {fileID: 1742533711}
   spawnPoints:
   - {fileID: 1742533711}
   - {fileID: 1388042384}
-  respawnOnSceneLoaded: 0
 --- !u!4 &2065874064
 Transform:
   m_ObjectHideFlags: 0
