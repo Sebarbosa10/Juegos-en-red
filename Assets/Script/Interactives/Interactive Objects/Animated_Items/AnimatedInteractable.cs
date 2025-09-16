@@ -6,15 +6,25 @@ public enum AnimatedType { Rotation, Translation }
 public class AnimatedInteractable : MonoBehaviour, IInteractive
 {
     [Header("Animation Settings")]
-    public AnimatedMode mode = AnimatedMode.Toggle;   // Toggle, OneShot, Incremental
-    public AnimatedType type = AnimatedType.Rotation; // Rotation or Translation
-    public Vector3 axis = Vector3.up;                 // Axis of movement
-    public float amount = 90f;                        // Degrees or units
-    public float speed = 2f;                          // Movement speed
+    public AnimatedMode mode = AnimatedMode.Toggle;    
+    public AnimatedType type = AnimatedType.Rotation;  
+    public Vector3 axis = Vector3.up;                  
+    public float amount = 90f;                         
+    public float speed = 2f;                           
 
-    // Internal state
-    [HideInInspector] public bool isActive = false;   // Current state (for Toggle)
-    [HideInInspector] public int stepCount = 0;       // Steps done (for Incremental)
+    // Estado interno
+    [HideInInspector] public bool isActive = false;   
+    [HideInInspector] public int stepCount = 0;        
+
+    // Pose inicial (LOCAL)
+    [HideInInspector] public Vector3 initialLocalPos;
+    [HideInInspector] public Quaternion initialLocalRot;
+
+    private void Awake()
+    {
+        initialLocalPos = transform.localPosition;
+        initialLocalRot = transform.localRotation;
+    }
 
     public void Interact()
     {
