@@ -683,7 +683,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2c638c9af2fa23143bb4767f0f7a3072, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  gameSceneName: GameScene
+  gameSceneName: Lobby
   inputField: {fileID: 1615116192}
   connectionButton: {fileID: 797438919}
   maxPlayers: 4
