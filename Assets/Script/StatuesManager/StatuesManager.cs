@@ -1,9 +1,11 @@
 using UnityEngine;
+using UnityEngine.Events;
 
 public class StatuesManager : MonoBehaviour
 {
     public enum Axis { X, Y, Z }
 
+    public UnityEvent onSolved;
     [System.Serializable]
     public class StatueRequirement
     {
@@ -98,6 +100,7 @@ public class StatuesManager : MonoBehaviour
             {
                 if (!solved || !logOnlyOnce) Debug.Log("Puzzle completo");
                 solved = true;
+                onSolved?.Invoke();
             }
         }
         else
