@@ -17,21 +17,20 @@ public class MainMenuLauncher : MonoBehaviourPunCallbacks
     public TMP_InputField inputField;
     public Button connectButton;
 
-    [Header("Rooms")]
-    [SerializeField] private byte maxPlayers = 4;
-    [SerializeField] private string lobbySceneName = "Lobby";     
-    [SerializeField] private string fixedRoomName = "EgyptLobby";
+    [Header("Scenes")]
+    [SerializeField] private string lobbySceneName = "Lobby";
 
     private string nickname;
     private const string nicknameKey = "playerNickname";
 
     void Start()
     {
-        PhotonNetwork.AutomaticallySyncScene = true; 
+        PhotonNetwork.AutomaticallySyncScene = true;
         PhotonNetwork.GameVersion = "0.1";
 
         connectButton.onClick.AddListener(Connect);
-        inputField.onValueChanged.AddListener(n => {
+        inputField.onValueChanged.AddListener(n =>
+        {
             nickname = n;
             connectButton.interactable = !string.IsNullOrWhiteSpace(n);
         });
@@ -57,25 +56,8 @@ public class MainMenuLauncher : MonoBehaviourPunCallbacks
 
     public override void OnConnectedToMaster()
     {
-        
-        var opts = new RoomOptions { MaxPlayers = maxPlayers, IsOpen = true, IsVisible = true };
-        PhotonNetwork.JoinOrCreateRoom(fixedRoomName, opts, TypedLobby.Default);
-        
-    }
-
-    public override void OnJoinRandomFailed(short code, string msg)
-    {
-        var opts = new RoomOptions { MaxPlayers = maxPlayers, IsOpen = true, IsVisible = true };
-        PhotonNetwork.CreateRoom(null, opts, null);
-    }
-
-    public override void OnJoinedRoom()
-    {
-        Debug.Log($"[MainMenu] Entraste a sala {PhotonNetwork.CurrentRoom.Name} ({PhotonNetwork.CurrentRoom.PlayerCount}/{PhotonNetwork.CurrentRoom.MaxPlayers})");
-
-        
-        if (PhotonNetwork.IsMasterClient)
-            PhotonNetwork.LoadLevel(lobbySceneName);
+        Debug.Log("[MainMenu] Conectado al servidor. Cargando Lobby...");
+        PhotonNetwork.LoadLevel(lobbySceneName);
     }
 
     public override void OnDisconnected(DisconnectCause cause)
@@ -83,3 +65,4 @@ public class MainMenuLauncher : MonoBehaviourPunCallbacks
         connectButton.interactable = true;
     }
 }
+
