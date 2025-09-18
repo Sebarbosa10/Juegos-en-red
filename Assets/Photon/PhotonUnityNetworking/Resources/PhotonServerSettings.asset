@@ -47,6 +47,7 @@ MonoBehaviour:
   - RPC_RequestClick
   - RPC_ResetStart
   - RPC_Solved
+  - RPC_PlayAbsolute
   DisableAutoOpenWizard: 1
   ShowSettings: 0
   DevRegionSetOnce: 1

@@ -152,4 +152,50 @@ public class AnimatedManager : MonoBehaviour
         _animating.Remove(obj);
         _running.Remove(obj);
     }
+    public Coroutine AnimateAbsolute(AnimatedInteractable obj,
+                                     Vector3 startPos, Quaternion startRot,
+                                     Vector3 endPos, Quaternion endRot,
+                                     float duration, bool markActive = true)
+    {
+        if (obj == null) return null;
+
+        if (_running.TryGetValue(obj, out var c))
+        {
+            StopCoroutine(c);
+            _running.Remove(obj);
+        }
+        _animating.Remove(obj);
+
+        var co = StartTracked(obj, AnimateAbsoluteRoutine(obj, startPos, startRot, endPos, endRot, duration, markActive));
+        return co;
+    }
+
+    private IEnumerator AnimateAbsoluteRoutine(AnimatedInteractable obj,
+                                               Vector3 startPos, Quaternion startRot,
+                                               Vector3 endPos, Quaternion endRot,
+                                               float duration, bool markActive)
+    {
+        _animating.Add(obj);
+
+        obj.transform.localPosition = startPos;
+        obj.transform.localRotation = startRot;
+
+        float t = 0f;
+        duration = Mathf.Max(0.0001f, duration);
+
+        while (t < 1f)
+        {
+            t += Time.deltaTime / duration;
+            obj.transform.localPosition = Vector3.Lerp(startPos, endPos, t);
+            obj.transform.localRotation = Quaternion.Slerp(startRot, endRot, t);
+            yield return null;
+        }
+
+        if (markActive)
+            obj.isActive = true;
+
+        _animating.Remove(obj);
+        _running.Remove(obj);
+    }
+
 }
