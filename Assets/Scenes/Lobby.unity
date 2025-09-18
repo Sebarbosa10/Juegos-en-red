@@ -330,7 +330,7 @@ GameObject:
   - component: {fileID: 709567617}
   - component: {fileID: 709567616}
   - component: {fileID: 709567615}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: InteractiveSync
   m_TagString: Untagged
   m_Icon: {fileID: 0}
