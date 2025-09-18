@@ -26,10 +26,8 @@ public class SarcophagusLid : MonoBehaviour, IInteractive
 
     public void Interact()
     {
-
         if (locked) return;
         if (puzzle != null && puzzle.IsBusy) return;
-
 
         var net = FindObjectOfType<SarcophagusPuzzleNetSync>();
         if (net != null)
@@ -37,7 +35,6 @@ public class SarcophagusLid : MonoBehaviour, IInteractive
             net.RequestClick(index);
             return;
         }
-
 
         if (animatedLid != null && AnimatedManager.Instance.IsAnimating(animatedLid)) return;
         if (puzzle != null && !puzzle.TryReserveIndex(index)) return;

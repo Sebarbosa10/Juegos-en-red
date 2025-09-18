@@ -7,8 +7,8 @@ using UnityEngine;
 public class SarcophagusPuzzleNetSync : MonoBehaviourPun, IPunObservable
 {
     [Header("Refs")]
-    [SerializeField] private SarcophagusPuzzle puzzle;  
-    [SerializeField] private SarcophagusLid[] lids;     
+    [SerializeField] private SarcophagusPuzzle puzzle;
+    [SerializeField] private SarcophagusLid[] lids;
 
     private readonly HashSet<int> reserved = new HashSet<int>();
     private readonly List<int> attemptOrder = new List<int>();
@@ -18,23 +18,19 @@ public class SarcophagusPuzzleNetSync : MonoBehaviourPun, IPunObservable
     private void Reset()
     {
         if (puzzle == null) puzzle = GetComponent<SarcophagusPuzzle>();
-        if (lids == null || lids.Length == 0) lids = puzzle?.lids;
+        if ((lids == null || lids.Length == 0) && puzzle != null) lids = puzzle.lids;
     }
 
     public void RequestClick(int lidIndex)
     {
         if (PhotonNetwork.IsMasterClient)
-        {
             HandleClickAsMaster(lidIndex);
-        }
         else
-        {
             photonView.RPC(nameof(RPC_RequestClick), RpcTarget.MasterClient, lidIndex);
-        }
     }
 
     [PunRPC]
-    private void RPC_RequestClick(int lidIndex, PhotonMessageInfo _info)
+    private void RPC_RequestClick(int lidIndex, PhotonMessageInfo _)
     {
         if (!PhotonNetwork.IsMasterClient) return;
         HandleClickAsMaster(lidIndex);
@@ -42,18 +38,35 @@ public class SarcophagusPuzzleNetSync : MonoBehaviourPun, IPunObservable
 
     private void HandleClickAsMaster(int lidIndex)
     {
-        if (puzzle == null || lids == null || lidIndex < 0 || lidIndex >= lids.Length) return;
+        if (Invalid(lidIndex)) return;
         if (solved || resetting) return;
-
         if (reserved.Contains(lidIndex)) return;
         if (attemptOrder.Count >= puzzle.correctOrder.Length) return;
 
+        var lid = lids[lidIndex];
+        var ai = lid.animatedLid;
+
+        Vector3 startPos = ai.transform.localPosition;
+        Quaternion startRot = ai.transform.localRotation;
+
+        Vector3 endPos = startPos;
+        Quaternion endRot = startRot;
+
+        float dir = +1f;
+        if (ai.type == AnimatedType.Rotation)
+            endRot = startRot * Quaternion.Euler(ai.axis * ai.amount * dir);
+        else
+            endPos = startPos + ai.axis.normalized * ai.amount * dir;
+
+        float duration = Mathf.Max(0.0001f, 1f / Mathf.Max(0.0001f, ai.speed));
 
         reserved.Add(lidIndex);
-        photonView.RPC(nameof(RPC_PlayLid), RpcTarget.All, lidIndex);
+        photonView.RPC(nameof(RPC_PlayAbsolute),
+                       RpcTarget.All,
+                       lidIndex,
+                       startPos, startRot, endPos, endRot, duration);
 
         attemptOrder.Add(lidIndex);
-
 
         if (attemptOrder.Count >= puzzle.correctOrder.Length)
             StartCoroutine(EvaluateAsMasterRoutine());
@@ -61,7 +74,6 @@ public class SarcophagusPuzzleNetSync : MonoBehaviourPun, IPunObservable
 
     private IEnumerator EvaluateAsMasterRoutine()
     {
-
         bool anyAnimating;
         do
         {
@@ -71,8 +83,7 @@ public class SarcophagusPuzzleNetSync : MonoBehaviourPun, IPunObservable
                 if (lid != null && lid.animatedLid != null &&
                     AnimatedManager.Instance.IsAnimating(lid.animatedLid))
                 {
-                    anyAnimating = true;
-                    break;
+                    anyAnimating = true; break;
                 }
             }
             yield return null;
@@ -88,7 +99,7 @@ public class SarcophagusPuzzleNetSync : MonoBehaviourPun, IPunObservable
         if (ok)
         {
             solved = true;
-            puzzle.onSolved?.Invoke(); 
+            puzzle.onSolved?.Invoke();             
             photonView.RPC(nameof(RPC_Solved), RpcTarget.All);
         }
         else
@@ -101,25 +112,26 @@ public class SarcophagusPuzzleNetSync : MonoBehaviourPun, IPunObservable
         }
     }
 
-    [PunRPC]
-    private void RPC_PlayLid(int lidIndex)
-    {
-        if (lids == null || lidIndex < 0 || lidIndex >= lids.Length) return;
-        var lid = lids[lidIndex];
-        if (lid == null) return;
 
+    [PunRPC]
+    private void RPC_PlayAbsolute(int lidIndex,
+                                  Vector3 startPos, Quaternion startRot,
+                                  Vector3 endPos, Quaternion endRot,
+                                  float duration)
+    {
+        if (Invalid(lidIndex)) return;
+        var lid = lids[lidIndex];
+        var ai = lid.animatedLid;
 
         lid.Lock();
-        if (lid.animatedLid != null)
-            AnimatedManager.Instance.HandleInteraction(lid.animatedLid);
+
+        AnimatedManager.Instance.AnimateAbsolute(ai, startPos, startRot, endPos, endRot, duration, markActive: true);
     }
 
     [PunRPC]
     private void RPC_ResetStart(bool animatedReset)
     {
-
         if (lids == null) return;
-
         foreach (var lid in lids)
         {
             if (lid == null) continue;
@@ -137,34 +149,59 @@ public class SarcophagusPuzzleNetSync : MonoBehaviourPun, IPunObservable
 
     public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
     {
-        if (stream.IsWriting)
+        if (stream.IsWriting) 
         {
-           
             stream.SendNext(solved);
-            var locks = new bool[lids.Length];
-            for (int i = 0; i < lids.Length; i++)
+
+            int n = (lids != null) ? lids.Length : 0;
+            stream.SendNext(n);
+            for (int i = 0; i < n; i++)
             {
-                locks[i] = reserved.Contains(i);
+                var lid = lids[i];
+                bool isLocked = lid != null ? IsLockedAuthoritative(i) : false;
+                stream.SendNext(isLocked);
+
+                if (lid != null && lid.animatedLid != null)
+                {
+                    var tr = lid.animatedLid.transform;
+                    stream.SendNext(tr.localPosition);
+                    stream.SendNext(tr.localRotation);
+                }
+                else
+                {
+                    stream.SendNext(Vector3.zero);
+                    stream.SendNext(Quaternion.identity);
+                }
             }
-            stream.SendNext(locks);
         }
-        else
+        else 
         {
             solved = (bool)stream.ReceiveNext();
 
-            var locks = (bool[])stream.ReceiveNext();
-            if (lids != null && locks != null && locks.Length == lids.Length)
+            int n = (int)stream.ReceiveNext();
+            for (int i = 0; i < n; i++)
             {
-                for (int i = 0; i < lids.Length; i++)
+                bool isLocked = (bool)stream.ReceiveNext();
+                Vector3 pos = (Vector3)stream.ReceiveNext();
+                Quaternion rot = (Quaternion)stream.ReceiveNext();
+
+                if (lids == null || i >= lids.Length || lids[i] == null) continue;
+
+                var lid = lids[i];
+                if (isLocked) lid.Lock(); else lid.Unlock();
+
+                var ai = lid.animatedLid;
+                if (ai != null && !AnimatedManager.Instance.IsAnimating(ai))
                 {
-                    if (lids[i] == null) continue;
-                    if (locks[i]) lids[i].Lock(); else lids[i].Unlock();
+                    ai.transform.localPosition = pos;
+                    ai.transform.localRotation = rot;
                 }
             }
-            //if (solved)
-            //{
-               
-            //}
+
+
         }
     }
+
+    private bool Invalid(int i) => (lids == null || i < 0 || i >= lids.Length || lids[i] == null);
+    private bool IsLockedAuthoritative(int i) => reserved.Contains(i) || (attemptOrder.Contains(i));
 }
