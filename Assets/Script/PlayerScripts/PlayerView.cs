@@ -11,7 +11,7 @@ public class PlayerView : MonoBehaviourPun
 
     void Awake()
     {
-        // ⚡ Siempre arranca con la cámara desactivada
+   
         if (playerCamera != null)
         {
             playerCamera.enabled = false;
@@ -24,7 +24,7 @@ public class PlayerView : MonoBehaviourPun
 
     void Start()
     {
-        // Activo cámara solo si es mi Player
+
         SetLocalCameraActive(photonView.IsMine);
     }
 
