@@ -6,17 +6,15 @@ public enum AnimatedType { Rotation, Translation }
 public class AnimatedInteractable : MonoBehaviour, IInteractive
 {
     [Header("Animation Settings")]
-    public AnimatedMode mode = AnimatedMode.Toggle;    
-    public AnimatedType type = AnimatedType.Rotation;  
-    public Vector3 axis = Vector3.up;                  
-    public float amount = 90f;                         
-    public float speed = 2f;                           
+    public AnimatedMode mode = AnimatedMode.Toggle;
+    public AnimatedType type = AnimatedType.Rotation;
+    public Vector3 axis = Vector3.up;
+    public float amount = 90f;
+    public float speed = 2f;
 
-    // Estado interno
-    [HideInInspector] public bool isActive = false;   
-    [HideInInspector] public int stepCount = 0;        
+    [HideInInspector] public bool isActive = false;
+    [HideInInspector] public int stepCount = 0;
 
-    // Pose inicial (LOCAL)
     [HideInInspector] public Vector3 initialLocalPos;
     [HideInInspector] public Quaternion initialLocalRot;
 
@@ -28,6 +26,10 @@ public class AnimatedInteractable : MonoBehaviour, IInteractive
 
     public void Interact()
     {
-        AnimatedManager.Instance.HandleInteraction(this);
+        var net = GetComponent<AnimatedNetSync>();
+        if (net != null)
+            net.InteractNetworked();
+        else
+            AnimatedManager.Instance.HandleInteraction(this);
     }
 }

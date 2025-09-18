@@ -42,6 +42,7 @@ MonoBehaviour:
   - RpcStartGameForPlayers
   - RPC_StartMatch
   - StartMatch
+  - RPC_HandleInteraction
   DisableAutoOpenWizard: 1
   ShowSettings: 0
   DevRegionSetOnce: 1

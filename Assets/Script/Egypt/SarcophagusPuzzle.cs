@@ -8,7 +8,6 @@ public class SarcophagusPuzzle : MonoBehaviour
     [Header("Config")]
     public SarcophagusLid[] lids;
     public int[] correctOrder;
-    [Tooltip("ODIO TODO")]
     public bool animatedReset = true;
 
     [Header("Events")]
