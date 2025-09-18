@@ -357,8 +357,8 @@ GameObject:
   - component: {fileID: 874332745}
   - component: {fileID: 874332744}
   - component: {fileID: 874332743}
-  - component: {fileID: 874332747}
   - component: {fileID: 874332742}
+  - component: {fileID: 874332746}
   m_Layer: 6
   m_Name: Cube
   m_TagString: Untagged
@@ -444,7 +444,7 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 4
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &874332747
+--- !u!114 &874332746
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -453,18 +453,9 @@ MonoBehaviour:
   m_GameObject: {fileID: 874332741}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4a8318a3d0fe87642a0ec1dcd95b67da, type: 3}
+  m_Script: {fileID: 11500000, guid: 2f322239716526742b66215036d0dda4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  mode: 0
-  type: 0
-  axis: {x: 0, y: 1, z: 0}
-  amount: 90
-  speed: 2
-  isActive: 0
-  stepCount: 0
-  initialLocalPos: {x: 0, y: 0, z: 0}
-  initialLocalRot: {x: 0, y: 0, z: 0, w: 0}
 --- !u!1 &919719978
 GameObject:
   m_ObjectHideFlags: 0
@@ -533,7 +524,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1388042383}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 17.1, z: 0}
+  m_LocalPosition: {x: -3.23, y: 17.1, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -564,7 +555,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1742533710}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 17.1, z: 0}
+  m_LocalPosition: {x: 4.88, y: 17.1, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -581,7 +572,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2065874064}
   - component: {fileID: 2065874066}
-  - component: {fileID: 2065874065}
+  - component: {fileID: 2065874067}
   m_Layer: 0
   m_Name: PunConnect
   m_TagString: Untagged
@@ -604,7 +595,24 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &2065874065
+--- !u!114 &2065874066
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2065874062}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0d4fcbb8463245c47adf826baab3c840, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _playerPrefabName: Player
+  _spawnPointBlue: {fileID: 1742533711}
+  _spawnPointRed: {fileID: 1388042384}
+  blueMat: {fileID: 2100000, guid: 7a61316133be56941b7cdb57c360c7b0, type: 2}
+  redMat: {fileID: 2100000, guid: a2800aedd50d628488403f88419a0ee8, type: 2}
+--- !u!114 &2065874067
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -618,21 +626,3 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   blueScene: EgyptMapBlue
   redScene: EgyptMapRed
---- !u!114 &2065874066
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2065874062}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0d4fcbb8463245c47adf826baab3c840, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  maxPlayers: 4
-  _playerPrefabName: Player
-  _spawnPointBlue: {fileID: 1742533711}
-  _spawnPointRed: {fileID: 1388042384}
-  blueMat: {fileID: 2100000, guid: 7a61316133be56941b7cdb57c360c7b0, type: 2}
-  redMat: {fileID: 2100000, guid: a2800aedd50d628488403f88419a0ee8, type: 2}

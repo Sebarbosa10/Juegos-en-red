@@ -1,15 +1,8 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using TMPro;
+﻿using TMPro;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using Photon.Pun;
 using Photon.Realtime;
-using System.Linq;
-
-using PhotonHashtable = ExitGames.Client.Photon.Hashtable;
-
 
 public class MainMenuLauncher : MonoBehaviourPunCallbacks
 {
@@ -19,6 +12,8 @@ public class MainMenuLauncher : MonoBehaviourPunCallbacks
 
     [Header("Scenes")]
     [SerializeField] private string lobbySceneName = "Lobby";
+    [SerializeField] private string roomName = "EgyptLobby";   // Nombre fijo de la sala
+    [SerializeField] private byte maxPlayers = 4;
 
     private string nickname;
     private const string nicknameKey = "playerNickname";
@@ -56,13 +51,27 @@ public class MainMenuLauncher : MonoBehaviourPunCallbacks
 
     public override void OnConnectedToMaster()
     {
-        Debug.Log("[MainMenu] Conectado al servidor. Cargando Lobby...");
-        PhotonNetwork.LoadLevel(lobbySceneName);
+        Debug.Log("[MainMenu] Conectado al servidor. Intentando entrar a sala...");
+
+        var opts = new RoomOptions { MaxPlayers = maxPlayers, IsOpen = true, IsVisible = true };
+        PhotonNetwork.JoinOrCreateRoom(roomName, opts, TypedLobby.Default);
+    }
+
+    public override void OnJoinedRoom()
+    {
+        Debug.Log($"[MainMenu] Entré a sala {PhotonNetwork.CurrentRoom.Name} ({PhotonNetwork.CurrentRoom.PlayerCount}/{PhotonNetwork.CurrentRoom.MaxPlayers})");
+
+        // El MasterClient carga la escena Lobby, los demás la siguen automáticamente
+        if (PhotonNetwork.IsMasterClient)
+        {
+            PhotonNetwork.LoadLevel(lobbySceneName);
+        }
     }
 
     public override void OnDisconnected(DisconnectCause cause)
     {
         connectButton.interactable = true;
+        Debug.LogWarning($"[MainMenu] Desconectado: {cause}");
     }
 }
 

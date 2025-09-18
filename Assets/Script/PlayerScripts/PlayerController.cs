@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using Photon.Pun;
 
 
@@ -36,8 +36,9 @@ public class PlayerController : MonoBehaviour
     {
         if (_rb != null) _rb.freezeRotation = true;
 
-
-        _playerView?.SetLocalCameraActive(_isLocal);
+        // ⚡ Garantizar que la cámara se active correctamente en el local
+        if (_playerView != null)
+            _playerView.SetLocalCameraActive(_isLocal);
 
         if (_isLocal)
         {
@@ -46,10 +47,10 @@ public class PlayerController : MonoBehaviour
         }
         else
         {
-
             if (_rb != null) _rb.isKinematic = true;
         }
     }
+
 
     private void Update()
     {

@@ -1,4 +1,4 @@
-using Photon.Pun;
+﻿using Photon.Pun;
 using UnityEngine;
 
 public class PlayerView : MonoBehaviourPun
@@ -6,28 +6,21 @@ public class PlayerView : MonoBehaviourPun
     public Camera playerCamera;
     public GameObject handIcon;
 
+    void Awake()
+    {
+        // ⚡ Siempre asegúrate de que la cámara arranque desactivada
+        if (playerCamera != null)
+        {
+            playerCamera.enabled = false;
+            var al = playerCamera.GetComponent<AudioListener>();
+            if (al != null) al.enabled = false;
+        }
+    }
 
     void Start()
     {
-        // Solo activo mi c�mara y mi handIcon si el jugador es local
-        if (photonView.IsMine)
-        {
-            SetLocalCameraActive(true);
-        }
-        else
-        {
-            SetLocalCameraActive(false);
-        }
-    }
-
-    public void Move(Vector3 movement)
-    {
-        transform.Translate(movement);
-    }
-
-    public void Rotate(float mouseX)
-    {
-        transform.Rotate(Vector3.up * mouseX);
+        // Activo cámara solo si es mi Player
+        SetLocalCameraActive(photonView.IsMine);
     }
 
     public void RotateCamera(float xRotation)
@@ -41,13 +34,15 @@ public class PlayerView : MonoBehaviourPun
         if (handIcon != null) handIcon.SetActive(show);
     }
 
-
     public void SetLocalCameraActive(bool isLocal)
     {
-        if (playerCamera != null) playerCamera.enabled = isLocal;
+        if (playerCamera != null)
+        {
+            playerCamera.enabled = isLocal;
 
-        var al = playerCamera != null ? playerCamera.GetComponent<AudioListener>() : null;
-        if (al != null) al.enabled = isLocal;
+            var al = playerCamera.GetComponent<AudioListener>();
+            if (al != null) al.enabled = isLocal;
+        }
 
         if (!isLocal && handIcon != null) handIcon.SetActive(false);
     }
