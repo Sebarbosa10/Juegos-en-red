@@ -4904,6 +4904,8 @@ GameObject:
   - component: {fileID: 764552476}
   - component: {fileID: 764552480}
   - component: {fileID: 764552481}
+  - component: {fileID: 764552483}
+  - component: {fileID: 764552482}
   m_Layer: 0
   m_Name: SarcophagusGate
   m_TagString: Untagged
@@ -5242,13 +5244,50 @@ MonoBehaviour:
   stepCount: 0
   initialLocalPos: {x: 0, y: 0, z: 0}
   initialLocalRot: {x: 0, y: 0, z: 0, w: 0}
+--- !u!114 &764552482
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 764552474}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0a6fcd0782cae044bb00fa48f8280f2c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  target: {fileID: 764552481}
+  useBufferedRPCs: 1
+--- !u!114 &764552483
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 764552474}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aa584fbee541324448dd18d8409c7a41, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ObservedComponentsFoldoutOpen: 1
+  Group: 0
+  prefixField: -1
+  Synchronization: 3
+  OwnershipTransfer: 0
+  observableSearch: 2
+  ObservedComponents:
+  - {fileID: 764552482}
+  sceneViewId: 3
+  InstantiationId: 0
+  isRuntimeInstantiated: 0
 --- !u!43 &809866876
 Mesh:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh43522
+  m_Name: pb_Mesh52378
   serializedVersion: 10
   m_SubMeshes:
   - serializedVersion: 2
@@ -12021,7 +12060,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh43474
+  m_Name: pb_Mesh52330
   serializedVersion: 10
   m_SubMeshes:
   - serializedVersion: 2
