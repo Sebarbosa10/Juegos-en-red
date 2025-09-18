@@ -75,7 +75,7 @@ public class LobbyReadyManager : MonoBehaviourPunCallbacks
                               (bool)PhotonNetwork.CurrentRoom.CustomProperties[MatchStartedKey];
         if (alreadyStarted) return;
 
-        // 1) Asignar equipos 2/2 de forma determinística (por ActorNumber)
+
         var players = PhotonNetwork.PlayerList.OrderBy(p => p.ActorNumber).ToArray();
         string matchId = Guid.NewGuid().ToString("N").Substring(0, 8);
 
@@ -92,7 +92,6 @@ public class LobbyReadyManager : MonoBehaviourPunCallbacks
             players[i].SetCustomProperties(props);
         }
 
-        // 2) Esperar propagación de props a TODOS antes de iniciar
         StartCoroutine(WaitTeamsPropsAndStart());
     }
 
@@ -114,7 +113,6 @@ public class LobbyReadyManager : MonoBehaviourPunCallbacks
             yield return null;
         }
 
-        // 3) Cerrar lobby (opcional) y marcar inicio
         PhotonNetwork.CurrentRoom.IsOpen = false;
         PhotonNetwork.CurrentRoom.IsVisible = false;
 

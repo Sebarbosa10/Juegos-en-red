@@ -5,7 +5,7 @@ public class VerticalGate : MonoBehaviour
     [Header("ANIMATED INTERACTIBLE")]
     public AnimatedInteractable mover; 
 
-    [Tooltip("aaaaaaaaaaaaaaaaaaaaaaaaaaa")]
+    [Tooltip("Gate")]
     public bool forceOpen = true;
 
     public void Open()

@@ -19,7 +19,6 @@ public class LobbyStarter : MonoBehaviourPunCallbacks
 
     void Start()
     {
-        // Si ya estamos dentro de una sala (porque venimos del menú)
         if (PhotonNetwork.InRoom)
         {
             OnJoinedRoom();

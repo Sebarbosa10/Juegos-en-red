@@ -6,16 +6,14 @@ public class ConditionalItem : MonoBehaviour, IInteractive
 
     public string RequiredFlag => requiredFlag;
 
-    /// <summary>
-    /// Check if this item can currently be interacted with
-    /// </summary>
+
     public bool CanInteract()
     {
-        // Si no hay flag asignado → siempre interactuable
+  
         if (string.IsNullOrEmpty(requiredFlag))
             return true;
 
-        // Si hay flag → depende del progreso
+
         return GameProgressManager.Instance != null &&
                GameProgressManager.Instance.HasProgressFlag(requiredFlag);
     }

@@ -36,7 +36,6 @@ public class PlayerController : MonoBehaviour
     {
         if (_rb != null) _rb.freezeRotation = true;
 
-        // ⚡ Garantizar que la cámara se active correctamente en el local
         if (_playerView != null)
             _playerView.SetLocalCameraActive(_isLocal);
 

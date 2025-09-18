@@ -21,10 +21,6 @@ public class LobbyReadyButton : MonoBehaviourPunCallbacks
         if (readyButton != null)
             readyButton.onClick.AddListener(SetReady);
 
-        // si querés forzar reset al entrar al Lobby, descomentá:
-        // PhotonNetwork.LocalPlayer.SetCustomProperties(new PhotonHashtable { { ReadyKey, false } });
-
-        // Sincronizar estado inicial por si ya venías ready
         if (PhotonNetwork.LocalPlayer.CustomProperties != null &&
             PhotonNetwork.LocalPlayer.CustomProperties.ContainsKey(ReadyKey))
         {

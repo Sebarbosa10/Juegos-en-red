@@ -12,7 +12,7 @@ public class MainMenuLauncher : MonoBehaviourPunCallbacks
 
     [Header("Scenes")]
     [SerializeField] private string lobbySceneName = "Lobby";
-    [SerializeField] private string roomName = "EgyptLobby";   // Nombre fijo de la sala
+    [SerializeField] private string roomName = "EgyptLobby";   
     [SerializeField] private byte maxPlayers = 4;
 
     private string nickname;
@@ -61,7 +61,6 @@ public class MainMenuLauncher : MonoBehaviourPunCallbacks
     {
         Debug.Log($"[MainMenu] Entré a sala {PhotonNetwork.CurrentRoom.Name} ({PhotonNetwork.CurrentRoom.PlayerCount}/{PhotonNetwork.CurrentRoom.MaxPlayers})");
 
-        // El MasterClient carga la escena Lobby, los demás la siguen automáticamente
         if (PhotonNetwork.IsMasterClient)
         {
             PhotonNetwork.LoadLevel(lobbySceneName);

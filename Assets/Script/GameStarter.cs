@@ -14,7 +14,7 @@ public class GameStarter : MonoBehaviourPun, IInteractive
 
     public void Interact()
     {
-        // Solo el host (MasterClient) puede iniciar
+
         if (!PhotonNetwork.IsMasterClient)
         {
             Debug.Log("[GameStarter] Solo el host puede iniciar la partida.");

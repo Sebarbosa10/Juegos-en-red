@@ -45,7 +45,7 @@ public class TeamSceneSwitcher : MonoBehaviourPunCallbacks
                        (bool)PhotonNetwork.CurrentRoom.CustomProperties[MatchStartedKey];
         if (!started) return;
 
-        // ¿Tengo mi team y mi teamRoom?
+
         if (PhotonNetwork.LocalPlayer.CustomProperties == null) return;
         if (!PhotonNetwork.LocalPlayer.CustomProperties.ContainsKey(TeamKey)) return;
         if (!PhotonNetwork.LocalPlayer.CustomProperties.ContainsKey(TeamRoomKey)) return;
@@ -64,14 +64,13 @@ public class TeamSceneSwitcher : MonoBehaviourPunCallbacks
     public override void OnLeftRoom()
     {
         Debug.Log("[Switch] Ya salí del lobby, esperando reconexión a Master...");
-        // Esperamos OnConnectedToMaster para hacer Join
+
     }
 
     public override void OnConnectedToMaster()
     {
         if (!_leavingLobby || string.IsNullOrEmpty(_targetRoom)) return;
 
-        // Activalo ANTES del join por si el master ya cargó escena
         PhotonNetwork.AutomaticallySyncScene = true;
 
         TryJoinTeamRoom();
@@ -113,7 +112,6 @@ public class TeamSceneSwitcher : MonoBehaviourPunCallbacks
 
     private System.Collections.IEnumerator LoadTeamSceneSafely()
     {
-        // Esperar un poco a que entre el 2º jugador o a que termine el handshake
         float wait = 0f;
         while (wait < 1.0f && PhotonNetwork.CurrentRoom.PlayerCount < 2)
         {
