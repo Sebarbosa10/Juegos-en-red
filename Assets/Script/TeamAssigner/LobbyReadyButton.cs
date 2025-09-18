@@ -6,9 +6,12 @@ using PhotonHashtable = ExitGames.Client.Photon.Hashtable;
 
 public class LobbyReadyButton : MonoBehaviourPunCallbacks
 {
+    
     [SerializeField] private Button readyButton;
     [SerializeField] private GameObject readyIndicator;
-    [SerializeField] private KeyCode readyKey = KeyCode.R; // ✅ Nueva línea
+
+   
+    [SerializeField] private KeyCode readyKey = KeyCode.R;
 
     private const string ReadyKey = "ready";
     private bool isReady = false;
@@ -18,15 +21,24 @@ public class LobbyReadyButton : MonoBehaviourPunCallbacks
         if (readyButton != null)
             readyButton.onClick.AddListener(SetReady);
 
+        // si querés forzar reset al entrar al Lobby, descomentá:
+        // PhotonNetwork.LocalPlayer.SetCustomProperties(new PhotonHashtable { { ReadyKey, false } });
+
+        // Sincronizar estado inicial por si ya venías ready
+        if (PhotonNetwork.LocalPlayer.CustomProperties != null &&
+            PhotonNetwork.LocalPlayer.CustomProperties.ContainsKey(ReadyKey))
+        {
+            isReady = (bool)PhotonNetwork.LocalPlayer.CustomProperties[ReadyKey];
+        }
+
         RefreshUI();
     }
 
     void Update()
     {
         if (!PhotonNetwork.InRoom) return;
-        if (isReady) return; // ya está listo
+        if (isReady) return;
 
-        // ✅ También escucha la tecla
         if (Input.GetKeyDown(readyKey))
         {
             SetReady();
@@ -41,12 +53,21 @@ public class LobbyReadyButton : MonoBehaviourPunCallbacks
         isReady = true;
         RefreshUI();
 
-        Debug.Log($"[Lobby] {PhotonNetwork.NickName} está listo.");
+        Debug.Log($"[Lobby] {PhotonNetwork.NickName} está listo (Ready).");
     }
 
     private void RefreshUI()
     {
         if (readyButton != null) readyButton.interactable = !isReady;
         if (readyIndicator != null) readyIndicator.SetActive(isReady);
+    }
+
+    public override void OnPlayerPropertiesUpdate(Photon.Realtime.Player target, PhotonHashtable changedProps)
+    {
+        if (!target.IsLocal || changedProps == null) return;
+        if (!changedProps.ContainsKey(ReadyKey)) return;
+
+        isReady = (bool)changedProps[ReadyKey];
+        RefreshUI();
     }
 }

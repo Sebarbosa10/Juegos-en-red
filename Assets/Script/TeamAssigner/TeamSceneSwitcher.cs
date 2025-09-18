@@ -6,6 +6,7 @@ using PhotonHashtable = ExitGames.Client.Photon.Hashtable;
 
 public class TeamSceneSwitcher : MonoBehaviourPunCallbacks
 {
+    [Header("Map scenes")]
     [SerializeField] private string blueScene = "EgyptMapBlue";
     [SerializeField] private string redScene = "EgyptMapRed";
 
@@ -63,28 +64,64 @@ public class TeamSceneSwitcher : MonoBehaviourPunCallbacks
     public override void OnLeftRoom()
     {
         Debug.Log("[Switch] Ya salí del lobby, esperando reconexión a Master...");
-        // No hacer Join acá. Esperar OnConnectedToMaster.
+        // Esperamos OnConnectedToMaster para hacer Join
     }
 
     public override void OnConnectedToMaster()
     {
         if (!_leavingLobby || string.IsNullOrEmpty(_targetRoom)) return;
 
+        // Activalo ANTES del join por si el master ya cargó escena
+        PhotonNetwork.AutomaticallySyncScene = true;
+
+        TryJoinTeamRoom();
+    }
+
+    private int _joinAttempts = 0;
+    private void TryJoinTeamRoom()
+    {
+        _joinAttempts++;
         var opts = new RoomOptions { MaxPlayers = 2, IsOpen = true, IsVisible = false };
-        Debug.Log("[Switch] Ahora en Master. Entrando a room del equipo: " + _targetRoom);
+        Debug.Log($"[Switch] JoinOrCreate '{_targetRoom}' (attempt #{_joinAttempts})");
         PhotonNetwork.JoinOrCreateRoom(_targetRoom, opts, TypedLobby.Default);
+    }
+
+    public override void OnJoinRoomFailed(short returnCode, string message)
+    {
+        Debug.LogWarning($"[Switch] OnJoinRoomFailed: {returnCode} - {message}");
+        if (_joinAttempts < 5) // reintenta hasta 5 veces
+            StartCoroutine(RetryJoinLater(0.5f));
+        else
+            Debug.LogError("[Switch] Fallaron múltiples intentos de join al team-room.");
+    }
+
+    private System.Collections.IEnumerator RetryJoinLater(float delay)
+    {
+        yield return new WaitForSeconds(delay);
+        TryJoinTeamRoom();
     }
 
     public override void OnJoinedRoom()
     {
-        Debug.Log($"[TeamRoom] Entré a {_targetRoom} ({PhotonNetwork.CurrentRoom.PlayerCount}/2).");
+        Debug.Log($"[TeamRoom] Entré a '{_targetRoom}' ({PhotonNetwork.CurrentRoom.PlayerCount}/2)");
 
         PhotonNetwork.AutomaticallySyncScene = true;
 
         if (PhotonNetwork.IsMasterClient)
+            StartCoroutine(LoadTeamSceneSafely());
+    }
+
+    private System.Collections.IEnumerator LoadTeamSceneSafely()
+    {
+        // Esperar un poco a que entre el 2º jugador o a que termine el handshake
+        float wait = 0f;
+        while (wait < 1.0f && PhotonNetwork.CurrentRoom.PlayerCount < 2)
         {
-            Debug.Log("[TeamRoom] Soy Master del team-room. Cargando escena de equipo: " + _targetScene);
-            PhotonNetwork.LoadLevel(_targetScene);
+            wait += Time.deltaTime;
+            yield return null;
         }
+
+        Debug.Log("[TeamRoom] Cargando escena de equipo: " + _targetScene);
+        PhotonNetwork.LoadLevel(_targetScene);
     }
 }

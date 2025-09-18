@@ -9,7 +9,6 @@ public class LobbyReadyManager : MonoBehaviourPunCallbacks
 {
     [SerializeField] private byte maxPlayers = 4;
 
-    // Opcional: UI para mostrar progreso (ej. "Ready: 3/4")
     [SerializeField] private TMPro.TMP_Text readyCountText;
 
     private const string ReadyKey = "ready";
@@ -64,7 +63,6 @@ public class LobbyReadyManager : MonoBehaviourPunCallbacks
         if (!PhotonNetwork.IsMasterClient) return;
         if (PhotonNetwork.CurrentRoom.PlayerCount < maxPlayers) return;
 
-        // ¿Están los 4 en ready?
         bool allReady = PhotonNetwork.PlayerList.All(p =>
             p.CustomProperties != null &&
             p.CustomProperties.ContainsKey(ReadyKey) &&
@@ -72,7 +70,6 @@ public class LobbyReadyManager : MonoBehaviourPunCallbacks
 
         if (!allReady) return;
 
-        // Ya inició?
         bool alreadyStarted = PhotonNetwork.CurrentRoom.CustomProperties != null &&
                               PhotonNetwork.CurrentRoom.CustomProperties.ContainsKey(MatchStartedKey) &&
                               (bool)PhotonNetwork.CurrentRoom.CustomProperties[MatchStartedKey];
@@ -84,7 +81,7 @@ public class LobbyReadyManager : MonoBehaviourPunCallbacks
 
         for (int i = 0; i < players.Length; i++)
         {
-            string team = (i < 2) ? TeamBlue : TeamRed; // 2 y 2
+            string team = (i < 2) ? TeamBlue : TeamRed;
             string teamRoom = $"Match{matchId}-{team}";
 
             var props = new PhotonHashtable
@@ -95,13 +92,33 @@ public class LobbyReadyManager : MonoBehaviourPunCallbacks
             players[i].SetCustomProperties(props);
         }
 
-        // (Opcional) cerrar el lobby
+        // 2) Esperar propagación de props a TODOS antes de iniciar
+        StartCoroutine(WaitTeamsPropsAndStart());
+    }
+
+    private System.Collections.IEnumerator WaitTeamsPropsAndStart()
+    {
+        float t = 0f;
+        const float timeout = 5f;
+
+        while (t < timeout)
+        {
+            bool allHaveProps = PhotonNetwork.PlayerList.All(p =>
+                p.CustomProperties != null &&
+                p.CustomProperties.ContainsKey(TeamKey) &&
+                p.CustomProperties.ContainsKey(TeamRoomKey));
+
+            if (allHaveProps) break;
+
+            t += Time.deltaTime;
+            yield return null;
+        }
+
+        // 3) Cerrar lobby (opcional) y marcar inicio
         PhotonNetwork.CurrentRoom.IsOpen = false;
         PhotonNetwork.CurrentRoom.IsVisible = false;
 
-        // 2) Señal: ¡arrancó! — hará que el TeamRoomSwitcher salga del lobby y entre al team-room
         PhotonNetwork.CurrentRoom.SetCustomProperties(new PhotonHashtable { { MatchStartedKey, true } });
-
-        Debug.Log($"[Lobby] Todos READY. Inicio → Rooms: Match{matchId}-Blue / Match{matchId}-Red");
+        Debug.Log("[Lobby] Props propagadas → matchStarted = true");
     }
 }
