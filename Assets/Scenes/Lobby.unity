@@ -1801,7 +1801,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh-18110
+  m_Name: pb_Mesh49810
   serializedVersion: 10
   m_SubMeshes:
   - serializedVersion: 2
@@ -2451,6 +2451,61 @@ Mesh:
     offset: 0
     size: 0
     path: 
+--- !u!1 &667412247
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 667412249}
+  - component: {fileID: 667412248}
+  m_Layer: 0
+  m_Name: UI MANAGER
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &667412248
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 667412247}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2354b84e27623c149971d4847e62bf8e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  pauseMenuUI: {fileID: 0}
+  newsPaperUI: {fileID: 0}
+  LetterUI: {fileID: 0}
+  NoteUI: {fileID: 0}
+  notePanelUI: {fileID: 0}
+  noteTitleText: {fileID: 0}
+  noteBodyText: {fileID: 0}
+  journalUI: {fileID: 0}
+  playerDialogueUI: {fileID: 0}
+  playerDialogueText: {fileID: 0}
+  dialogueDisplayTime: 2.5
+--- !u!4 &667412249
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 667412247}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 20.539013, y: -14.712174, z: 28.326897}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 10
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &687734807
 GameObject:
   m_ObjectHideFlags: 0
@@ -3920,6 +3975,8 @@ GameObject:
   - component: {fileID: 781006098}
   - component: {fileID: 781006096}
   - component: {fileID: 781006097}
+  - component: {fileID: 781006104}
+  - component: {fileID: 781006103}
   m_Layer: 0
   m_Name: SarcophagusGate
   m_TagString: Untagged
@@ -4258,6 +4315,43 @@ Transform:
   m_Father: {fileID: 1484835639}
   m_RootOrder: 7
   m_LocalEulerAnglesHint: {x: 0, y: 37.939, z: 0}
+--- !u!114 &781006103
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 781006095}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0a6fcd0782cae044bb00fa48f8280f2c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  target: {fileID: 781006097}
+  useBufferedRPCs: 1
+--- !u!114 &781006104
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 781006095}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aa584fbee541324448dd18d8409c7a41, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ObservedComponentsFoldoutOpen: 1
+  Group: 0
+  prefixField: -1
+  Synchronization: 3
+  OwnershipTransfer: 0
+  observableSearch: 2
+  ObservedComponents:
+  - {fileID: 781006103}
+  sceneViewId: 3
+  InstantiationId: 0
+  isRuntimeInstantiated: 0
 --- !u!1 &830380313
 GameObject:
   m_ObjectHideFlags: 0
