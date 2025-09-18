@@ -38,13 +38,13 @@ public class TeamSceneSwitcher : MonoBehaviourPunCallbacks
         if (_leavingLobby) return;
         if (!PhotonNetwork.InRoom) return;
 
-        
+        // ¿Partida iniciada?
         bool started = PhotonNetwork.CurrentRoom.CustomProperties != null &&
                        PhotonNetwork.CurrentRoom.CustomProperties.ContainsKey(MatchStartedKey) &&
                        (bool)PhotonNetwork.CurrentRoom.CustomProperties[MatchStartedKey];
         if (!started) return;
 
-        
+        // ¿Tengo mi team y mi teamRoom?
         if (PhotonNetwork.LocalPlayer.CustomProperties == null) return;
         if (!PhotonNetwork.LocalPlayer.CustomProperties.ContainsKey(TeamKey)) return;
         if (!PhotonNetwork.LocalPlayer.CustomProperties.ContainsKey(TeamRoomKey)) return;
@@ -55,7 +55,6 @@ public class TeamSceneSwitcher : MonoBehaviourPunCallbacks
 
         if (string.IsNullOrEmpty(_targetRoom) || string.IsNullOrEmpty(_targetScene)) return;
 
-        
         _leavingLobby = true;
         Debug.Log($"[Switch] Saliendo de Lobby → {_targetRoom} ({_targetTeam})");
         PhotonNetwork.LeaveRoom();
@@ -64,7 +63,7 @@ public class TeamSceneSwitcher : MonoBehaviourPunCallbacks
     public override void OnLeftRoom()
     {
         Debug.Log("[Switch] Ya salí del lobby, esperando reconexión a Master...");
-        
+        // No hacer Join acá. Esperar OnConnectedToMaster.
     }
 
     public override void OnConnectedToMaster()
@@ -76,18 +75,16 @@ public class TeamSceneSwitcher : MonoBehaviourPunCallbacks
         PhotonNetwork.JoinOrCreateRoom(_targetRoom, opts, TypedLobby.Default);
     }
 
-
     public override void OnJoinedRoom()
     {
         Debug.Log($"[TeamRoom] Entré a {_targetRoom} ({PhotonNetwork.CurrentRoom.PlayerCount}/2).");
 
-        
         PhotonNetwork.AutomaticallySyncScene = true;
 
         if (PhotonNetwork.IsMasterClient)
         {
             Debug.Log("[TeamRoom] Soy Master del team-room. Cargando escena de equipo: " + _targetScene);
-            PhotonNetwork.LoadLevel(_targetScene); 
+            PhotonNetwork.LoadLevel(_targetScene);
         }
     }
 }
