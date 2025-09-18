@@ -1,19 +1,24 @@
 ﻿using Photon.Pun;
 using UnityEngine;
 
+
+
 public class PlayerView : MonoBehaviourPun
 {
+  
     public Camera playerCamera;
     public GameObject handIcon;
 
     void Awake()
     {
-        // ⚡ Siempre asegúrate de que la cámara arranque desactivada
+        // ⚡ Siempre arranca con la cámara desactivada
         if (playerCamera != null)
         {
             playerCamera.enabled = false;
-            var al = playerCamera.GetComponent<AudioListener>();
-            if (al != null) al.enabled = false;
+
+            var audioListener = playerCamera.GetComponent<AudioListener>();
+            if (audioListener != null)
+                audioListener.enabled = false;
         }
     }
 
@@ -26,12 +31,15 @@ public class PlayerView : MonoBehaviourPun
     public void RotateCamera(float xRotation)
     {
         if (playerCamera != null)
+        {
             playerCamera.transform.localRotation = Quaternion.Euler(xRotation, 0f, 0f);
+        }
     }
 
     public void ShowHandIcon(bool show)
     {
-        if (handIcon != null) handIcon.SetActive(show);
+        if (handIcon != null)
+            handIcon.SetActive(show);
     }
 
     public void SetLocalCameraActive(bool isLocal)
@@ -40,10 +48,14 @@ public class PlayerView : MonoBehaviourPun
         {
             playerCamera.enabled = isLocal;
 
-            var al = playerCamera.GetComponent<AudioListener>();
-            if (al != null) al.enabled = isLocal;
+            var audioListener = playerCamera.GetComponent<AudioListener>();
+            if (audioListener != null)
+                audioListener.enabled = isLocal;
         }
 
-        if (!isLocal && handIcon != null) handIcon.SetActive(false);
+        if (!isLocal && handIcon != null)
+        {
+            handIcon.SetActive(false);
+        }
     }
 }
