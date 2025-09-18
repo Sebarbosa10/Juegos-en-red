@@ -48,6 +48,10 @@ MonoBehaviour:
   - RPC_ResetStart
   - RPC_Solved
   - RPC_PlayAbsolute
+  - RPC_ApplyPickupAll
+  - RPC_ApplyToggleAll
+  - RPC_RequestPickup
+  - RPC_RequestToggle
   DisableAutoOpenWizard: 1
   ShowSettings: 0
   DevRegionSetOnce: 1

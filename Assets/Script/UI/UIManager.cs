@@ -113,7 +113,7 @@ public class UIManager : MonoBehaviour
     {
         _journalOpen = true;
         journalUI.SetActive(true);
-        Time.timeScale = 0f;
+        //Time.timeScale = 0f;
 
         SetCursorVisible(true);
 
@@ -125,7 +125,7 @@ public class UIManager : MonoBehaviour
     {
         _journalOpen = false;
         journalUI.SetActive(false);
-        Time.timeScale = 1f;
+        //Time.timeScale = 1f;
 
         SetCursorVisible(false);
 
@@ -159,7 +159,7 @@ public class UIManager : MonoBehaviour
         ShowUI(pauseMenuUI);
         //HideUI(optionsMenuUI);
         _isGamePaused = true;
-        Time.timeScale = 0f;
+        //Time.timeScale = 0f;
         SetCursorVisible(true);
         if (_playerController != null)
             _playerController.SetPaused(true);
@@ -274,7 +274,6 @@ public class UIManager : MonoBehaviour
         HideUI(pauseMenuUI);
         //HideUI(optionsMenuUI);
 
-        // Cierra documento si hay algo abierto (book / letter / note)
         if (_isBookOpen)
         {
             if (newsPaperUI != null && newsPaperUI.activeSelf)
@@ -287,14 +286,14 @@ public class UIManager : MonoBehaviour
                 _isBookOpen = false; // fallback de seguridad
         }
 
-        // Cierra Clue si está abierto
+
         if (_isClueOpen)
             CloseClueNote();
 
         _isGamePaused = false;
         IsInOptionsMenu = false;
 
-        Time.timeScale = 1f;
+        //Time.timeScale = 1f;
         SetCursorVisible(false);
 
         if (_playerController != null)
