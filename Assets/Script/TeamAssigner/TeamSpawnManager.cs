@@ -3,12 +3,14 @@ using Photon.Pun;
 using Photon.Realtime;
 using PhotonHashtable = ExitGames.Client.Photon.Hashtable;
 
+
 public class TeamSpawnManager : MonoBehaviourPunCallbacks
 {
     [Header("Prefab & Tags")]
     [SerializeField] private string playerPrefabName = "Player"; // Resources/Player.prefab
     [SerializeField] private string blueSpawnTag = "BlueSpawn";
     [SerializeField] private string redSpawnTag = "RedSpawn";
+    [SerializeField] private string lobbySpawnTag = "LobbySpawn";
 
     private const string TeamKey = "team";
     private const string MatchStartedKey = "matchStarted";
@@ -16,74 +18,86 @@ public class TeamSpawnManager : MonoBehaviourPunCallbacks
     private const string TeamBlue = "Blue";
     private const string TeamRed = "Red";
 
-    private bool _triedToClaim = false; // evita spamear claims locales
-    private bool _spawnedLocal = false; // guard local
+    private bool _triedToClaim = false;
+    private bool _spawnedLocal = false;
+    private bool? _lastMatchStarted = null; // null = desconocido
 
     void Start()
     {
-        TryProceed(); // por si ya estaba todo listo al cargar la escena
+        // Si ya estaba la partida comenzada al cargar escena, intenta spawnear a equipo
+        TrySpawnIfInMatch();
     }
 
+    // SOLO reaccionamos al CAMBIO de matchStarted
     public override void OnRoomPropertiesUpdate(PhotonHashtable changedProps)
     {
-        TryProceed();
+        if (changedProps == null || !changedProps.ContainsKey(MatchStartedKey)) return;
+
+        bool started = (bool)changedProps[MatchStartedKey];
+        bool previous = _lastMatchStarted ?? started; // primera vez no disparemos transición falsa
+        _lastMatchStarted = started;
+
+        if (!previous && started)
+        {
+            // Transición Lobby -> Match
+            ResetLocalFlagsForMatch();
+            TrySpawnIfInMatch();
+        }
+        else if (previous && !started)
+        {
+            // Transición Match -> Lobby
+            MoveToLobbySpawn();
+        }
     }
 
     public override void OnPlayerPropertiesUpdate(Player target, PhotonHashtable changedProps)
     {
-        // Nos importa especialmente CUANDO:
-        // - el local recibe su Team
-        // - el local recibe SpawnedKey=true (tras claim atómico)
-        if (target.IsLocal)
-            TryProceed();
+        if (!target.IsLocal || changedProps == null) return;
+
+        // Si me llegó mi Team o el token "spawned", intenta completar el spawn en match
+        if (changedProps.ContainsKey(TeamKey) || changedProps.ContainsKey(SpawnedKey))
+            TrySpawnIfInMatch();
     }
 
-    private void TryProceed()
+    // ========= MATCH: spawnear/reubicar en spawns de equipo =========
+    private void TrySpawnIfInMatch()
     {
         if (!PhotonNetwork.InRoom) return;
-        if (_spawnedLocal) return;
 
-        // 1) ¿arrancó el match?
+        // lee el valor actual de matchStarted (no mover a lobby aquí)
         bool started = PhotonNetwork.CurrentRoom.CustomProperties != null &&
                        PhotonNetwork.CurrentRoom.CustomProperties.ContainsKey(MatchStartedKey) &&
                        (bool)PhotonNetwork.CurrentRoom.CustomProperties[MatchStartedKey];
+        _lastMatchStarted ??= started;
         if (!started) return;
 
-        // 2) ¿tengo mi team?
         if (PhotonNetwork.LocalPlayer.CustomProperties == null ||
             !PhotonNetwork.LocalPlayer.CustomProperties.ContainsKey(TeamKey))
             return;
 
-        // 3) ¿ya tomé el token "spawned"? Si no, intentarlo una sola vez
         bool alreadySpawnedFlag = PhotonNetwork.LocalPlayer.CustomProperties.ContainsKey(SpawnedKey) &&
                                   PhotonNetwork.LocalPlayer.CustomProperties[SpawnedKey] is bool b && b;
+
         if (!alreadySpawnedFlag && !_triedToClaim)
         {
             _triedToClaim = true;
-            ClaimSpawnToken(); // intento atómico
-            return; // esperamos el OnPlayerPropertiesUpdate con SpawnedKey=true
+            ClaimSpawnToken();       // operación atómica
+            return;                  // esperar a OnPlayerPropertiesUpdate
         }
 
-        // 4) Si ya tengo spawned=true, hacer el spawn SOLO si aún no tengo TagObject
         if (alreadySpawnedFlag && PhotonNetwork.LocalPlayer.TagObject == null)
-        {
             DoSpawnAtTeamPoint();
-        }
     }
 
     private void ClaimSpawnToken()
     {
-        // Claim atómico: set SpawnedKey=true SOLO si el valor actual coincide con expected
-        // Si no existe, esperamos null. Si existe y es false, esperamos false.
         object current = null;
         if (PhotonNetwork.LocalPlayer.CustomProperties.ContainsKey(SpawnedKey))
             current = PhotonNetwork.LocalPlayer.CustomProperties[SpawnedKey];
 
         var props = new PhotonHashtable { { SpawnedKey, true } };
         var expected = new PhotonHashtable { { SpawnedKey, current } };
-
         PhotonNetwork.LocalPlayer.SetCustomProperties(props, expected);
-        // Nota: si falla por condición de carrera, otro claim ganó → nos llegará el cambio igualmente.
     }
 
     private void DoSpawnAtTeamPoint()
@@ -91,18 +105,8 @@ public class TeamSpawnManager : MonoBehaviourPunCallbacks
         string team = PhotonNetwork.LocalPlayer.CustomProperties[TeamKey] as string;
         string tag = (team == TeamBlue) ? blueSpawnTag : redSpawnTag;
 
-        var spawns = GameObject.FindGameObjectsWithTag(tag);
-        Transform spawn = null;
-        if (spawns != null && spawns.Length > 0)
-        {
-            int idx = (PhotonNetwork.LocalPlayer.ActorNumber - 1) % spawns.Length;
-            spawn = spawns[idx].transform;
-        }
+        GetSpawnTransform(tag, out Vector3 pos, out Quaternion rot);
 
-        Vector3 pos = spawn ? spawn.position : Vector3.zero;
-        Quaternion rot = spawn ? spawn.rotation : Quaternion.identity;
-
-        // Si ya tenía una instancia mía (ej: la del lobby), moverla en vez de crear otra
         var existing = FindMyLocalPlayer();
         if (existing != null)
         {
@@ -110,47 +114,67 @@ public class TeamSpawnManager : MonoBehaviourPunCallbacks
             PhotonNetwork.LocalPlayer.TagObject = existing;
             CleanupExtraLocalPlayers(existing);
             _spawnedLocal = true;
-            Debug.Log($"[Spawn] Reubicado player existente a {pos}");
+            Debug.Log($"[Spawn] Reubicado a {team} en {pos}");
             return;
         }
 
-        // Crear de red
         var go = PhotonNetwork.Instantiate(playerPrefabName, pos, rot);
         PhotonNetwork.LocalPlayer.TagObject = go;
-
-        // Limpieza por si acaso
         CleanupExtraLocalPlayers(go);
-
         _spawnedLocal = true;
-        Debug.Log($"[Spawn] {PhotonNetwork.NickName} ({team}) instanciado en {pos}");
+        Debug.Log($"[Spawn] Instanciado {team} en {pos}");
+    }
+
+    // ========= LOBBY: mover de vuelta SOLO en transición explícita =========
+    private void MoveToLobbySpawn()
+    {
+        var mine = FindMyLocalPlayer();
+        if (mine == null) return;
+
+        GetSpawnTransform(lobbySpawnTag, out Vector3 pos, out Quaternion rot);
+        mine.transform.SetPositionAndRotation(pos, rot);
+        PhotonNetwork.LocalPlayer.TagObject = mine;
+
+        Debug.Log($"[Spawn] Movido a Lobby en {pos}");
+    }
+
+    private void ResetLocalFlagsForMatch()
+    {
+        // Permite que, si reusamos el mismo player, termine de completar el flujo sin re-clonear
+        _triedToClaim = false;
+        _spawnedLocal = PhotonNetwork.LocalPlayer.TagObject != null; // si ya tengo uno, no crear otro
+    }
+
+    // ========= Helpers =========
+    private void GetSpawnTransform(string tag, out Vector3 pos, out Quaternion rot)
+    {
+        var spawns = GameObject.FindGameObjectsWithTag(tag);
+        Transform spawn = null;
+        if (spawns != null && spawns.Length > 0)
+        {
+            int idx = (PhotonNetwork.LocalPlayer.ActorNumber - 1) % spawns.Length;
+            spawn = spawns[idx].transform;
+        }
+        pos = spawn ? spawn.position : Vector3.zero;
+        rot = spawn ? spawn.rotation : Quaternion.identity;
     }
 
     private GameObject FindMyLocalPlayer()
     {
-        // 1) Si ya lo guardamos en TagObject
         if (PhotonNetwork.LocalPlayer.TagObject is GameObject go && go != null)
             return go;
 
-        // 2) Buscar un objeto mío con tag "Player"
-        var allPV = FindObjectsOfType<PhotonView>();
-        foreach (var pv in allPV)
-        {
+        foreach (var pv in FindObjectsOfType<PhotonView>())
             if (pv && pv.IsMine && pv.gameObject.CompareTag("Player"))
                 return pv.gameObject;
-        }
+
         return null;
     }
 
     private void CleanupExtraLocalPlayers(GameObject keep)
     {
-        var allPV = FindObjectsOfType<PhotonView>();
-        foreach (var pv in allPV)
-        {
+        foreach (var pv in FindObjectsOfType<PhotonView>())
             if (pv && pv.IsMine && pv.gameObject.CompareTag("Player") && pv.gameObject != keep)
-            {
-                Debug.LogWarning("[Spawn] Había un clon local extra. Lo destruyo.");
                 PhotonNetwork.Destroy(pv.gameObject);
-            }
-        }
     }
 }

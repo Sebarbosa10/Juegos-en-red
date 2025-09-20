@@ -61,7 +61,7 @@ public class LobbyReadyManager : MonoBehaviourPunCallbacks
     {
         if (!PhotonNetwork.InRoom) return;
         if (!PhotonNetwork.IsMasterClient) return;
-        if (PhotonNetwork.CurrentRoom.PlayerCount < 1) return;
+        if (PhotonNetwork.CurrentRoom.PlayerCount < maxPlayers) return;
 
         bool allReady = PhotonNetwork.PlayerList.All(p =>
             p.CustomProperties != null &&
