@@ -8,6 +8,9 @@ TagManager:
   - BlueSpawn
   - RedSpawn
   - Spawn
+  - LobbySpawn
+  - BlueSpawn_R0
+  - RedSpawn_R{0}
   layers:
   - Default
   - TransparentFX
