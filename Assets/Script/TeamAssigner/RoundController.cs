@@ -15,7 +15,7 @@ public class RoundController : MonoBehaviourPunCallbacks
 
         if (Input.GetKeyDown(endRoundKey))
         {
-            // Señal global: volvemos a lobby
+            
             PhotonNetwork.CurrentRoom.SetCustomProperties(
                 new PhotonHashtable { { MatchStartedKey, false } });
 

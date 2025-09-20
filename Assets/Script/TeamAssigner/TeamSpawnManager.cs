@@ -7,7 +7,7 @@ using PhotonHashtable = ExitGames.Client.Photon.Hashtable;
 public class TeamSpawnManager : MonoBehaviourPunCallbacks
 {
     [Header("Prefab & Tags")]
-    [SerializeField] private string playerPrefabName = "Player"; // Resources/Player.prefab
+    [SerializeField] private string playerPrefabName = "Player"; 
     [SerializeField] private string blueSpawnTag = "BlueSpawn";
     [SerializeField] private string redSpawnTag = "RedSpawn";
     [SerializeField] private string lobbySpawnTag = "LobbySpawn";
@@ -20,32 +20,32 @@ public class TeamSpawnManager : MonoBehaviourPunCallbacks
 
     private bool _triedToClaim = false;
     private bool _spawnedLocal = false;
-    private bool? _lastMatchStarted = null; // null = desconocido
+    private bool? _lastMatchStarted = null; 
 
     void Start()
     {
-        // Si ya estaba la partida comenzada al cargar escena, intenta spawnear a equipo
+        
         TrySpawnIfInMatch();
     }
 
-    // SOLO reaccionamos al CAMBIO de matchStarted
+    
     public override void OnRoomPropertiesUpdate(PhotonHashtable changedProps)
     {
         if (changedProps == null || !changedProps.ContainsKey(MatchStartedKey)) return;
 
         bool started = (bool)changedProps[MatchStartedKey];
-        bool previous = _lastMatchStarted ?? started; // primera vez no disparemos transición falsa
+        bool previous = _lastMatchStarted ?? started; 
         _lastMatchStarted = started;
 
         if (!previous && started)
         {
-            // Transición Lobby -> Match
+            
             ResetLocalFlagsForMatch();
             TrySpawnIfInMatch();
         }
         else if (previous && !started)
         {
-            // Transición Match -> Lobby
+           
             MoveToLobbySpawn();
         }
     }
@@ -54,17 +54,17 @@ public class TeamSpawnManager : MonoBehaviourPunCallbacks
     {
         if (!target.IsLocal || changedProps == null) return;
 
-        // Si me llegó mi Team o el token "spawned", intenta completar el spawn en match
+        
         if (changedProps.ContainsKey(TeamKey) || changedProps.ContainsKey(SpawnedKey))
             TrySpawnIfInMatch();
     }
 
-    // ========= MATCH: spawnear/reubicar en spawns de equipo =========
+    
     private void TrySpawnIfInMatch()
     {
         if (!PhotonNetwork.InRoom) return;
 
-        // lee el valor actual de matchStarted (no mover a lobby aquí)
+        
         bool started = PhotonNetwork.CurrentRoom.CustomProperties != null &&
                        PhotonNetwork.CurrentRoom.CustomProperties.ContainsKey(MatchStartedKey) &&
                        (bool)PhotonNetwork.CurrentRoom.CustomProperties[MatchStartedKey];
@@ -81,8 +81,8 @@ public class TeamSpawnManager : MonoBehaviourPunCallbacks
         if (!alreadySpawnedFlag && !_triedToClaim)
         {
             _triedToClaim = true;
-            ClaimSpawnToken();       // operación atómica
-            return;                  // esperar a OnPlayerPropertiesUpdate
+            ClaimSpawnToken();       
+            return;                  
         }
 
         if (alreadySpawnedFlag && PhotonNetwork.LocalPlayer.TagObject == null)
@@ -125,7 +125,7 @@ public class TeamSpawnManager : MonoBehaviourPunCallbacks
         Debug.Log($"[Spawn] Instanciado {team} en {pos}");
     }
 
-    // ========= LOBBY: mover de vuelta SOLO en transición explícita =========
+    
     private void MoveToLobbySpawn()
     {
         var mine = FindMyLocalPlayer();
@@ -140,12 +140,12 @@ public class TeamSpawnManager : MonoBehaviourPunCallbacks
 
     private void ResetLocalFlagsForMatch()
     {
-        // Permite que, si reusamos el mismo player, termine de completar el flujo sin re-clonear
+       
         _triedToClaim = false;
-        _spawnedLocal = PhotonNetwork.LocalPlayer.TagObject != null; // si ya tengo uno, no crear otro
+        _spawnedLocal = PhotonNetwork.LocalPlayer.TagObject != null; 
     }
 
-    // ========= Helpers =========
+    
     private void GetSpawnTransform(string tag, out Vector3 pos, out Quaternion rot)
     {
         var spawns = GameObject.FindGameObjectsWithTag(tag);

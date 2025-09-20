@@ -10,15 +10,14 @@ public class PlayerTeamVisual : MonoBehaviourPunCallbacks
     [SerializeField] private Material redMat;
 
     [Header("Renderers a pintar")]
-    [SerializeField] private Renderer[] renderersToTint; // arrastra aquí los MeshRenderer/SkinnedMeshRenderer que quieras pintar
-
+    [SerializeField] private Renderer[] renderersToTint; 
     private const string TeamKey = "team";
     private const string TeamBlue = "Blue";
     private const string TeamRed = "Red";
 
     void Awake()
     {
-        // Si no asignaste array, intenta tomar el primero encontrado
+       
         if (renderersToTint == null || renderersToTint.Length == 0)
         {
             var r = GetComponentInChildren<Renderer>();
@@ -33,7 +32,7 @@ public class PlayerTeamVisual : MonoBehaviourPunCallbacks
 
     public override void OnPlayerPropertiesUpdate(Player target, PhotonHashtable changedProps)
     {
-        // Reaplicar SOLO cuando cambian las props del dueño de ESTE objeto
+        
         if (target == photonView.Owner && changedProps != null && changedProps.ContainsKey(TeamKey))
         {
             ApplyTeamNow();
@@ -48,21 +47,20 @@ public class PlayerTeamVisual : MonoBehaviourPunCallbacks
 
         string team = owner.CustomProperties[TeamKey] as string;
 
-        // Cambiar material por instancia (renderer.material) para no tocar el sharedMaterial de todos
+        
         Material targetMat = (team == TeamBlue) ? blueMat : redMat;
         if (targetMat == null) return;
 
         foreach (var r in renderersToTint)
         {
             if (!r) continue;
-            // crea instancia por-renderer y asigna
+            
             var mats = r.materials;
             for (int i = 0; i < mats.Length; i++)
                 mats[i] = targetMat;
             r.materials = mats;
         }
 
-        // Debug útil:
-        // Debug.Log($"[TeamVisual] {owner.NickName} aplicado a {team} en {gameObject.name}");
+       
     }
 }
