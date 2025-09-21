@@ -20,11 +20,13 @@ public class PlayerCard : MonoBehaviourPunCallbacks
 
     public override void OnPlayerPropertiesUpdate(Player targetPlayer, ExitGames.Client.Photon.Hashtable changedProps)
     {
-        if (targetPlayer != PhotonNetwork.LocalPlayer) return;
+        if (!changedProps.ContainsKey("cardID")) return;
 
-        if (changedProps.ContainsKey(CardKey))
+        int cardId = (int)changedProps["cardID"];
+
+        // Solo aplico la carta si el que cambió soy yo
+        if (targetPlayer == PhotonNetwork.LocalPlayer)
         {
-            int cardId = (int)changedProps[CardKey];
             ApplyCard(cardId);
         }
     }
