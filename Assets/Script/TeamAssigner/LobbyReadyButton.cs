@@ -58,6 +58,32 @@ public class LobbyReadyButton : MonoBehaviourPunCallbacks
         if (readyIndicator != null) readyIndicator.SetActive(isReady);
     }
 
+    private void CheckAllReady()
+    {
+        foreach (var player in PhotonNetwork.PlayerList)
+        {
+            if (!player.CustomProperties.ContainsKey(ReadyKey) || !(bool)player.CustomProperties[ReadyKey])
+            {
+                return; // alguien no está listo todavía
+            }
+        }
+
+        // Si todos están listos
+        if (PhotonNetwork.IsMasterClient)
+        {
+            //Debug.Log("[Lobby] Todos listos. Repartiendo cartas...");
+            var cardManager = FindObjectOfType<CardManagerPhoton>();
+            if (cardManager != null)
+            {
+                cardManager.DealCards();
+            }
+            else
+            {
+                Debug.LogWarning("[Lobby] No se encontró el CardManager en la escena.");
+            }
+        }
+    }
+
     public override void OnPlayerPropertiesUpdate(Photon.Realtime.Player target, PhotonHashtable changedProps)
     {
         if (!target.IsLocal || changedProps == null) return;
@@ -65,5 +91,7 @@ public class LobbyReadyButton : MonoBehaviourPunCallbacks
 
         isReady = (bool)changedProps[ReadyKey];
         RefreshUI();
+
+        CheckAllReady();
     }
 }
