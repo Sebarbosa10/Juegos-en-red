@@ -68,7 +68,6 @@ public class LobbyReadyButton : MonoBehaviourPunCallbacks
             }
         }
 
-        //  todos los presentes están listos (sin importar si son 2, 3 o 4)
         if (PhotonNetwork.IsMasterClient)
         {
             Debug.Log("[Lobby] Todos listos. Repartiendo cartas...");
@@ -81,14 +80,20 @@ public class LobbyReadyButton : MonoBehaviourPunCallbacks
     }
 
 
+
     public override void OnPlayerPropertiesUpdate(Photon.Realtime.Player target, PhotonHashtable changedProps)
     {
-        if (!target.IsLocal || changedProps == null) return;
+        if (changedProps == null) return;
         if (!changedProps.ContainsKey(ReadyKey)) return;
 
-        isReady = (bool)changedProps[ReadyKey];
-        RefreshUI();
+        if (target.IsLocal)
+        {
+            isReady = (bool)changedProps[ReadyKey];
+            RefreshUI();
+        }
 
+        // siempre chequeamos, así el Master detecta cuando todos están listos
         CheckAllReady();
     }
+
 }
