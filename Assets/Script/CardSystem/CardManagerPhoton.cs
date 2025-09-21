@@ -6,7 +6,7 @@ using System.Collections.Generic;
 
 public class CardManagerPhoton : MonoBehaviourPunCallbacks
 {
-    [SerializeField] private CardDataBase cardDataBase;
+    [SerializeField] private CardDataBase cardDatabase;
     private const string CardKey = "cardID";
 
     public void DealCards()
@@ -15,7 +15,7 @@ public class CardManagerPhoton : MonoBehaviourPunCallbacks
 
         // Copiar IDs
         List<int> availableCards = new List<int>();
-        for (int i = 0; i < cardDataBase.allCards.Count; i++)
+        for (int i = 0; i < cardDatabase.allCards.Count; i++)
         {
             availableCards.Add(i);
         }
