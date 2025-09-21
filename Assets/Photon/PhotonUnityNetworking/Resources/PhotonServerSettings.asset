@@ -60,6 +60,11 @@ MonoBehaviour:
   - RPC_Submit
   - RPC_LoadSceneAll
   - RPC_TeleportAll
+  - RPC_EndRoundTeleport
+  - RPC_OnMatchFinished
+  - RPC_ReportScore
+  - RPC_ResetPads
+  - RPC_StartRoundTeleport
   DisableAutoOpenWizard: 1
   ShowSettings: 0
   DevRegionSetOnce: 1
