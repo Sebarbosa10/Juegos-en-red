@@ -34,6 +34,11 @@ public class CardManagerPhoton : MonoBehaviourPunCallbacks
             Hashtable props = new Hashtable { { "Card", cardId } };
             player.SetCustomProperties(props);
 
+            if (player == PhotonNetwork.LocalPlayer)
+            {
+                PhotonNetwork.LocalPlayer.SetCustomProperties(props);
+            }
+
         }
 
     }

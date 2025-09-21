@@ -71,7 +71,7 @@ public class LobbyReadyButton : MonoBehaviourPunCallbacks
         // Si todos están listos
         if (PhotonNetwork.IsMasterClient)
         {
-            //Debug.Log("[Lobby] Todos listos. Repartiendo cartas...");
+            Debug.Log("[Lobby] Todos listos. Repartiendo cartas...");
             var cardManager = FindObjectOfType<CardManagerPhoton>();
             if (cardManager != null)
             {

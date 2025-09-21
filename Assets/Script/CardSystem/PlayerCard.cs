@@ -1,31 +1,45 @@
 using UnityEngine;
 using Photon.Pun;
 using Photon.Realtime;
-using ExitGames.Client.Photon;
 
 public class PlayerCard : MonoBehaviourPunCallbacks
 {
     [SerializeField] private CardDataBase cardDatabase;
-    public CardData currentCard { get; private set; }
+
+    private const string CardKey = "cardID";
+    public CardData CurrentCard { get; private set; }
+
+    private void OnEnable()
+    {
+        if (PhotonNetwork.LocalPlayer.CustomProperties.ContainsKey(CardKey))
+        {
+            int cardId = (int)PhotonNetwork.LocalPlayer.CustomProperties[CardKey];
+            ApplyCard(cardId);
+        }
+    }
 
     public override void OnPlayerPropertiesUpdate(Player targetPlayer, ExitGames.Client.Photon.Hashtable changedProps)
     {
-        if(targetPlayer != PhotonNetwork.LocalPlayer) return;
+        if (targetPlayer != PhotonNetwork.LocalPlayer) return;
 
-        if (changedProps.ContainsKey("cardID"))
+        if (changedProps.ContainsKey(CardKey))
         {
-            int cardId = (int)changedProps["cardID"];
-            if (cardId >= 0)
-            {
-                currentCard = cardDatabase.GetCardById(cardId);
-                Debug.Log($"[PlayerCard] Me tocó: {currentCard.cardName}");
-            }
-            else
-            {
-                currentCard = null;
-                Debug.Log("[PlayerCard] Carta reseteada");
-            }
+            int cardId = (int)changedProps[CardKey];
+            ApplyCard(cardId);
         }
+    }
 
+    private void ApplyCard(int cardId)
+    {
+        if (cardId >= 0)
+        {
+            CurrentCard = cardDatabase.GetCardById(cardId);
+            Debug.Log($"[PlayerCard] {PhotonNetwork.NickName} me tocó: {CurrentCard.cardName}");
+        }
+        else
+        {
+            CurrentCard = null;
+            Debug.Log("[PlayerCard] Carta reseteada");
+        }
     }
 }
