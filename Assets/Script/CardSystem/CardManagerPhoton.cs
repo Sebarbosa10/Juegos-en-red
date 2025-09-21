@@ -13,46 +13,47 @@ public class CardManagerPhoton : MonoBehaviourPunCallbacks
     {
         if (!PhotonNetwork.IsMasterClient) return;
 
-
-        //Copy List
+        // Copiar IDs
         List<int> availableCards = new List<int>();
         for (int i = 0; i < cardDataBase.allCards.Count; i++)
         {
             availableCards.Add(i);
         }
 
-        //Shuffle Cards
+        // Barajar
         ShuffleCards(availableCards);
 
-        //Draw Card
+        // Asignar
         int playerIndex = 0;
         foreach (Player player in PhotonNetwork.PlayerList)
         {
             int cardId = availableCards[playerIndex];
             playerIndex++;
 
-            //Save in CustomProperties
+            // Guardar en customProperties (opcional, por persistencia/debug)
             Hashtable props = new Hashtable { { CardKey, cardId } };
             player.SetCustomProperties(props);
 
-            if (player == PhotonNetwork.LocalPlayer)
-            {
-                var playerCard = FindObjectOfType<PlayerCard>();
-                if (playerCard != null)
-                {
-                    playerCard.ApplyCard(cardId);
-                }
-            }
-
+            // Llamar RPC al dueño para que aplique su carta
+            photonView.RPC(nameof(RPC_AssignCard), player, cardId);
         }
+    }
 
+    [PunRPC]
+    private void RPC_AssignCard(int cardId, PhotonMessageInfo info)
+    {
+        var playerCard = FindObjectOfType<PlayerCard>();
+        if (playerCard != null)
+        {
+            playerCard.ApplyCard(cardId);
+        }
     }
 
     public void ResetCards()
     {
         foreach (Player player in PhotonNetwork.PlayerList)
         {
-            Hashtable props = new Hashtable { { CardKey, null } };
+            Hashtable props = new Hashtable { { CardKey, -1 } };
             player.SetCustomProperties(props);
 
             if (player == PhotonNetwork.LocalPlayer)

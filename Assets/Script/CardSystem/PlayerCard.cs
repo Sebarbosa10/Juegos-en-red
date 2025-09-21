@@ -1,6 +1,5 @@
 using UnityEngine;
 using Photon.Pun;
-using Photon.Realtime;
 
 public class PlayerCard : MonoBehaviourPunCallbacks
 {
@@ -11,22 +10,10 @@ public class PlayerCard : MonoBehaviourPunCallbacks
 
     private void OnEnable()
     {
+        
         if (PhotonNetwork.LocalPlayer.CustomProperties.ContainsKey(CardKey))
         {
             int cardId = (int)PhotonNetwork.LocalPlayer.CustomProperties[CardKey];
-            ApplyCard(cardId);
-        }
-    }
-
-    public override void OnPlayerPropertiesUpdate(Player targetPlayer, ExitGames.Client.Photon.Hashtable changedProps)
-    {
-        if (!changedProps.ContainsKey("cardID")) return;
-
-        int cardId = (int)changedProps["cardID"];
-
-        // Solo aplico la carta si el que cambió soy yo
-        if (targetPlayer == PhotonNetwork.LocalPlayer)
-        {
             ApplyCard(cardId);
         }
     }

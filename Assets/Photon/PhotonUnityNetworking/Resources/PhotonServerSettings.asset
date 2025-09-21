@@ -54,6 +54,7 @@ MonoBehaviour:
   - RPC_RequestToggle
   - RPC_SolvedAll
   - RPC_RequestComplete
+  - RPC_AssignCard
   DisableAutoOpenWizard: 1
   ShowSettings: 0
   DevRegionSetOnce: 1
