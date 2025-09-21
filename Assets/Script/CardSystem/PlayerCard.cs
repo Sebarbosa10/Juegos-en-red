@@ -10,7 +10,7 @@ public class PlayerCard : MonoBehaviourPunCallbacks
 
     private void OnEnable()
     {
-        
+
         if (PhotonNetwork.LocalPlayer.CustomProperties.ContainsKey(CardKey))
         {
             int cardId = (int)PhotonNetwork.LocalPlayer.CustomProperties[CardKey];
