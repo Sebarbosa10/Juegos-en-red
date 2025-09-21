@@ -59,6 +59,7 @@ MonoBehaviour:
   - RPC_PressDigit
   - RPC_Submit
   - RPC_LoadSceneAll
+  - RPC_TeleportAll
   DisableAutoOpenWizard: 1
   ShowSettings: 0
   DevRegionSetOnce: 1
