@@ -60,7 +60,6 @@ public class LobbyReadyButton : MonoBehaviourPunCallbacks
 
     private void CheckAllReady()
     {
-        //  ahora chequea solo a los jugadores que estén en la sala, sin importar cuántos
         foreach (var player in PhotonNetwork.PlayerList)
         {
             if (!player.CustomProperties.ContainsKey(ReadyKey) || !(bool)player.CustomProperties[ReadyKey])
@@ -69,7 +68,7 @@ public class LobbyReadyButton : MonoBehaviourPunCallbacks
             }
         }
 
-        // Si llegamos acá, todos los presentes están listos
+        //  todos los presentes están listos (sin importar si son 2, 3 o 4)
         if (PhotonNetwork.IsMasterClient)
         {
             Debug.Log("[Lobby] Todos listos. Repartiendo cartas...");
@@ -78,12 +77,9 @@ public class LobbyReadyButton : MonoBehaviourPunCallbacks
             {
                 cardManager.DealCards();
             }
-            else
-            {
-                Debug.LogWarning("[Lobby] No se encontró el CardManager en la escena.");
-            }
         }
     }
+
 
     public override void OnPlayerPropertiesUpdate(Photon.Realtime.Player target, PhotonHashtable changedProps)
     {
