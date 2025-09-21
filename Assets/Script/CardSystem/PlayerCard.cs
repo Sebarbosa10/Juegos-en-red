@@ -29,7 +29,7 @@ public class PlayerCard : MonoBehaviourPunCallbacks
         }
     }
 
-    private void ApplyCard(int cardId)
+    public void ApplyCard(int cardId)
     {
         if (cardId >= 0)
         {

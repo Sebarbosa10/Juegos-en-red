@@ -60,6 +60,7 @@ public class LobbyReadyButton : MonoBehaviourPunCallbacks
 
     private void CheckAllReady()
     {
+        //  ahora chequea solo a los jugadores que estén en la sala, sin importar cuántos
         foreach (var player in PhotonNetwork.PlayerList)
         {
             if (!player.CustomProperties.ContainsKey(ReadyKey) || !(bool)player.CustomProperties[ReadyKey])
@@ -68,7 +69,7 @@ public class LobbyReadyButton : MonoBehaviourPunCallbacks
             }
         }
 
-        // Si todos están listos
+        // Si llegamos acá, todos los presentes están listos
         if (PhotonNetwork.IsMasterClient)
         {
             Debug.Log("[Lobby] Todos listos. Repartiendo cartas...");

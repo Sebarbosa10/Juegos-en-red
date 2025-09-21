@@ -6,7 +6,8 @@ using System.Collections.Generic;
 
 public class CardManagerPhoton : MonoBehaviourPunCallbacks
 {
-    [SerializeField] private CardDataBase cardDatabase;
+    [SerializeField] private CardDataBase cardDataBase;
+    private const string CardKey = "cardID";
 
     public void DealCards()
     {
@@ -15,7 +16,7 @@ public class CardManagerPhoton : MonoBehaviourPunCallbacks
 
         //Copy List
         List<int> availableCards = new List<int>();
-        for (int i = 0; i < cardDatabase.allCards.Count; i++)
+        for (int i = 0; i < cardDataBase.allCards.Count; i++)
         {
             availableCards.Add(i);
         }
@@ -31,12 +32,16 @@ public class CardManagerPhoton : MonoBehaviourPunCallbacks
             playerIndex++;
 
             //Save in CustomProperties
-            Hashtable props = new Hashtable { { "Card", cardId } };
+            Hashtable props = new Hashtable { { CardKey, cardId } };
             player.SetCustomProperties(props);
 
             if (player == PhotonNetwork.LocalPlayer)
             {
-                PhotonNetwork.LocalPlayer.SetCustomProperties(props);
+                var playerCard = FindObjectOfType<PlayerCard>();
+                if (playerCard != null)
+                {
+                    playerCard.ApplyCard(cardId);
+                }
             }
 
         }
@@ -47,8 +52,17 @@ public class CardManagerPhoton : MonoBehaviourPunCallbacks
     {
         foreach (Player player in PhotonNetwork.PlayerList)
         {
-            Hashtable props = new Hashtable { { "Card", null } };
+            Hashtable props = new Hashtable { { CardKey, null } };
             player.SetCustomProperties(props);
+
+            if (player == PhotonNetwork.LocalPlayer)
+            {
+                var playerCard = FindObjectOfType<PlayerCard>();
+                if (playerCard != null)
+                {
+                    playerCard.ApplyCard(-1);
+                }
+            }
         }
     }
 

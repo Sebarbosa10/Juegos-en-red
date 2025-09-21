@@ -1462,7 +1462,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8e95de7eafce28c4987ebbb74967fa2c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  cardDatabase: {fileID: 11400000, guid: 12a703ea36a64b44ea04c19f791dd581, type: 2}
+  cardDataBase: {fileID: 11400000, guid: 12a703ea36a64b44ea04c19f791dd581, type: 2}
 --- !u!4 &1116864132
 Transform:
   m_ObjectHideFlags: 0
