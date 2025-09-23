@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using Photon.Pun;
 using Photon.Realtime;
-using ExitGames.Client.Photon; 
+using ExitGames.Client.Photon;
 using System.Collections;
 
 public class ScoreManager : MonoBehaviourPunCallbacks, IOnEventCallback
@@ -9,7 +9,7 @@ public class ScoreManager : MonoBehaviourPunCallbacks, IOnEventCallback
     public static ScoreManager Instance;
 
     private const byte ScoreEventCode = 1;
-    private const byte WinEventCode = 1;
+    private const byte WinEventCode = 2;
 
     private int maxScore = 1; // Mejor de 3
     private readonly ExitGames.Client.Photon.Hashtable scores = new ExitGames.Client.Photon.Hashtable();
@@ -27,16 +27,15 @@ public class ScoreManager : MonoBehaviourPunCallbacks, IOnEventCallback
     private void Start()
     {
         PhotonNetwork.AddCallbackTarget(this);
-        scores["blue"] = 0;
-        scores["red"] = 0;
+        scores["Blue"] = 0;
+        scores["Red"] = 0;
 
-        Debug.Log("[ScoreManager] Iniciado con equipos blue=0, red=0");
+        Debug.Log("[ScoreManager] Iniciado con equipos Blue=0, Red=0");
     }
 
     public void AddPoint(string team)
     {
-        Debug.Log($"[ScoreManager] AddPoint recibido equipo {team}");
-
+        Debug.Log($"[ScoreManager] AddPoint recibido → equipo {team}");
         object[] content = new object[] { team };
         PhotonNetwork.RaiseEvent(
             ScoreEventCode,
@@ -45,7 +44,6 @@ public class ScoreManager : MonoBehaviourPunCallbacks, IOnEventCallback
             SendOptions.SendReliable
         );
     }
-
 
     public void OnEvent(EventData photonEvent)
     {
@@ -70,8 +68,7 @@ public class ScoreManager : MonoBehaviourPunCallbacks, IOnEventCallback
             object[] data = (object[])photonEvent.CustomData;
             string winningTeam = (string)data[0];
 
-            Debug.Log($"[ScoreManager] Evento de victoria recibido. Ganador: {winningTeam}");
-            StartCoroutine(GoToEndScreens(winningTeam));
+            Debug.Log($"[ScoreManager]  ¡El equipo {winningTeam} ganó la partida!");
         }
     }
 
@@ -86,17 +83,15 @@ public class ScoreManager : MonoBehaviourPunCallbacks, IOnEventCallback
 
             if (score >= maxScore)
             {
-                Debug.Log($"[ScoreManager] Equipo {team} alcanzó el puntaje máximo WIN");
+                Debug.Log($"[ScoreManager] Equipo {team} alcanzó el puntaje máximo  WIN");
                 RaiseWinEvent(team);
                 break;
             }
         }
     }
 
-
     private void RaiseWinEvent(string winningTeam)
     {
-        Debug.Log($"[ScoreManager] Enviando evento de victoria. Ganador: {winningTeam}");
         object[] content = new object[] { winningTeam };
         PhotonNetwork.RaiseEvent(
             WinEventCode,
@@ -105,29 +100,4 @@ public class ScoreManager : MonoBehaviourPunCallbacks, IOnEventCallback
             SendOptions.SendReliable
         );
     }
-
-    private IEnumerator GoToEndScreens(string winningTeam)
-    {
-        Debug.Log("[ScoreManager] Juego terminado. Transición en 5 segundos...");
-        yield return new WaitForSeconds(5f);
-
-        string myTeam = "";
-        var p = PhotonNetwork.LocalPlayer;
-        if (p?.CustomProperties != null && p.CustomProperties.TryGetValue("team", out object t))
-            myTeam = t as string ?? "";
-
-        Debug.Log($"[ScoreManager] Soy del equipo {myTeam}. El ganador es {winningTeam}");
-
-        if (myTeam == winningTeam)
-        {
-            Debug.Log("[ScoreManager] Soy del equipo ganador  cargando WinScreen");
-            PhotonNetwork.LoadLevel("WinScreen");
-        }
-        else
-        {
-            Debug.Log("[ScoreManager] Soy del equipo perdedor  cargando LoseScreen");
-            PhotonNetwork.LoadLevel("LoseScreen");
-        }
-    }
-
 }
