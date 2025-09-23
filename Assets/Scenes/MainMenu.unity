@@ -685,7 +685,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   inputField: {fileID: 1615116192}
   connectButton: {fileID: 797438919}
-  lobbySceneName: Lobby
+  lobbySceneName: Test
   roomName: Test
   maxPlayers: 4
 --- !u!114 &850044479
