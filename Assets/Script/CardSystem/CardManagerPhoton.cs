@@ -13,14 +13,14 @@ public class CardManagerPhoton : MonoBehaviourPunCallbacks
     {
         if (!PhotonNetwork.IsMasterClient) return;
 
-        // Copiar IDs
+        // Copy IDs
         List<int> availableCards = new List<int>();
         for (int i = 0; i < cardDatabase.allCards.Count; i++)
         {
             availableCards.Add(i);
         }
 
-        // Barajar
+        // Shuffle
         ShuffleCards(availableCards);
 
         // Asignar
@@ -30,22 +30,31 @@ public class CardManagerPhoton : MonoBehaviourPunCallbacks
             int cardId = availableCards[playerIndex];
             playerIndex++;
 
-            // Guardar en customProperties (opcional, por persistencia/debug)
-            Hashtable props = new Hashtable { { CardKey, cardId } };
-            player.SetCustomProperties(props);
+            //  Look for rival
+            var rival = TeamManager.Instance.GetRival(player);
+            if (rival == null)
+            {
+                UnityEngine.Debug.LogWarning($"[CardManager] {player.NickName} no tiene rival, se salta.");
+                continue;
+            }
 
-            // Llamar RPC al dueño para que aplique su carta
-            photonView.RPC(nameof(RPC_AssignCard), player, cardId);
+            Hashtable props = new Hashtable { { CardKey, cardId } };
+            rival.SetCustomProperties(props);
+
+            photonView.RPC(nameof(RPC_AssignCard), rival, cardId, player.NickName);
+            UnityEngine.Debug.Log($"[CardManager] {player.NickName} robó {cardId}, aplicado a {rival.NickName}");
         }
     }
 
+
     [PunRPC]
-    private void RPC_AssignCard(int cardId, PhotonMessageInfo info)
+    private void RPC_AssignCard(int cardId, string fromPlayer, PhotonMessageInfo info)
     {
         var playerCard = FindObjectOfType<PlayerCard>();
         if (playerCard != null)
         {
             playerCard.ApplyCard(cardId);
+            UnityEngine.Debug.Log($"[PlayerCard] Me aplicaron la carta {playerCard.CurrentCard.cardName} desde {fromPlayer}");
         }
     }
 

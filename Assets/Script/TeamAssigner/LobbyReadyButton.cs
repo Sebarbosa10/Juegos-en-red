@@ -71,6 +71,10 @@ public class LobbyReadyButton : MonoBehaviourPunCallbacks
         if (PhotonNetwork.IsMasterClient)
         {
             Debug.Log("[Lobby] Todos listos. Repartiendo cartas...");
+
+            //  refrescamos los equipos
+            TeamManager.Instance.RefreshTeams();
+
             var cardManager = FindObjectOfType<CardManagerPhoton>();
             if (cardManager != null)
             {
