@@ -1,4 +1,4 @@
-using UnityEngine;
+Ôªøusing UnityEngine;
 using Photon.Pun;
 using Photon.Realtime;
 using ExitGames.Client.Photon; 
@@ -35,7 +35,8 @@ public class ScoreManager : MonoBehaviourPunCallbacks, IOnEventCallback
 
     public void AddPoint(string team)
     {
-        Debug.Log($"[ScoreManager] Se pidiÛ agregar un punto al equipo: {team}");
+        Debug.Log($"[ScoreManager] AddPoint recibido equipo {team}");
+
         object[] content = new object[] { team };
         PhotonNetwork.RaiseEvent(
             ScoreEventCode,
@@ -44,6 +45,7 @@ public class ScoreManager : MonoBehaviourPunCallbacks, IOnEventCallback
             SendOptions.SendReliable
         );
     }
+
 
     public void OnEvent(EventData photonEvent)
     {
@@ -80,16 +82,17 @@ public class ScoreManager : MonoBehaviourPunCallbacks, IOnEventCallback
             string team = key as string;
             int score = (int)scores[key];
 
-            Debug.Log($"[ScoreManager] Chequeando condiciÛn de victoria: {team} tiene {score}/{maxScore}");
+            Debug.Log($"[ScoreManager] Chequeando condici√≥n: {team} tiene {score}/{maxScore}");
 
             if (score >= maxScore)
             {
-                Debug.Log($"[ScoreManager] Equipo {team} alcanzÛ el puntaje m·ximo. Disparando evento de victoria.");
+                Debug.Log($"[ScoreManager] Equipo {team} alcanz√≥ el puntaje m√°ximo WIN");
                 RaiseWinEvent(team);
                 break;
             }
         }
     }
+
 
     private void RaiseWinEvent(string winningTeam)
     {
@@ -105,7 +108,7 @@ public class ScoreManager : MonoBehaviourPunCallbacks, IOnEventCallback
 
     private IEnumerator GoToEndScreens(string winningTeam)
     {
-        Debug.Log("[ScoreManager] Juego terminado. TransiciÛn en 5 segundos...");
+        Debug.Log("[ScoreManager] Juego terminado. Transici√≥n en 5 segundos...");
         yield return new WaitForSeconds(5f);
 
         string myTeam = "";
@@ -126,4 +129,5 @@ public class ScoreManager : MonoBehaviourPunCallbacks, IOnEventCallback
             PhotonNetwork.LoadLevel("LoseScreen");
         }
     }
+
 }

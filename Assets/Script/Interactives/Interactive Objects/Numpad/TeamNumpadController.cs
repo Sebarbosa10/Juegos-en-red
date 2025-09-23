@@ -1,4 +1,4 @@
-using System.Text;
+Ôªøusing System.Text;
 using UnityEngine;
 using UnityEngine.Events;
 using TMPro;
@@ -9,13 +9,13 @@ using ExitGames.Client.Photon;
 public class TeamNumpadController : MonoBehaviourPun
 {
     [Header("Config")]
-    [Tooltip("Blue o Red (de CustomProperties['team']). Si queda vacÌo, acepta de todos.")]
+    [Tooltip("Blue o Red (de CustomProperties['team']). Si queda vac√≠o, acepta de todos.")]
     [SerializeField] private string teamFilter = "Blue";
 
-    [Tooltip("CÛdigo correcto de 4 dÌgitos")]
+    [Tooltip("C√≥digo correcto de 4 d√≠gitos")]
     [SerializeField] private string correctCode = "1234";
 
-    [Tooltip("Longitud m·xima de entrada")]
+    [Tooltip("Longitud m√°xima de entrada")]
     [SerializeField] private int maxLength = 4;
 
     [Tooltip("Bloquear input luego de resolver")]
@@ -23,7 +23,7 @@ public class TeamNumpadController : MonoBehaviourPun
 
     [Header("UI")]
     [SerializeField] private TMP_Text displayText;          // opcional (pantalla)
-    [SerializeField] private string hiddenChar = "ï";       // si querÈs ocultar dÌgitos
+    [SerializeField] private string hiddenChar = "‚Ä¢";       // si quer√©s ocultar d√≠gitos
     [SerializeField] private bool hideDigits = false;
 
     [Header("Progreso (opcional)")]
@@ -133,24 +133,26 @@ public class TeamNumpadController : MonoBehaviourPun
         {
             _solved = true;
             onCorrectCode?.Invoke();
-            ScoreManager.Instance.AddPoint(GetLocalTeam());//
+
+            if (PhotonNetwork.IsMasterClient)
+            {
+                Debug.Log($"[Numpad] C√≥digo correcto ingresado por {senderTeam}. Sumando punto solo en el Master.");
+                ScoreManager.Instance.AddPoint(senderTeam); // 
+            }
 
             if (!string.IsNullOrEmpty(progressFlagOnSolved) && GameProgressManager.Instance != null)
                 GameProgressManager.Instance.SetProgressFlag(progressFlagOnSolved, true);
-
-            if (lockAfterSolve == false)
-            {
-                // si no se bloquea, dejamos buffer lleno para que quede visible
-            }
         }
+
         else
         {
             onWrongCode?.Invoke();
-            // limpiar tras error (opcional):
+            Debug.Log($"[Numpad] C√≥digo incorrecto ingresado por {senderTeam}. Reset del buffer.");
             _buffer.Clear();
         }
         RefreshDisplay();
     }
+
 
     // ---- Helpers ------------------------------------------------------
 
@@ -163,7 +165,7 @@ public class TeamNumpadController : MonoBehaviourPun
 
     private bool _enabledForLocal()
     {
-        // permite que cualquiera apriete si teamFilter vacÌo
+        // permite que cualquiera apriete si teamFilter vac√≠o
         if (string.IsNullOrEmpty(teamFilter)) return true;
         return string.Equals(GetLocalTeam(), teamFilter);
     }
@@ -197,14 +199,14 @@ public class TeamNumpadController : MonoBehaviourPun
         }
         else
         {
-            // mostrar dÌgitos a izquierda y rellenar con -
+            // mostrar d√≠gitos a izquierda y rellenar con -
             string s = _buffer.ToString();
             if (s.Length < maxLength) s = s.PadRight(maxLength, '-');
             displayText.text = s;
         }
     }
 
-    // Utilidad si querÈs setear el cÛdigo por script
+    // Utilidad si quer√©s setear el c√≥digo por script
     public void SetCorrectCode(string code)
     {
         correctCode = code ?? "";
