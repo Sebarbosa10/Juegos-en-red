@@ -17,4 +17,7 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/EgyptMapRed.unity
     guid: 697ecfdb67f89544184b38992ee74453
+  - enabled: 1
+    path: Assets/Scenes/Test.unity
+    guid: 34d81c90a1f254e48b0bd10911f3d4ca
   m_configObjects: {}
