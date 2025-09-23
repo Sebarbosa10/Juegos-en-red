@@ -14,18 +14,18 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   allCards:
   - id: 0
-    cardName: Extra Speed
-    description: Movement speed increased by 20%
-    cardType: 0
+    cardName: Ice Born
+    description: 
+    cardEffectType: 0
   - id: 1
-    cardName: Better Jump
-    description: You can jumop higher
-    cardType: 0
+    cardName: DPI Bot
+    description: 
+    cardEffectType: 1
   - id: 2
-    cardName: Slippery Feet
-    description: The floor is ICE
-    cardType: 1
+    cardName: Get Shocked
+    description: 
+    cardEffectType: 2
   - id: 3
-    cardName: Sloth
-    description: Movement speed decreased by 20%
-    cardType: 1
+    cardName: Go to the Gym
+    description: 
+    cardEffectType: 3
