@@ -1,5 +1,5 @@
-using UnityEngine;
 using Photon.Pun;
+using UnityEngine;
 
 public class PlayerCard : MonoBehaviourPunCallbacks
 {
@@ -9,21 +9,10 @@ public class PlayerCard : MonoBehaviourPunCallbacks
     private const string CardKey = "cardID";
     public CardData CurrentCard { get; private set; }
 
-    
-
     private void Awake()
     {
         _effectManager = GetComponent<CardEffectManager>();
-    }
-
-    private void OnEnable()
-    {
-
-        if (PhotonNetwork.LocalPlayer.CustomProperties.ContainsKey(CardKey))
-        {
-            int cardId = (int)PhotonNetwork.LocalPlayer.CustomProperties[CardKey];
-            ApplyCard(cardId);
-        }
+        photonView.Owner.TagObject = photonView;
     }
 
     public void ApplyCard(int cardId)
@@ -33,16 +22,27 @@ public class PlayerCard : MonoBehaviourPunCallbacks
             CurrentCard = cardDatabase.GetCardById(cardId);
             Debug.Log($"[PlayerCard] {PhotonNetwork.NickName} me tocó: {CurrentCard.cardName}");
 
-            //  Apenas asignamos, activamos el efecto
             if (_effectManager != null && CurrentCard != null)
-            {
                 _effectManager.ActivateEffects(CurrentCard);
-            }
         }
         else
         {
             CurrentCard = null;
             Debug.Log("[PlayerCard] Carta reseteada");
         }
+    }
+
+    [PunRPC]
+    public void RPC_AssignCard(int cardId, string fromPlayer)
+    {
+        ApplyCard(cardId);
+
+        Debug.Log($"[PlayerCard] Me aplicaron la carta {CurrentCard.cardName} desde {fromPlayer}");
+
+        if (CardEffectUI.Instance != null)
+            CardEffectUI.Instance.ShowCard(CurrentCard.cardName, fromPlayer);
+
+        if (_effectManager != null && CurrentCard != null)
+            _effectManager.ActivateEffects(CurrentCard);
     }
 }

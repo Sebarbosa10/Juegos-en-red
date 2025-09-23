@@ -1,4 +1,4 @@
-using System.Linq;
+﻿using System.Linq;
 using UnityEngine;
 using Photon.Pun;
 using Photon.Realtime;
@@ -14,6 +14,7 @@ public class TeamMapSpawner : MonoBehaviourPunCallbacks
     [Header("Spawn points")]
     [SerializeField] private Transform[] blueSpawns;
     [SerializeField] private Transform[] redSpawns;
+    [SerializeField] private Transform lobbySpawn;   // 👈 spawn de lobby (centro)
 
     private const string TeamKey = "team";
     private const string TeamBlue = "Blue";
@@ -23,7 +24,7 @@ public class TeamMapSpawner : MonoBehaviourPunCallbacks
 
     private void Start()
     {
-        TrySpawn();
+        TrySpawnLobby();
     }
 
     public override void OnPlayerPropertiesUpdate(PUNPlayer target, PhotonHashtable changedProps)
@@ -32,21 +33,28 @@ public class TeamMapSpawner : MonoBehaviourPunCallbacks
         if (_spawned) return;
         if (changedProps != null && changedProps.ContainsKey(TeamKey))
         {
-            TrySpawn();
+            TrySpawnLobby();
         }
     }
 
-    private void TrySpawn()
+    // 🔑 escucha cambios de sala
+    public override void OnRoomPropertiesUpdate(PhotonHashtable changedProps)
+    {
+        if (changedProps.ContainsKey("matchStarted"))
+        {
+            bool started = (bool)changedProps["matchStarted"];
+            if (started) TeleportToTeamZone();
+            else TeleportToLobby();
+        }
+    }
+
+    private void TrySpawnLobby()
     {
         if (_spawned) return;
         if (!PhotonNetwork.InRoom) return;
 
-        string myTeam = GetMyTeam();
-        if (string.IsNullOrEmpty(myTeam)) return; 
-
-        Transform spawn = PickSpawnFor(PhotonNetwork.LocalPlayer, myTeam);
-        Vector3 pos = spawn ? spawn.position : Vector3.zero;
-        Quaternion rot = spawn ? spawn.rotation : Quaternion.identity;
+        Vector3 pos = lobbySpawn ? lobbySpawn.position : Vector3.zero;
+        Quaternion rot = lobbySpawn ? lobbySpawn.rotation : Quaternion.identity;
 
         if (PhotonNetwork.LocalPlayer.TagObject == null)
         {
@@ -54,7 +62,32 @@ public class TeamMapSpawner : MonoBehaviourPunCallbacks
             PhotonNetwork.LocalPlayer.TagObject = go;
             _spawned = true;
 
-            Debug.Log($"[TeamMapSpawner] {PhotonNetwork.NickName} ({myTeam}) spawneado en {pos}");
+            Debug.Log($"[TeamMapSpawner] {PhotonNetwork.NickName} spawneado en Lobby {pos}");
+        }
+    }
+
+    private void TeleportToTeamZone()
+    {
+        string myTeam = GetMyTeam();
+        Transform spawn = PickSpawnFor(PhotonNetwork.LocalPlayer, myTeam);
+
+        if (spawn != null && PhotonNetwork.LocalPlayer.TagObject is GameObject playerObj)
+        {
+            playerObj.transform.position = spawn.position;
+            playerObj.transform.rotation = spawn.rotation;
+
+            Debug.Log($"[TeamMapSpawner] {PhotonNetwork.NickName} tepeado a {myTeam} en {spawn.position}");
+        }
+    }
+
+    private void TeleportToLobby()
+    {
+        if (lobbySpawn != null && PhotonNetwork.LocalPlayer.TagObject is GameObject playerObj)
+        {
+            playerObj.transform.position = lobbySpawn.position;
+            playerObj.transform.rotation = lobbySpawn.rotation;
+
+            Debug.Log($"[TeamMapSpawner] {PhotonNetwork.NickName} volvió al Lobby en {lobbySpawn.position}");
         }
     }
 
@@ -77,16 +110,10 @@ public class TeamMapSpawner : MonoBehaviourPunCallbacks
         int indexInTeam = System.Array.IndexOf(teamPlayers, player);
         if (indexInTeam < 0) indexInTeam = 0;
 
-        if (team == TeamBlue)
-        {
-            if (blueSpawns != null && blueSpawns.Length > 0)
-                return blueSpawns[indexInTeam % blueSpawns.Length];
-        }
-        else 
-        {
-            if (redSpawns != null && redSpawns.Length > 0)
-                return redSpawns[indexInTeam % redSpawns.Length];
-        }
+        if (team == TeamBlue && blueSpawns.Length > 0)
+            return blueSpawns[indexInTeam % blueSpawns.Length];
+        if (team == TeamRed && redSpawns.Length > 0)
+            return redSpawns[indexInTeam % redSpawns.Length];
 
         return null;
     }
