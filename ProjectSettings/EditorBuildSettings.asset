@@ -20,4 +20,10 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/EgyptMapRed.unity
     guid: 697ecfdb67f89544184b38992ee74453
+  - enabled: 1
+    path: Assets/Scenes/WinScreen.unity
+    guid: e332580b0f1086149832cec36724363e
+  - enabled: 1
+    path: Assets/Scenes/LoseScreen.unity
+    guid: cff6468fa972d494896040040bc2b300
   m_configObjects: {}

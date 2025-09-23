@@ -133,6 +133,7 @@ public class TeamNumpadController : MonoBehaviourPun
         {
             _solved = true;
             onCorrectCode?.Invoke();
+            ScoreManager.Instance.AddPoint(GetLocalTeam());//
 
             if (!string.IsNullOrEmpty(progressFlagOnSolved) && GameProgressManager.Instance != null)
                 GameProgressManager.Instance.SetProgressFlag(progressFlagOnSolved, true);
