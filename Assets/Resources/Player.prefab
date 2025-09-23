@@ -118,12 +118,14 @@ GameObject:
   - component: {fileID: 4718432841056966075}
   - component: {fileID: 3753228255658708538}
   - component: {fileID: 9084348806244266740}
+  - component: {fileID: 761976151500181208}
   - component: {fileID: 913842864554160270}
   - component: {fileID: 5220462046564738627}
   - component: {fileID: -2720876930039762435}
+  - component: {fileID: 5852772111303493465}
   m_Layer: 0
   m_Name: Player
-  m_TagString: Untagged
+  m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -285,6 +287,21 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   nicknameText: {fileID: 4400594826553305945}
+--- !u!114 &761976151500181208
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 659907106617431138}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5f290a083e5729445af0c9aabf2f80ce, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  blueMat: {fileID: 2100000, guid: 7a61316133be56941b7cdb57c360c7b0, type: 2}
+  redMat: {fileID: 2100000, guid: a2800aedd50d628488403f88419a0ee8, type: 2}
+  renderersToTint: []
 --- !u!114 &913842864554160270
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -358,6 +375,19 @@ MonoBehaviour:
   centerOffset: {x: 0, y: 0, z: 0}
   followOnStart: 0
   smoothSpeed: 0.125
+--- !u!114 &5852772111303493465
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 659907106617431138}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 56acad6159f382d4784abd24b1cc68e0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  cardDatabase: {fileID: 11400000, guid: 12a703ea36a64b44ea04c19f791dd581, type: 2}
 --- !u!1 &1667989650847771911
 GameObject:
   m_ObjectHideFlags: 0

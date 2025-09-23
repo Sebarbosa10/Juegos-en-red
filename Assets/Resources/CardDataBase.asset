@@ -1,0 +1,31 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4b5f800b78280ce499be24c40d4759ad, type: 3}
+  m_Name: CardDataBase
+  m_EditorClassIdentifier: 
+  allCards:
+  - id: 0
+    cardName: Extra Speed
+    description: Movement speed increased by 20%
+    cardType: 0
+  - id: 1
+    cardName: Better Jump
+    description: You can jumop higher
+    cardType: 0
+  - id: 2
+    cardName: Slippery Feet
+    description: The floor is ICE
+    cardType: 1
+  - id: 3
+    cardName: Sloth
+    description: Movement speed decreased by 20%
+    cardType: 1
