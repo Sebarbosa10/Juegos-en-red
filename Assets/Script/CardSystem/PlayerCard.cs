@@ -4,9 +4,17 @@ using Photon.Pun;
 public class PlayerCard : MonoBehaviourPunCallbacks
 {
     [SerializeField] private CardDataBase cardDatabase;
+    private CardEffectManager _effectManager;
 
     private const string CardKey = "cardID";
     public CardData CurrentCard { get; private set; }
+
+    
+
+    private void Awake()
+    {
+        _effectManager = GetComponent<CardEffectManager>();
+    }
 
     private void OnEnable()
     {
@@ -24,6 +32,12 @@ public class PlayerCard : MonoBehaviourPunCallbacks
         {
             CurrentCard = cardDatabase.GetCardById(cardId);
             Debug.Log($"[PlayerCard] {PhotonNetwork.NickName} me tocó: {CurrentCard.cardName}");
+
+            //  Apenas asignamos, activamos el efecto
+            if (_effectManager != null && CurrentCard != null)
+            {
+                _effectManager.ActivateEffects(CurrentCard);
+            }
         }
         else
         {

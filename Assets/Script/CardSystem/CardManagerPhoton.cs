@@ -50,13 +50,29 @@ public class CardManagerPhoton : MonoBehaviourPunCallbacks
     [PunRPC]
     private void RPC_AssignCard(int cardId, string fromPlayer, PhotonMessageInfo info)
     {
-        var playerCard = FindObjectOfType<PlayerCard>();
+        var playerCard = GetComponent<PlayerCard>();
         if (playerCard != null)
         {
             playerCard.ApplyCard(cardId);
-            UnityEngine.Debug.Log($"[PlayerCard] Me aplicaron la carta {playerCard.CurrentCard.cardName} desde {fromPlayer}");
+
+            Debug.Log($"[PlayerCard] Me aplicaron la carta {playerCard.CurrentCard.cardName} desde {fromPlayer}");
+
+            // Mostrar en UI
+            if (CardEffectUI.Instance != null)
+            {
+                CardEffectUI.Instance.ShowCard(playerCard.CurrentCard.cardName, fromPlayer);
+            }
+
+            // Activar efecto
+            var effectManager = GetComponent<CardEffectManager>();
+            if (effectManager != null)
+            {
+                effectManager.ActivateEffects(playerCard.CurrentCard);
+            }
         }
     }
+
+
 
     public void ResetCards()
     {
