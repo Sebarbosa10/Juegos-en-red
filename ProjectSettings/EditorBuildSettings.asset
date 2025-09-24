@@ -9,21 +9,21 @@ EditorBuildSettings:
     path: Assets/Scenes/MainMenu.unity
     guid: bab1f065decdf9c468feb1260d700080
   - enabled: 1
-    path: Assets/Scenes/Test.unity
-    guid: 34d81c90a1f254e48b0bd10911f3d4ca
-  - enabled: 1
     path: Assets/Scenes/Lobby.unity
     guid: 9fc0d4010bbf28b4594072e72b8655ab
+  - enabled: 0
+    path: Assets/Scenes/Test.unity
+    guid: 34d81c90a1f254e48b0bd10911f3d4ca
   - enabled: 0
     path: Assets/Scenes/EgyptMapBlue.unity
     guid: 29f5331bc121a184f9e8b8d2c62ab0a0
   - enabled: 0
     path: Assets/Scenes/EgyptMapRed.unity
     guid: 697ecfdb67f89544184b38992ee74453
-  - enabled: 1
-    path: Assets/Scenes/WinScreen.unity
-    guid: e332580b0f1086149832cec36724363e
-  - enabled: 1
-    path: Assets/Scenes/LoseScreen.unity
-    guid: cff6468fa972d494896040040bc2b300
+  - enabled: 0
+    path: 
+    guid: 00000000000000000000000000000000
+  - enabled: 0
+    path: 
+    guid: 00000000000000000000000000000000
   m_configObjects: {}
