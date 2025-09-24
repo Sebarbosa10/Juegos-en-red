@@ -14,6 +14,8 @@ public class ScoreManager : MonoBehaviourPunCallbacks, IOnEventCallback
     private int maxScore = 1; // Mejor de 3
     private readonly ExitGames.Client.Photon.Hashtable scores = new ExitGames.Client.Photon.Hashtable();
 
+    public event System.Action<int, int> OnScoreUpdated;
+
     private void Awake()
     {
         if (Instance == null) Instance = this;
@@ -58,18 +60,19 @@ public class ScoreManager : MonoBehaviourPunCallbacks, IOnEventCallback
                 scores[team] = 0;
             }
 
+            // sumamos
             scores[team] = (int)scores[team] + 1;
             Debug.Log($"[ScoreManager] Team {team} ahora tiene {scores[team]} puntos");
 
+            // 🚀 notificar al marcador
+            int blueScore = scores.ContainsKey("Blue") ? (int)scores["Blue"] : 0;
+            int redScore = scores.ContainsKey("Red") ? (int)scores["Red"] : 0;
+            OnScoreUpdated?.Invoke(blueScore, redScore);
+
+            // verificar victoria
             CheckWinCondition();
         }
-        else if (photonEvent.Code == WinEventCode)
-        {
-            object[] data = (object[])photonEvent.CustomData;
-            string winningTeam = (string)data[0];
 
-            Debug.Log($"[ScoreManager]  ¡El equipo {winningTeam} ganó la partida!");
-        }
     }
 
     private void CheckWinCondition()
