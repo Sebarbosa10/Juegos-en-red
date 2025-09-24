@@ -89,19 +89,46 @@ public class LobbyReadyManager : MonoBehaviourPunCallbacks
 
     private System.Collections.IEnumerator WaitTeamsPropsAndStart()
     {
-        float t = 0f, timeout = 5f;
+        float t = 0f, timeout = 10f; // le damos más tiempo por seguridad
         while (t < timeout)
         {
             bool allHaveTeam = PhotonNetwork.PlayerList.All(p =>
                 p.CustomProperties != null &&
                 p.CustomProperties.ContainsKey(TeamKey));
-            if (allHaveTeam) break;
+
+            bool allSpawned = PhotonNetwork.PlayerList.All(p =>
+                p.TagObject is GameObject);
+
+            if (allHaveTeam && allSpawned)
+                break;
 
             t += Time.deltaTime;
             yield return null;
         }
 
-        PhotonNetwork.CurrentRoom.SetCustomProperties(new PhotonHashtable { { MatchStartedKey, true } });
+        // 🔹 1) Repartir cartas cuando todos ya spawnearon
+        var cardManager = FindObjectOfType<CardManagerPhoton>();
+        if (cardManager != null)
+        {
+            TeamManager.Instance.RefreshTeams();
+
+            yield return null;
+
+            cardManager.DealCards();
+            Debug.Log("[Lobby] Cartas repartidas a todos los jugadores.");
+        }
+        else
+        {
+            Debug.LogWarning("[Lobby] No encontré CardManagerPhoton en la escena.");
+        }
+
+        // 🔹 2) Esperar un poquito para que apliquen efectos/UI
+        yield return new WaitForSeconds(2f);
+
+        // 🔹 3) Arrancar el match → Spawner teleporta
+        PhotonNetwork.CurrentRoom.SetCustomProperties(
+            new PhotonHashtable { { MatchStartedKey, true } }
+        );
         Debug.Log("[Lobby] matchStarted = true (misma escena, a spawnear).");
     }
 }

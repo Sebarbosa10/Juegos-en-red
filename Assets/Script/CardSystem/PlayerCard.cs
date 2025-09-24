@@ -1,5 +1,6 @@
-using Photon.Pun;
+﻿using Photon.Pun;
 using UnityEngine;
+using Photon.Realtime;
 
 public class PlayerCard : MonoBehaviourPunCallbacks
 {
@@ -12,37 +13,43 @@ public class PlayerCard : MonoBehaviourPunCallbacks
     private void Awake()
     {
         _effectManager = GetComponent<CardEffectManager>();
-        photonView.Owner.TagObject = photonView;
     }
 
-    public void ApplyCard(int cardId)
+    public void ApplyCard(int cardId, string fromPlayer = null)
     {
         if (cardId >= 0)
         {
             CurrentCard = cardDatabase.GetCardById(cardId);
-            Debug.Log($"[PlayerCard] {PhotonNetwork.NickName} me toc�: {CurrentCard.cardName}");
+            Debug.Log($"[PlayerCard] {photonView.Owner.NickName} me tocó: {CurrentCard.cardName}");
 
-            if (_effectManager != null && CurrentCard != null)
-                _effectManager.ActivateEffects(CurrentCard);
+            // Solo mostrar la UI si soy el jugador local
+            if (photonView.IsMine && fromPlayer != null && CardEffectUI.Instance != null)
+                CardEffectUI.Instance.ShowCard(CurrentCard.cardName, fromPlayer);
+
+            // Efectos se aplican solo en el dueño local
+            if (photonView.IsMine)
+                _effectManager?.ActivateEffects(CurrentCard);
         }
         else
         {
             CurrentCard = null;
-            Debug.Log("[PlayerCard] Carta reseteada");
+            if (photonView.IsMine)
+                Debug.Log("[PlayerCard] Carta reseteada");
         }
     }
 
-    [PunRPC]
-    public void RPC_AssignCard(int cardId, string fromPlayer)
+    public override void OnPlayerPropertiesUpdate(Player target, ExitGames.Client.Photon.Hashtable changedProps)
     {
-        ApplyCard(cardId);
+        // Solo reacciono si soy yo
+        if (target != photonView.Owner) return;
 
-        Debug.Log($"[PlayerCard] Me aplicaron la carta {CurrentCard.cardName} desde {fromPlayer}");
+        if (changedProps.ContainsKey(CardKey))
+        {
+            int cardId = (int)changedProps[CardKey];
+            string fromName = changedProps.ContainsKey("cardFrom") ? changedProps["cardFrom"].ToString() : "???";
 
-        if (CardEffectUI.Instance != null)
-            CardEffectUI.Instance.ShowCard(CurrentCard.cardName, fromPlayer);
-
-        if (_effectManager != null && CurrentCard != null)
-            _effectManager.ActivateEffects(CurrentCard);
+            ApplyCard(cardId, fromName);
+        }
     }
+
 }

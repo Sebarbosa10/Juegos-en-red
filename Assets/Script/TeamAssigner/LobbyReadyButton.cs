@@ -58,33 +58,6 @@ public class LobbyReadyButton : MonoBehaviourPunCallbacks
         if (readyIndicator != null) readyIndicator.SetActive(isReady);
     }
 
-    private void CheckAllReady()
-    {
-        foreach (var player in PhotonNetwork.PlayerList)
-        {
-            if (!player.CustomProperties.ContainsKey(ReadyKey) || !(bool)player.CustomProperties[ReadyKey])
-            {
-                return; // alguien no está listo todavía
-            }
-        }
-
-        if (PhotonNetwork.IsMasterClient)
-        {
-            Debug.Log("[Lobby] Todos listos. Repartiendo cartas...");
-
-            //  refrescamos los equipos
-            TeamManager.Instance.RefreshTeams();
-
-            var cardManager = FindObjectOfType<CardManagerPhoton>();
-            if (cardManager != null)
-            {
-                cardManager.DealCards();
-            }
-        }
-    }
-
-
-
     public override void OnPlayerPropertiesUpdate(Photon.Realtime.Player target, PhotonHashtable changedProps)
     {
         if (changedProps == null) return;
@@ -95,9 +68,6 @@ public class LobbyReadyButton : MonoBehaviourPunCallbacks
             isReady = (bool)changedProps[ReadyKey];
             RefreshUI();
         }
-
-        // siempre chequeamos, así el Master detecta cuando todos están listos
-        CheckAllReady();
     }
 
 }

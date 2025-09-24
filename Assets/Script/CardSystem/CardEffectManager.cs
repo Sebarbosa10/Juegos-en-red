@@ -42,17 +42,10 @@ public class CardEffectManager : MonoBehaviour
     private IEnumerator DoSlipperyFeet()
     {
         Debug.Log("[CardEffect] SlipperyFeet activado");
-        float originalDrag = GetComponent<Rigidbody>().drag;
-
-        while (true)
-        {
-            GetComponent<Rigidbody>().drag = 0.1f; // slippery
-            yield return new WaitForSeconds(20f);
-
-            GetComponent<Rigidbody>().drag = originalDrag; // normal
-            yield return new WaitForSeconds(10f);
-        }
+        _model.IsSlippery = true; // activa el modo resbaladizo
+        yield break;
     }
+
 
     private IEnumerator DoRandomSensivity()
     {
@@ -62,13 +55,13 @@ public class CardEffectManager : MonoBehaviour
 
         while (true)
         {
-            _model.MouseSensivityX = Random.Range(1f, 10f);
-            _model.MouseSensivityY = Random.Range(1f, 10f);
-            yield return new WaitForSeconds(20f);
+            _model.MouseSensivityX = Random.Range(0.5f, 20f);
+            _model.MouseSensivityY = Random.Range(0.5f, 20f);
+            yield return new WaitForSeconds(25f);
 
             _model.MouseSensivityX = origX;
             _model.MouseSensivityY = origY;
-            yield return new WaitForSeconds(10f);
+            yield return new WaitForSeconds(5f);
         }
     }
 
@@ -79,7 +72,7 @@ public class CardEffectManager : MonoBehaviour
         {
             yield return new WaitForSeconds(12.5f);
             _controller.SetCanMove(false);
-            yield return new WaitForSeconds(2.5f);
+            yield return new WaitForSeconds(5f);
             _controller.SetCanMove(true);
         }
     }
@@ -87,23 +80,22 @@ public class CardEffectManager : MonoBehaviour
     private IEnumerator DoHeavyWeight()
     {
         Debug.Log("[CardEffect] HeavyWeight activado");
-        float originalSpeed = _model.Speed;
+
+        float originalWalk = _model.Speed;
+        float originalSprint = _model.SprintSpeed;
 
         while (true)
         {
-            typeof(PlayerModel).GetField("_speed",
-                System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
-                .SetValue(_model, originalSpeed / 2f);
-
+            // mitad de velocidad y sin sprint (lo igualo al walk)
+            _model.SetMovementSpeed(originalWalk / 2f, originalWalk / 2f);
             yield return new WaitForSeconds(20f);
 
-            typeof(PlayerModel).GetField("_speed",
-                System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
-                .SetValue(_model, originalSpeed);
-
+            // restaurar velocidades originales
+            _model.SetMovementSpeed(originalWalk, originalSprint);
             yield return new WaitForSeconds(10f);
         }
     }
+
 
     //private IEnumerator DoBlindness()
     //{
@@ -111,9 +103,9 @@ public class CardEffectManager : MonoBehaviour
 
     //    while (true)
     //    {
-            
+
     //        yield return new WaitForSeconds(10f);
-            
+
     //        yield return new WaitForSeconds(6.5f);
     //    }
     //}
