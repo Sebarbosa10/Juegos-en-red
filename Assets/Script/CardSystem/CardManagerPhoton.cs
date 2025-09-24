@@ -33,8 +33,12 @@ public class CardManagerPhoton : MonoBehaviourPunCallbacks
             }
 
             // Guardamos carta en customProperties del rival
-            var props = new ExitGames.Client.Photon.Hashtable { { CardKey, cardId } };
+            var props = new ExitGames.Client.Photon.Hashtable {
+                { "cardID", cardId },
+                { "cardFrom", player.NickName }
+            };
             rival.SetCustomProperties(props);
+
 
             Debug.Log($"[CardManager] {player.NickName} robó {cardId}, aplicado a {rival.NickName}");
         }

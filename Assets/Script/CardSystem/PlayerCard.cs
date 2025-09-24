@@ -20,36 +20,36 @@ public class PlayerCard : MonoBehaviourPunCallbacks
         if (cardId >= 0)
         {
             CurrentCard = cardDatabase.GetCardById(cardId);
-            Debug.Log($"[PlayerCard] {PhotonNetwork.NickName} me tocó: {CurrentCard.cardName}");
+            Debug.Log($"[PlayerCard] {photonView.Owner.NickName} me tocó: {CurrentCard.cardName}");
 
-            // Mostrar UI si vino con atacante
-            if (fromPlayer != null && CardEffectUI.Instance != null)
+            // Solo mostrar la UI si soy el jugador local
+            if (photonView.IsMine && fromPlayer != null && CardEffectUI.Instance != null)
                 CardEffectUI.Instance.ShowCard(CurrentCard.cardName, fromPlayer);
 
-            if (_effectManager != null && CurrentCard != null)
-                _effectManager.ActivateEffects(CurrentCard);
+            // Efectos se aplican solo en el dueño local
+            if (photonView.IsMine)
+                _effectManager?.ActivateEffects(CurrentCard);
         }
         else
         {
             CurrentCard = null;
-            Debug.Log("[PlayerCard] Carta reseteada");
+            if (photonView.IsMine)
+                Debug.Log("[PlayerCard] Carta reseteada");
         }
     }
 
-    // 🔹 Detecta cuando alguien le setea la carta
     public override void OnPlayerPropertiesUpdate(Player target, ExitGames.Client.Photon.Hashtable changedProps)
     {
+        // Solo reacciono si soy yo
         if (target != photonView.Owner) return;
 
         if (changedProps.ContainsKey(CardKey))
         {
             int cardId = (int)changedProps[CardKey];
+            string fromName = changedProps.ContainsKey("cardFrom") ? changedProps["cardFrom"].ToString() : "???";
 
-            //  el "attacker" es quien me eligió como rival
-            Player attacker = TeamManager.Instance.GetRival(target);
-
-            string fromName = attacker != null ? attacker.NickName : "???";
             ApplyCard(cardId, fromName);
         }
     }
+
 }
