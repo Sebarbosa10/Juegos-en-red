@@ -8,6 +8,7 @@ TagManager:
   - BlueSpawn
   - RedSpawn
   - Spawn
+  - Mirror
   layers:
   - Default
   - TransparentFX
@@ -16,8 +17,8 @@ TagManager:
   - Water
   - UI
   - Interactive
-  - 
-  - 
+  - MirrorPLate
+  - Light Receivers
   - 
   - 
   - 

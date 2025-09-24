@@ -121,6 +121,6 @@ public class SarcophagusPuzzle : MonoBehaviour
         attemptOrder.Clear();
         reserved.Clear();
         resetting = false;
-        Debug.Log("↩️NOOOOOOOOOO");
+        Debug.Log("↩NOOOOOOOOOO");
     }
 }
