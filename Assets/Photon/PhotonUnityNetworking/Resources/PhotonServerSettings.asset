@@ -53,7 +53,13 @@ MonoBehaviour:
   - RPC_RequestPickup
   - RPC_RequestToggle
   - RPC_SolvedAll
-  - RPC_OnLit
+  - RPC_RequestComplete
+  - RPC_AssignCard
+  - RPC_Backspace
+  - RPC_Clear
+  - RPC_PressDigit
+  - RPC_Submit
+  - RPC_TeleportAll
   DisableAutoOpenWizard: 1
   ShowSettings: 0
   DevRegionSetOnce: 1

@@ -60,10 +60,14 @@ public class LobbyReadyButton : MonoBehaviourPunCallbacks
 
     public override void OnPlayerPropertiesUpdate(Photon.Realtime.Player target, PhotonHashtable changedProps)
     {
-        if (!target.IsLocal || changedProps == null) return;
+        if (changedProps == null) return;
         if (!changedProps.ContainsKey(ReadyKey)) return;
 
-        isReady = (bool)changedProps[ReadyKey];
-        RefreshUI();
+        if (target.IsLocal)
+        {
+            isReady = (bool)changedProps[ReadyKey];
+            RefreshUI();
+        }
     }
+
 }

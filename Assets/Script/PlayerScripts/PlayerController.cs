@@ -1,7 +1,6 @@
 ﻿using UnityEngine;
 using Photon.Pun;
 
-
 [RequireComponent(typeof(PhotonView))]
 public class PlayerController : MonoBehaviour
 {
@@ -11,8 +10,8 @@ public class PlayerController : MonoBehaviour
     private PlayerView _playerView;
     private Rigidbody _rb;
 
-    private PhotonView _pv;           
-    private bool _isLocal;           
+    private PhotonView _pv;
+    private bool _isLocal;
 
     private float _xRotation = 0f;
     private float _currentYRotation;
@@ -21,6 +20,9 @@ public class PlayerController : MonoBehaviour
 
     private bool _isPaused = false;
     private bool _canMove = true;
+
+    // 🔹 NUEVO: velocidad con inercia
+    private Vector3 _currentVelocity;
 
     private void Awake()
     {
@@ -50,10 +52,9 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-
     private void Update()
     {
-        if (!_isLocal) return;    
+        if (!_isLocal) return;
         if (!_canMove) return;
 
         HandleMouseLook();
@@ -62,7 +63,7 @@ public class PlayerController : MonoBehaviour
 
     private void FixedUpdate()
     {
-        if (!_isLocal) return;     
+        if (!_isLocal) return;
         if (!_canMove) return;
 
         HandleMovement();
@@ -98,11 +99,25 @@ public class PlayerController : MonoBehaviour
     private void HandleMovement()
     {
         float playerSpeed = Input.GetKey(KeyCode.LeftShift) ? _playerModel.SprintSpeed : _playerModel.Speed;
-        float x = Input.GetAxis("Horizontal") * playerSpeed * Time.fixedDeltaTime;
-        float z = Input.GetAxis("Vertical") * playerSpeed * Time.fixedDeltaTime;
 
-        Vector3 move = transform.right * x + transform.forward * z;
-        _rb.MovePosition(_rb.position + move);
+        // dirección del input
+        Vector3 moveDir = (transform.right * Input.GetAxis("Horizontal") +
+                           transform.forward * Input.GetAxis("Vertical")).normalized;
+
+        // aceleración hacia la dirección del input
+        if (moveDir != Vector3.zero)
+        {
+            _currentVelocity = moveDir * playerSpeed * Time.fixedDeltaTime;
+        }
+        else
+        {
+            // 🔹 fricción según si está resbaladizo o no
+            float friction = _playerModel.IsSlippery ? 0.99f : 0.5f;
+            _currentVelocity *= friction;
+        }
+
+        // aplicar movimiento
+        _rb.MovePosition(_rb.position + _currentVelocity);
     }
 
     private void HandleInteraction()
@@ -124,7 +139,6 @@ public class PlayerController : MonoBehaviour
 
             if (canShowHand && Input.GetMouseButtonDown(0) && interactive != null)
             {
-
                 interactive.Interact();
                 _playerView.ShowHandIcon(false);
             }

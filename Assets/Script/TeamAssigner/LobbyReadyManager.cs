@@ -5,15 +5,15 @@ using Photon.Pun;
 using Photon.Realtime;
 using PhotonHashtable = ExitGames.Client.Photon.Hashtable;
 
+
 public class LobbyReadyManager : MonoBehaviourPunCallbacks
 {
     [SerializeField] private byte maxPlayers = 4;
-
+    [Header("UI (opcional)")]
     [SerializeField] private TMPro.TMP_Text readyCountText;
 
     private const string ReadyKey = "ready";
     private const string TeamKey = "team";
-    private const string TeamRoomKey = "teamRoom";
     private const string MatchStartedKey = "matchStarted";
     private const string TeamBlue = "Blue";
     private const string TeamRed = "Red";
@@ -75,48 +75,60 @@ public class LobbyReadyManager : MonoBehaviourPunCallbacks
                               (bool)PhotonNetwork.CurrentRoom.CustomProperties[MatchStartedKey];
         if (alreadyStarted) return;
 
-
         var players = PhotonNetwork.PlayerList.OrderBy(p => p.ActorNumber).ToArray();
-        string matchId = Guid.NewGuid().ToString("N").Substring(0, 8);
-
         for (int i = 0; i < players.Length; i++)
         {
             string team = (i < 2) ? TeamBlue : TeamRed;
-            string teamRoom = $"Match{matchId}-{team}";
-
-            var props = new PhotonHashtable
-            {
-                { TeamKey, team },
-                { TeamRoomKey, teamRoom }
-            };
+            var props = new PhotonHashtable { { TeamKey, team } };
             players[i].SetCustomProperties(props);
         }
 
+        // 2) Esperar propagación y recién ahí iniciar
         StartCoroutine(WaitTeamsPropsAndStart());
     }
 
     private System.Collections.IEnumerator WaitTeamsPropsAndStart()
     {
-        float t = 0f;
-        const float timeout = 5f;
-
+        float t = 0f, timeout = 10f; // le damos más tiempo por seguridad
         while (t < timeout)
         {
-            bool allHaveProps = PhotonNetwork.PlayerList.All(p =>
+            bool allHaveTeam = PhotonNetwork.PlayerList.All(p =>
                 p.CustomProperties != null &&
-                p.CustomProperties.ContainsKey(TeamKey) &&
-                p.CustomProperties.ContainsKey(TeamRoomKey));
+                p.CustomProperties.ContainsKey(TeamKey));
 
-            if (allHaveProps) break;
+            bool allSpawned = PhotonNetwork.PlayerList.All(p =>
+                p.TagObject is GameObject);
+
+            if (allHaveTeam && allSpawned)
+                break;
 
             t += Time.deltaTime;
             yield return null;
         }
 
-        PhotonNetwork.CurrentRoom.IsOpen = false;
-        PhotonNetwork.CurrentRoom.IsVisible = false;
+        // 🔹 1) Repartir cartas cuando todos ya spawnearon
+        var cardManager = FindObjectOfType<CardManagerPhoton>();
+        if (cardManager != null)
+        {
+            TeamManager.Instance.RefreshTeams();
 
-        PhotonNetwork.CurrentRoom.SetCustomProperties(new PhotonHashtable { { MatchStartedKey, true } });
-        Debug.Log("[Lobby] Props propagadas → matchStarted = true");
+            yield return null;
+
+            cardManager.DealCards();
+            Debug.Log("[Lobby] Cartas repartidas a todos los jugadores.");
+        }
+        else
+        {
+            Debug.LogWarning("[Lobby] No encontré CardManagerPhoton en la escena.");
+        }
+
+        // 🔹 2) Esperar un poquito para que apliquen efectos/UI
+        yield return new WaitForSeconds(2f);
+
+        // 🔹 3) Arrancar el match → Spawner teleporta
+        PhotonNetwork.CurrentRoom.SetCustomProperties(
+            new PhotonHashtable { { MatchStartedKey, true } }
+        );
+        Debug.Log("[Lobby] matchStarted = true (misma escena, a spawnear).");
     }
 }

@@ -11,8 +11,8 @@ public class MainMenuLauncher : MonoBehaviourPunCallbacks
     public Button connectButton;
 
     [Header("Scenes")]
-    [SerializeField] private string lobbySceneName = "Lobby";
-    [SerializeField] private string roomName = "EgyptLobby";   
+    [SerializeField] private string lobbySceneName = "Lobby"; // Lobby
+    [SerializeField] private string roomName = "Lobby";  //EgyptLobby
     [SerializeField] private byte maxPlayers = 4;
 
     private string nickname;
