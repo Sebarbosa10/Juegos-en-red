@@ -12,7 +12,7 @@ public class PlayerCard : MonoBehaviourPunCallbacks
     private void Awake()
     {
         _effectManager = GetComponent<CardEffectManager>();
-        photonView.Owner.TagObject = photonView;
+        //photonView.Owner.TagObject = photonView;
     }
 
     public void ApplyCard(int cardId)
