@@ -16,6 +16,8 @@ public class PlayerModel : MonoBehaviour
 
     public float Speed => _speed;
     public float SprintSpeed => _sprintSpeed;
+    public bool IsSlippery { get; set; } = false;
+
 
     public float MouseSensivityX
     {
@@ -28,6 +30,13 @@ public class PlayerModel : MonoBehaviour
         get => _mouseSensivityY;
         set => _mouseSensivityY = value;
     }
+
+    public void SetMovementSpeed(float walkSpeed, float sprintSpeed)
+    {
+        _speed = walkSpeed;
+        _sprintSpeed = sprintSpeed;
+    }
+
 
     private void Awake()
     {
