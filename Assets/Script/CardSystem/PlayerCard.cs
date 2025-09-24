@@ -1,5 +1,6 @@
-using Photon.Pun;
+﻿using Photon.Pun;
 using UnityEngine;
+using Photon.Realtime;
 
 public class PlayerCard : MonoBehaviourPunCallbacks
 {
@@ -12,15 +13,18 @@ public class PlayerCard : MonoBehaviourPunCallbacks
     private void Awake()
     {
         _effectManager = GetComponent<CardEffectManager>();
-        //photonView.Owner.TagObject = photonView;
     }
 
-    public void ApplyCard(int cardId)
+    public void ApplyCard(int cardId, string fromPlayer = null)
     {
         if (cardId >= 0)
         {
             CurrentCard = cardDatabase.GetCardById(cardId);
-            Debug.Log($"[PlayerCard] {PhotonNetwork.NickName} me toc�: {CurrentCard.cardName}");
+            Debug.Log($"[PlayerCard] {PhotonNetwork.NickName} me tocó: {CurrentCard.cardName}");
+
+            // Mostrar UI si vino con atacante
+            if (fromPlayer != null && CardEffectUI.Instance != null)
+                CardEffectUI.Instance.ShowCard(CurrentCard.cardName, fromPlayer);
 
             if (_effectManager != null && CurrentCard != null)
                 _effectManager.ActivateEffects(CurrentCard);
@@ -32,17 +36,20 @@ public class PlayerCard : MonoBehaviourPunCallbacks
         }
     }
 
-    [PunRPC]
-    public void RPC_AssignCard(int cardId, string fromPlayer)
+    // 🔹 Detecta cuando alguien le setea la carta
+    public override void OnPlayerPropertiesUpdate(Player target, ExitGames.Client.Photon.Hashtable changedProps)
     {
-        ApplyCard(cardId);
+        if (target != photonView.Owner) return;
 
-        Debug.Log($"[PlayerCard] Me aplicaron la carta {CurrentCard.cardName} desde {fromPlayer}");
+        if (changedProps.ContainsKey(CardKey))
+        {
+            int cardId = (int)changedProps[CardKey];
 
-        if (CardEffectUI.Instance != null)
-            CardEffectUI.Instance.ShowCard(CurrentCard.cardName, fromPlayer);
+            //  el "attacker" es quien me eligió como rival
+            Player attacker = TeamManager.Instance.GetRival(target);
 
-        if (_effectManager != null && CurrentCard != null)
-            _effectManager.ActivateEffects(CurrentCard);
+            string fromName = attacker != null ? attacker.NickName : "???";
+            ApplyCard(cardId, fromName);
+        }
     }
 }
