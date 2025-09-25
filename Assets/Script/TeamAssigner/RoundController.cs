@@ -19,7 +19,7 @@ public class RoundController : MonoBehaviourPunCallbacks
             PhotonNetwork.CurrentRoom.SetCustomProperties(
                 new PhotonHashtable { { MatchStartedKey, false } });
 
-            Debug.Log("[Round] Master marcó fin de ronda → matchStarted=false (volver a Lobby).");
+            Debug.Log("[Round] Master marcó fin de ronda matchStarted=false (volver a Lobby).");
         }
     }
 }
