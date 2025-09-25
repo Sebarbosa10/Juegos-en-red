@@ -7,7 +7,15 @@ public class SarcophagusLid : MonoBehaviour, IInteractive
     public SarcophagusPuzzle puzzle;
     public int index;
 
+    [SerializeField] private SarcophagusPuzzleNetSync net;
+
     private bool locked = false;
+
+    private void Awake()
+    {
+        if (!puzzle) puzzle = GetComponentInParent<SarcophagusPuzzle>();
+        if (!net) net = GetComponentInParent<SarcophagusPuzzleNetSync>();
+    }
 
     public void Lock() { locked = true; }
     public void Unlock() { locked = false; }
@@ -29,7 +37,7 @@ public class SarcophagusLid : MonoBehaviour, IInteractive
         if (locked) return;
         if (puzzle != null && puzzle.IsBusy) return;
 
-        var net = FindObjectOfType<SarcophagusPuzzleNetSync>();
+
         if (net != null)
         {
             net.RequestClick(index);
