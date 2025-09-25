@@ -7,25 +7,24 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: Water
-  m_Shader: {fileID: 4800000, guid: 6539a55e92b9f3f4aa7458217caa717f, type: 3}
+  m_Name: Neon
+  m_Shader: {fileID: 4800000, guid: 50d91848a9fcc6a43be1227c2941b3ae, type: 3}
+  m_Parent: {fileID: 0}
+  m_ModifiedSerializedProperties: 0
   m_ValidKeywords: []
   m_InvalidKeywords: []
-  m_LightmapFlags: 4
+  m_LightmapFlags: 0
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
   m_CustomRenderQueue: -1
   stringTagMap: {}
   disabledShaderPasses: []
+  m_LockedProperties: 
   m_SavedProperties:
     serializedVersion: 3
     m_TexEnvs:
-    - _FlowMap:
+    - _TextureSample0:
         m_Texture: {fileID: 0}
-        m_Scale: {x: 1, y: 1}
-        m_Offset: {x: 0, y: 0}
-    - _MainTex:
-        m_Texture: {fileID: 2800000, guid: cd786501219b102479325a5d0535b192, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _texcoord:
@@ -34,18 +33,14 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
-    - _Amplitude: 0
-    - _Distance: 0
-    - _FallOff: 0
-    - _FlorIntencity: 0.93
-    - _FlowSpeed: 0.26
-    - _Height: 0
-    - _Range: 0
-    - _Tiling: 1
-    - __dirty: 1
-    - _freq: 0
+    - _Bias: 1
+    - _EmissionIntensity: 3.26
+    - _Power: 1
+    - _Scale: 1
+    - __dirty: 0
     - _speed: 0
     m_Colors:
-    - _Direction: {r: 1, g: 0, b: 1, a: 0}
-    - _Speed: {r: 0.1, g: 0.1, b: 0, a: 0}
+    - _Color0: {r: 1, g: 0.2740412, b: 0, a: 0}
+    - _Color1: {r: 1, g: 0.11764707, b: 0, a: 0}
   m_BuildTextureStacks: []
+  m_AllowLocking: 1
