@@ -69,14 +69,14 @@ Material:
     - _BumpScale: 1
     - _CameraDepthFadeOFfset: 0
     - _Cutoff: 0.5
-    - _DepthFadeDistance: 6.6
+    - _DepthFadeDistance: 4.41
     - _DetailNormalMapScale: 1
     - _DstBlend: 0
-    - _FresnelPowert: 1
+    - _FresnelPowert: 4
     - _GlossMapScale: 1
     - _Glossiness: 0.5
     - _GlossyReflections: 1
-    - _LerpStrength: 0
+    - _LerpStrength: 0.59
     - _Metallic: 0
     - _Mode: 0
     - _NormalMap1Strength: 1
