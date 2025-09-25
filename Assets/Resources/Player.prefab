@@ -257,7 +257,7 @@ MonoBehaviour:
   _sprintSpeed: 4
   _mouseSensivityX: 10
   _mouseSensivityY: 10
-  _interactionDistance: 0.3
+  _interactionDistance: 0.5
   _interactableLayer:
     serializedVersion: 2
     m_Bits: 64
@@ -533,7 +533,7 @@ Camera:
     y: 0
     width: 1
     height: 1
-  near clip plane: 0.3
+  near clip plane: 0.5
   far clip plane: 1000
   field of view: 60
   orthographic: 0
