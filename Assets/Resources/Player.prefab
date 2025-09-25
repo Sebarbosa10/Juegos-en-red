@@ -257,10 +257,10 @@ MonoBehaviour:
   _sprintSpeed: 4
   _mouseSensivityX: 10
   _mouseSensivityY: 10
-  _interactionDistance: 1
+  _interactionDistance: 0.3
   _interactableLayer:
     serializedVersion: 2
-    m_Bits: 320
+    m_Bits: 64
 --- !u!114 &3753228255658708538
 MonoBehaviour:
   m_ObjectHideFlags: 0
