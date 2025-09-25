@@ -7,7 +7,7 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: fencesEgypt
+  m_Name: 2Egypt
   m_Shader: {fileID: 46, guid: 0000000000000000f000000000000000, type: 0}
   m_ValidKeywords: []
   m_InvalidKeywords: []
@@ -38,12 +38,12 @@ Material:
         m_Offset: {x: 0, y: 0}
     - _EmissionMap:
         m_Texture: {fileID: 0}
-        m_Scale: {x: -0.29, y: 0.37}
-        m_Offset: {x: 0, y: 0}
+        m_Scale: {x: 0.5, y: 0.5}
+        m_Offset: {x: 0.24, y: 0.36}
     - _MainTex:
-        m_Texture: {fileID: 2800000, guid: 4efe0cf95929c3146ac8b3b52b4f3d9d, type: 3}
-        m_Scale: {x: -0.29, y: 0.37}
-        m_Offset: {x: 0, y: 0}
+        m_Texture: {fileID: 2800000, guid: 71186d6d54f554e48aa39430421458ff, type: 3}
+        m_Scale: {x: 0.5, y: 0.5}
+        m_Offset: {x: 0.24, y: 0.36}
     - _MetallicGlossMap:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
