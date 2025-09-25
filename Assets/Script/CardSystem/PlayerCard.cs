@@ -22,11 +22,11 @@ public class PlayerCard : MonoBehaviourPunCallbacks
             CurrentCard = cardDatabase.GetCardById(cardId);
             Debug.Log($"[PlayerCard] {photonView.Owner.NickName} me tocó: {CurrentCard.cardName}");
 
-            // Solo mostrar la UI si soy el jugador local
+            // Show UI only for the local player
             if (photonView.IsMine && fromPlayer != null && CardEffectUI.Instance != null)
                 CardEffectUI.Instance.ShowCard(CurrentCard.cardName, fromPlayer);
 
-            // Efectos se aplican solo en el dueño local
+            // Effects apply only for the local player
             if (photonView.IsMine)
                 _effectManager?.ActivateEffects(CurrentCard);
         }
@@ -40,7 +40,7 @@ public class PlayerCard : MonoBehaviourPunCallbacks
 
     public override void OnPlayerPropertiesUpdate(Player target, ExitGames.Client.Photon.Hashtable changedProps)
     {
-        // Solo reacciono si soy yo
+        // Only reacts if im the player
         if (target != photonView.Owner) return;
 
         if (changedProps.ContainsKey(CardKey))

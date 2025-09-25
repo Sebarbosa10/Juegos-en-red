@@ -12,7 +12,6 @@ public class ScoreBoard : MonoBehaviour
             ScoreManager.Instance.OnScoreUpdated += UpdateScore;
         }
 
-        // Inicializa el marcador
         UpdateScore(0, 0);
     }
 

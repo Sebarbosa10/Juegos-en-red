@@ -83,13 +83,12 @@ public class LobbyReadyManager : MonoBehaviourPunCallbacks
             players[i].SetCustomProperties(props);
         }
 
-        // 2) Esperar propagación y recién ahí iniciar
         StartCoroutine(WaitTeamsPropsAndStart());
     }
 
     private System.Collections.IEnumerator WaitTeamsPropsAndStart()
     {
-        float t = 0f, timeout = 10f; // le damos más tiempo por seguridad
+        float t = 0f, timeout = 10f;
         while (t < timeout)
         {
             bool allHaveTeam = PhotonNetwork.PlayerList.All(p =>
@@ -106,7 +105,6 @@ public class LobbyReadyManager : MonoBehaviourPunCallbacks
             yield return null;
         }
 
-        // 🔹 1) Repartir cartas cuando todos ya spawnearon
         var cardManager = FindObjectOfType<CardManagerPhoton>();
         if (cardManager != null)
         {
@@ -122,10 +120,8 @@ public class LobbyReadyManager : MonoBehaviourPunCallbacks
             Debug.LogWarning("[Lobby] No encontré CardManagerPhoton en la escena.");
         }
 
-        // 🔹 2) Esperar un poquito para que apliquen efectos/UI
         yield return new WaitForSeconds(2f);
 
-        // 🔹 3) Arrancar el match → Spawner teleporta
         PhotonNetwork.CurrentRoom.SetCustomProperties(
             new PhotonHashtable { { MatchStartedKey, true } }
         );

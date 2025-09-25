@@ -8,7 +8,6 @@ public class CardManagerPhoton : MonoBehaviourPunCallbacks
     [SerializeField] private CardDataBase cardDatabase;
     private const string CardKey = "cardID";
 
-    //  Llamar desde el Master cuando todos están ready
     public void DealCards()
     {
         if (!PhotonNetwork.IsMasterClient) return;
@@ -32,7 +31,6 @@ public class CardManagerPhoton : MonoBehaviourPunCallbacks
                 continue;
             }
 
-            // Guardamos carta en customProperties del rival
             var props = new ExitGames.Client.Photon.Hashtable {
                 { "cardID", cardId },
                 { "cardFrom", player.NickName }

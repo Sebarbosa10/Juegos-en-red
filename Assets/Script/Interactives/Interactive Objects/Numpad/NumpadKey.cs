@@ -18,7 +18,6 @@ public class NumpadKey : MonoBehaviour, IInteractive
     {
         if (!controller) return;
 
-        // dispara la animación del botón si hay AnimatedInteractable (y su AnimatedNetSync)
         var anim = GetComponent<AnimatedInteractable>();
         if (anim != null) anim.Interact();
 

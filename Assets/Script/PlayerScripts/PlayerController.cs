@@ -100,23 +100,19 @@ public class PlayerController : MonoBehaviour
     {
         float playerSpeed = Input.GetKey(KeyCode.LeftShift) ? _playerModel.SprintSpeed : _playerModel.Speed;
 
-        // dirección del input
         Vector3 moveDir = (transform.right * Input.GetAxis("Horizontal") +
                            transform.forward * Input.GetAxis("Vertical")).normalized;
 
-        // aceleración hacia la dirección del input
         if (moveDir != Vector3.zero)
         {
             _currentVelocity = moveDir * playerSpeed * Time.fixedDeltaTime;
         }
         else
         {
-            // 🔹 fricción según si está resbaladizo o no
             float friction = _playerModel.IsSlippery ? 0.99f : 0.5f;
             _currentVelocity *= friction;
         }
 
-        // aplicar movimiento
         _rb.MovePosition(_rb.position + _currentVelocity);
     }
 

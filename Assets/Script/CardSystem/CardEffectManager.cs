@@ -42,7 +42,7 @@ public class CardEffectManager : MonoBehaviour
     private IEnumerator DoSlipperyFeet()
     {
         Debug.Log("[CardEffect] SlipperyFeet activado");
-        _model.IsSlippery = true; // activa el modo resbaladizo
+        _model.IsSlippery = true; // slippery effect activated
         yield break;
     }
 
@@ -86,7 +86,6 @@ public class CardEffectManager : MonoBehaviour
 
         while (true)
         {
-            // mitad de velocidad y sin sprint (lo igualo al walk)
             _model.SetMovementSpeed(originalWalk / 2f, originalWalk / 2f);
             yield return new WaitForSeconds(20f);
 
@@ -95,7 +94,6 @@ public class CardEffectManager : MonoBehaviour
             yield return new WaitForSeconds(10f);
         }
     }
-
 
     //private IEnumerator DoBlindness()
     //{

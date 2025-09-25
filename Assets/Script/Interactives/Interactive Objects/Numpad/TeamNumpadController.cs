@@ -9,25 +9,19 @@ using ExitGames.Client.Photon;
 public class TeamNumpadController : MonoBehaviourPun
 {
     [Header("Config")]
-    [Tooltip("Blue o Red (de CustomProperties['team']). Si queda vacío, acepta de todos.")]
     [SerializeField] private string teamFilter = "Blue";
 
-    [Tooltip("Código correcto de 4 dígitos")]
     [SerializeField] private string correctCode = "1234";
 
-    [Tooltip("Longitud máxima de entrada")]
     [SerializeField] private int maxLength = 4;
 
-    [Tooltip("Bloquear input luego de resolver")]
     [SerializeField] private bool lockAfterSolve = true;
 
     [Header("UI")]
-    [SerializeField] private TMP_Text displayText;          // opcional (pantalla)
-    [SerializeField] private string hiddenChar = "•";       // si querés ocultar dígitos
+    [SerializeField] private TMP_Text displayText;          
+    [SerializeField] private string hiddenChar = "•";       
     [SerializeField] private bool hideDigits = false;
 
-    [Header("Progreso (opcional)")]
-    [Tooltip("Flag a setear en tu GameProgressManager al resolver")]
     [SerializeField] private string progressFlagOnSolved = "Blue_Numpad_Solved";
 
     [Header("Eventos")]
@@ -48,7 +42,6 @@ public class TeamNumpadController : MonoBehaviourPun
 
     public bool IsSolved => _solved;
 
-    // ---- API local (la llaman los botones) ----------------------------
 
     public void RequestDigit(int d)
     {
@@ -80,7 +73,6 @@ public class TeamNumpadController : MonoBehaviourPun
         photonView.RPC(nameof(RPC_Submit), RpcTarget.All, senderTeam);
     }
 
-    // ---- RPCs ---------------------------------------------------------
 
     [PunRPC]
     private void RPC_PressDigit(int d, string senderTeam, PhotonMessageInfo _mi)
@@ -153,9 +145,6 @@ public class TeamNumpadController : MonoBehaviourPun
         RefreshDisplay();
     }
 
-
-    // ---- Helpers ------------------------------------------------------
-
     private bool RejectInput()
     {
         if (!_enabledForLocal()) return true;
@@ -165,7 +154,6 @@ public class TeamNumpadController : MonoBehaviourPun
 
     private bool _enabledForLocal()
     {
-        // permite que cualquiera apriete si teamFilter vacío
         if (string.IsNullOrEmpty(teamFilter)) return true;
         return string.Equals(GetLocalTeam(), teamFilter);
     }
@@ -199,14 +187,11 @@ public class TeamNumpadController : MonoBehaviourPun
         }
         else
         {
-            // mostrar dígitos a izquierda y rellenar con -
             string s = _buffer.ToString();
             if (s.Length < maxLength) s = s.PadRight(maxLength, '-');
             displayText.text = s;
         }
     }
-
-    // Utilidad si querés setear el código por script
     public void SetCorrectCode(string code)
     {
         correctCode = code ?? "";

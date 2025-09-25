@@ -60,16 +60,13 @@ public class ScoreManager : MonoBehaviourPunCallbacks, IOnEventCallback
                 scores[team] = 0;
             }
 
-            // sumamos
             scores[team] = (int)scores[team] + 1;
             Debug.Log($"[ScoreManager] Team {team} ahora tiene {scores[team]} puntos");
 
-            // 🚀 notificar al marcador
             int blueScore = scores.ContainsKey("Blue") ? (int)scores["Blue"] : 0;
             int redScore = scores.ContainsKey("Red") ? (int)scores["Red"] : 0;
             OnScoreUpdated?.Invoke(blueScore, redScore);
 
-            // verificar victoria
             CheckWinCondition();
         }
 

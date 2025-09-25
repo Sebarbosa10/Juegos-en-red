@@ -19,7 +19,7 @@ public class RuntimeLogger : MonoBehaviour
     private void HandleLog(string logString, string stackTrace, LogType type)
     {
         logs += logString + "\n";
-        if (logs.Length > 1000) // para no explotar memoria
+        if (logs.Length > 1000) 
             logs = logs.Substring(logs.Length - 1000);
 
         if (logText != null)
