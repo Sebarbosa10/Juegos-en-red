@@ -12,6 +12,8 @@ TagManager:
   - BlueSpawn_R0
   - RedSpawn_R{0}
   - Mirror
+  - GoalRight
+  - GoalLeft
   layers:
   - Default
   - TransparentFX
