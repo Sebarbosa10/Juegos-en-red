@@ -57,7 +57,6 @@ public class PongLauncher : MonoBehaviourPunCallbacks
 
         if (PhotonNetwork.IsMasterClient && PhotonNetwork.CurrentRoom.PlayerCount == maxPlayers)
         {
-            // Sincroniza el nivel automáticamente
             PhotonNetwork.LoadLevel(pongSceneName);
         }
     }
