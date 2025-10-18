@@ -60,6 +60,15 @@ MonoBehaviour:
   - RPC_PressDigit
   - RPC_Submit
   - RPC_TeleportAll
+  - RPC_ConfirmEat
+  - RPC_Respawn
+  - RPC_AddMass
+  - RPC_ResetMass
+  - RPC_RequestEatPellet
+  - RPC_RequestEatPlayer
+  - RPC_RespawnAsSmall
+  - RPC_RespawnAtAll
+  - RPC_InitSplitBlob
   DisableAutoOpenWizard: 1
   ShowSettings: 0
   DevRegionSetOnce: 1

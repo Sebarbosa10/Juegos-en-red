@@ -12,6 +12,7 @@ TagManager:
   - BlueSpawn_R0
   - RedSpawn_R{0}
   - Mirror
+  - Pellet
   layers:
   - Default
   - TransparentFX
