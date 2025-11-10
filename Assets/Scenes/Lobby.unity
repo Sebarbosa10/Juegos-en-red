@@ -16278,7 +16278,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 575699061}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.9782653, y: -2.7710998, z: 184.4}
+  m_LocalPosition: {x: 0.9782653, y: -2.7710998, z: 187.8}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -30663,8 +30663,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4fef62e1f0b16eb48ad43b890bc92946, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  readyButton: {fileID: 1368502610}
-  readyIndicator: {fileID: 0}
   readyKey: 114
 --- !u!114 &1101102687
 MonoBehaviour:
@@ -53881,8 +53879,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a67f5071afead3c45a42f54f47e430ad, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  maxPlayers: 4
   readyCountText: {fileID: 421343696}
+  requiredPlayers: 4
+  gameSceneName: Egypt
 --- !u!114 &2065874069
 MonoBehaviour:
   m_ObjectHideFlags: 0

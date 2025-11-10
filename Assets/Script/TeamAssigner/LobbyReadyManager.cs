@@ -1,130 +1,145 @@
-﻿using System;
+﻿using System.Collections;
 using System.Linq;
-using UnityEngine;
 using Photon.Pun;
 using Photon.Realtime;
+using TMPro;
+using UnityEngine;
 using PhotonHashtable = ExitGames.Client.Photon.Hashtable;
 
 
 public class LobbyReadyManager : MonoBehaviourPunCallbacks
 {
-    [SerializeField] private byte maxPlayers = 4;
     [Header("UI (opcional)")]
-    [SerializeField] private TMPro.TMP_Text readyCountText;
+    [SerializeField] private TMP_Text readyCountText;
+
+    [Header("Config")]
+    [SerializeField] private int requiredPlayers = 4;
+    [SerializeField] private string gameSceneName = "Egypt";
 
     private const string ReadyKey = "ready";
     private const string TeamKey = "team";
-    private const string MatchStartedKey = "matchStarted";
-    private const string TeamBlue = "Blue";
-    private const string TeamRed = "Red";
+    private const string Blue = "Blue";
+    private const string Red = "Red";
+
+    private bool _starting = false;
+
+    void Awake()
+    {
+        // redundante pero seguro
+        PhotonNetwork.AutomaticallySyncScene = true;
+    }
 
     void Start()
     {
-        UpdateReadyUI();
-        TryStartIfAllReady();
-    }
-
-    public override void OnJoinedRoom()
-    {
-        UpdateReadyUI();
-        TryStartIfAllReady();
+        LogRoomState("Start()");
+        Evaluate();
     }
 
     public override void OnPlayerEnteredRoom(Player newPlayer)
     {
-        UpdateReadyUI();
-        TryStartIfAllReady();
+        LogRoomState($"OnPlayerEnteredRoom: {newPlayer.NickName}");
+        Evaluate();
     }
 
-    public override void OnPlayerPropertiesUpdate(Player target, PhotonHashtable changedProps)
+    public override void OnPlayerLeftRoom(Player otherPlayer)
     {
-        if (changedProps != null && changedProps.ContainsKey(ReadyKey))
+        LogRoomState($"OnPlayerLeftRoom: {otherPlayer.NickName}");
+        _starting = false; // por si se fue alguien
+        Evaluate();
+    }
+
+    public override void OnPlayerPropertiesUpdate(Player targetPlayer, PhotonHashtable changedProps)
+    {
+        if (changedProps == null) return;
+        if (!changedProps.ContainsKey(ReadyKey)) return;
+
+        Debug.Log($"[ReadyChange] {targetPlayer.NickName} -> {changedProps[ReadyKey]}");
+        Evaluate();
+    }
+
+    private void Evaluate()
+    {
+        var players = PhotonNetwork.PlayerList;
+        int playerCount = players.Length;
+
+        int readyCount = players.Count(p =>
+            p.CustomProperties != null &&
+            p.CustomProperties.ContainsKey(ReadyKey) &&
+            (bool)p.CustomProperties[ReadyKey]);
+
+        if (readyCountText != null)
+            readyCountText.text = $"Ready: {readyCount}/{requiredPlayers}";
+
+        Debug.Log($"[Eval] count={playerCount} ready={readyCount} required={requiredPlayers} master={PhotonNetwork.IsMasterClient}");
+
+        if (!PhotonNetwork.IsMasterClient) return;
+        if (_starting) return;
+
+        // Condición de arranque:
+        // - hay requiredPlayers en la sala
+        // - todos esos están ready
+        if (playerCount == requiredPlayers && readyCount == requiredPlayers)
         {
-            UpdateReadyUI();
-            TryStartIfAllReady();
+            StartCoroutine(StartMatchOnce());
         }
     }
 
-    private void UpdateReadyUI()
+    private IEnumerator StartMatchOnce()
     {
-        if (readyCountText == null || !PhotonNetwork.InRoom) return;
+        _starting = true;
 
-        int readyCount = PhotonNetwork.PlayerList.Count(p =>
-            p.CustomProperties != null &&
-            p.CustomProperties.ContainsKey(ReadyKey) &&
-            (bool)p.CustomProperties[ReadyKey]);
+        // Asignar equipos determinísticamente (2 y 2) si les falta team
+        var ordered = PhotonNetwork.PlayerList.OrderBy(p => p.ActorNumber).ToArray();
+        int blue = 0, red = 0;
+        foreach (var p in ordered)
+        {
+            string team = null;
+            if (p.CustomProperties != null && p.CustomProperties.ContainsKey(TeamKey))
+                team = p.CustomProperties[TeamKey] as string;
 
-        readyCountText.text = $"Ready: {readyCount}/{PhotonNetwork.CurrentRoom.MaxPlayers}";
+            if (string.IsNullOrEmpty(team))
+            {
+                team = (blue < requiredPlayers / 2) ? Blue : Red;
+                photonView.RPC(nameof(RPC_SetTeam), p, team);
+            }
+
+            if (team == Blue) blue++; else if (team == Red) red++;
+        }
+
+        Debug.Log($"[StartMatch] Assigned -> Blue:{blue} Red:{red}");
+
+        // Pequeña espera para que los RPC de team lleguen a todos
+        yield return new WaitForSeconds(0.2f);
+
+        Debug.Log("[StartMatch] Loading scene 'Egypt' (master)");
+        PhotonNetwork.LoadLevel(gameSceneName);
     }
 
-    private void TryStartIfAllReady()
+    [PunRPC]
+    private void RPC_SetTeam(string team)
     {
-        if (!PhotonNetwork.InRoom) return;
-        if (!PhotonNetwork.IsMasterClient) return;
-        if (PhotonNetwork.CurrentRoom.PlayerCount < maxPlayers) return;
+        var me = PhotonNetwork.LocalPlayer;
+        me.SetCustomProperties(new PhotonHashtable { { TeamKey, team } });
+        Debug.Log($"[Team] {me.NickName} -> {team}");
+    }
 
-        bool allReady = PhotonNetwork.PlayerList.All(p =>
-            p.CustomProperties != null &&
-            p.CustomProperties.ContainsKey(ReadyKey) &&
-            (bool)p.CustomProperties[ReadyKey]);
-
-        if (!allReady) return;
-
-        bool alreadyStarted = PhotonNetwork.CurrentRoom.CustomProperties != null &&
-                              PhotonNetwork.CurrentRoom.CustomProperties.ContainsKey(MatchStartedKey) &&
-                              (bool)PhotonNetwork.CurrentRoom.CustomProperties[MatchStartedKey];
-        if (alreadyStarted) return;
+    private void LogRoomState(string where)
+    {
+        if (!PhotonNetwork.InRoom)
+        {
+            Debug.Log($"[RoomState:{where}] Not in room");
+            return;
+        }
 
         var players = PhotonNetwork.PlayerList.OrderBy(p => p.ActorNumber).ToArray();
-        for (int i = 0; i < players.Length; i++)
+        string dump = string.Join(", ", players.Select(p =>
         {
-            string team = (i < 2) ? TeamBlue : TeamRed;
-            var props = new PhotonHashtable { { TeamKey, team } };
-            players[i].SetCustomProperties(props);
-        }
-
-        StartCoroutine(WaitTeamsPropsAndStart());
-    }
-
-    private System.Collections.IEnumerator WaitTeamsPropsAndStart()
-    {
-        float t = 0f, timeout = 10f;
-        while (t < timeout)
-        {
-            bool allHaveTeam = PhotonNetwork.PlayerList.All(p =>
-                p.CustomProperties != null &&
-                p.CustomProperties.ContainsKey(TeamKey));
-
-            bool allSpawned = PhotonNetwork.PlayerList.All(p =>
-                p.TagObject is GameObject);
-
-            if (allHaveTeam && allSpawned)
-                break;
-
-            t += Time.deltaTime;
-            yield return null;
-        }
-
-        var cardManager = FindObjectOfType<CardManagerPhoton>();
-        if (cardManager != null)
-        {
-            TeamManager.Instance.RefreshTeams();
-
-            yield return null;
-
-            cardManager.DealCards();
-            Debug.Log("[Lobby] Cartas repartidas a todos los jugadores.");
-        }
-        else
-        {
-            Debug.LogWarning("[Lobby] No encontré CardManagerPhoton en la escena.");
-        }
-
-        yield return new WaitForSeconds(2f);
-
-        PhotonNetwork.CurrentRoom.SetCustomProperties(
-            new PhotonHashtable { { MatchStartedKey, true } }
-        );
-        Debug.Log("[Lobby] matchStarted = true (misma escena, a spawnear).");
+            string r = (p.CustomProperties != null && p.CustomProperties.ContainsKey(ReadyKey))
+                ? ((bool)p.CustomProperties[ReadyKey] ? "R" : "nR") : "--";
+            string t = (p.CustomProperties != null && p.CustomProperties.ContainsKey(TeamKey))
+                ? (string)p.CustomProperties[TeamKey] : "--";
+            return $"{p.ActorNumber}:{p.NickName}[{r}|{t}]";
+        }));
+        Debug.Log($"[RoomState:{where}] players={players.Length} :: {dump}");
     }
 }
