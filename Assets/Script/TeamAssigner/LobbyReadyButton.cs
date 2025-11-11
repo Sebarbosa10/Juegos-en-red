@@ -6,20 +6,26 @@ using PhotonHashtable = ExitGames.Client.Photon.Hashtable;
 public class LobbyReadyButton : MonoBehaviourPunCallbacks
 {
     [SerializeField] private KeyCode readyKey = KeyCode.R;
-    private const string ReadyKey = "ready";
+
+    private const string ReadyCycleKey = "readyCycle";
+    private const string LobbyCycleKey = "lobbyCycle";
 
     void Update()
     {
         if (Input.GetKeyDown(readyKey))
         {
-            var me = PhotonNetwork.LocalPlayer;
-            bool current = false;
-            if (me.CustomProperties != null && me.CustomProperties.ContainsKey(ReadyKey))
-                current = (bool)me.CustomProperties[ReadyKey];
+            if (!PhotonNetwork.InRoom) return;
 
-            bool next = !current;
-            me.SetCustomProperties(new PhotonHashtable { { ReadyKey, next } });
-            Debug.Log($"[Ready] {(next ? "ON" : "OFF")} for {me.NickName} (Actor {me.ActorNumber})");
+            int lobbyCycle = 0;
+            var rp = PhotonNetwork.CurrentRoom.CustomProperties;
+            if (rp != null && rp.ContainsKey(LobbyCycleKey))
+                lobbyCycle = (int)rp[LobbyCycleKey];
+
+            // ✅ Marco listo para ESTE ciclo
+            PhotonNetwork.LocalPlayer.SetCustomProperties(
+                new PhotonHashtable { { ReadyCycleKey, lobbyCycle } });
+
+            Debug.Log($"[Ready] {PhotonNetwork.NickName} listo para ciclo {lobbyCycle}");
         }
     }
 }

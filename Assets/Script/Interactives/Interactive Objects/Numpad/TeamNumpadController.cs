@@ -129,7 +129,10 @@ public class TeamNumpadController : MonoBehaviourPun
             if (PhotonNetwork.IsMasterClient)
             {
                 Debug.Log($"[Numpad] Código correcto ingresado por {senderTeam}. Sumando punto solo en el Master.");
-                ScoreManager.Instance.AddPoint(senderTeam); // 
+                ScoreManager.Instance.AddPoint(senderTeam);
+
+                PuzzleMatchFlow.Instance?.CompleteMatch();
+
             }
 
             if (!string.IsNullOrEmpty(progressFlagOnSolved) && GameProgressManager.Instance != null)
