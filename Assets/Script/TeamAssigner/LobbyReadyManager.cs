@@ -92,7 +92,7 @@ public class LobbyReadyManager : MonoBehaviourPunCallbacks
     {
         _starting = true;
 
-        // Asignar equipos 2/2 si faltan
+        
         var ordered = PhotonNetwork.PlayerList.OrderBy(p => p.ActorNumber).ToArray();
         int blue = 0, red = 0;
         foreach (var p in ordered)
@@ -107,13 +107,13 @@ public class LobbyReadyManager : MonoBehaviourPunCallbacks
             if (team == Blue) blue++; else if (team == Red) red++;
         }
 
-        // Limpiar flag de spawned
+        
         foreach (var p in PhotonNetwork.PlayerList)
             photonView.RPC(nameof(RPC_ClearSpawnFlag), p);
 
         yield return new WaitForSeconds(0.2f);
 
-        // Elegir escena: sceneOrder[lobbyCycle % sceneOrder.Length]
+        
         if (sceneOrder == null || sceneOrder.Length == 0)
         {
             Debug.LogError("[Lobby] sceneOrder vacío");

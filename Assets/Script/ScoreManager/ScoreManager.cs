@@ -11,7 +11,7 @@ public class ScoreManager : MonoBehaviourPunCallbacks, IOnEventCallback
     private const byte ScoreEventCode = 2;
     private const byte WinEventCode = 2;
 
-    private int maxScore = 2; // Mejor de 3
+    private int maxScore = 2; 
     private readonly ExitGames.Client.Photon.Hashtable scores = new ExitGames.Client.Photon.Hashtable();
 
     public event System.Action<int, int> OnScoreUpdated;

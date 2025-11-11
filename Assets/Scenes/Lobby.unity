@@ -4489,7 +4489,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   readyCountText: {fileID: 421343696}
-  requiredPlayers: 1
+  requiredPlayers: 2
   sceneOrder:
   - Egypt
   - Greece

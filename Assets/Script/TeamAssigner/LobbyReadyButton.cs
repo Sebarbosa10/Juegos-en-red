@@ -1,5 +1,4 @@
 ﻿using Photon.Pun;
-using Photon.Realtime;
 using UnityEngine;
 using PhotonHashtable = ExitGames.Client.Photon.Hashtable;
 
@@ -7,8 +6,8 @@ public class LobbyReadyButton : MonoBehaviourPunCallbacks
 {
     [SerializeField] private KeyCode readyKey = KeyCode.R;
 
-    private const string ReadyCycleKey = "readyCycle";
     private const string LobbyCycleKey = "lobbyCycle";
+    private const string ReadyCycleKey = "readyCycle";
 
     void Update()
     {
@@ -21,7 +20,6 @@ public class LobbyReadyButton : MonoBehaviourPunCallbacks
             if (rp != null && rp.ContainsKey(LobbyCycleKey))
                 lobbyCycle = (int)rp[LobbyCycleKey];
 
-            // ✅ Marco listo para ESTE ciclo
             PhotonNetwork.LocalPlayer.SetCustomProperties(
                 new PhotonHashtable { { ReadyCycleKey, lobbyCycle } });
 

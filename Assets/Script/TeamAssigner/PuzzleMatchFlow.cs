@@ -4,22 +4,21 @@ using PhotonHashtable = ExitGames.Client.Photon.Hashtable;
 
 public class PuzzleMatchFlow : MonoBehaviourPun
 {
-    public static PuzzleMatchFlow Instance { get; private set; }  // 👈 singleton
+    public static PuzzleMatchFlow Instance { get; private set; }  
 
     [SerializeField] private string lobbySceneName = "Lobby";
     private const string LobbyCycleKey = "lobbyCycle";
 
     private void Awake()
     {
-        // Singleton simple por escena; si hubiera dos, destruimos el duplicado
+        
         if (Instance != null && Instance != this)
         {
             Destroy(gameObject);
             return;
         }
         Instance = this;
-        // (Opcional) si querés que sobreviva al cambio de escena:
-        // DontDestroyOnLoad(gameObject);
+      
     }
 
     public void CompleteMatch()

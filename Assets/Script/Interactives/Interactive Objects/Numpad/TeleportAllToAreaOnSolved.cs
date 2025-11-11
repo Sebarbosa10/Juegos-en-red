@@ -42,7 +42,7 @@ public class TeleportAllToAreaOnSolved : MonoBehaviourPun
     {
         if (spawnPoints == null || spawnPoints.Length == 0) return;
 
-        var players = PhotonNetwork.PlayerList; // ordenados por ActorNumber
+        var players = PhotonNetwork.PlayerList; 
         int myIndex = System.Array.FindIndex(players, p => p == PhotonNetwork.LocalPlayer);
         if (myIndex < 0) return;
 

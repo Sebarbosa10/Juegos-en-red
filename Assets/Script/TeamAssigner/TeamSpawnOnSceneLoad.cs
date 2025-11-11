@@ -7,7 +7,7 @@ using PhotonHashtable = ExitGames.Client.Photon.Hashtable;
 public class TeamSpawnOnSceneLoad : MonoBehaviourPunCallbacks
 {
     [Header("Prefab & Tags")]
-    [SerializeField] private string playerPrefabName = "Player";   // en Resources/
+    [SerializeField] private string playerPrefabName = "Player";   
     [SerializeField] private string blueSpawnTag = "BlueSpawn";
     [SerializeField] private string redSpawnTag = "RedSpawn";
 
@@ -19,7 +19,7 @@ public class TeamSpawnOnSceneLoad : MonoBehaviourPunCallbacks
 
     IEnumerator Start()
     {
-        // Esperar a estar realmente dentro de la room y con team disponible
+        
         while (!PhotonNetwork.InRoom ||
                PhotonNetwork.LocalPlayer.CustomProperties == null ||
                !PhotonNetwork.LocalPlayer.CustomProperties.ContainsKey(TeamKey))
@@ -39,7 +39,7 @@ public class TeamSpawnOnSceneLoad : MonoBehaviourPunCallbacks
 
         GetSpawnTransform(tag, out Vector3 pos, out Quaternion rot);
 
-        // Instanciar solo si aún no tengo Player local en escena
+        
         var mine = FindMyLocalPlayer();
         if (mine == null)
         {
@@ -79,7 +79,7 @@ public class TeamSpawnOnSceneLoad : MonoBehaviourPunCallbacks
 
     public override void OnPlayerPropertiesUpdate(Player target, PhotonHashtable changedProps)
     {
-        // Si el team nos llegó tarde por alguna razón y todavía no spawneamos
+        
         if (!_spawned && target.IsLocal && changedProps != null && changedProps.ContainsKey(TeamKey))
             DoSpawn();
     }

@@ -63,6 +63,7 @@ MonoBehaviour:
   - RPC_ClearSpawnFlag
   - RPC_SetTeam
   - RPC_ClearReadyAndSpawn
+  - RPC_ResetReadyCycleAll
   DisableAutoOpenWizard: 1
   ShowSettings: 0
   DevRegionSetOnce: 1
