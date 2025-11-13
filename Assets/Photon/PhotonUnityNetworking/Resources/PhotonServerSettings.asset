@@ -64,6 +64,8 @@ MonoBehaviour:
   - RPC_SetTeam
   - RPC_ClearReadyAndSpawn
   - RPC_ResetReadyCycleAll
+  - RPC_RequestStageEnd
+  - RPC_SetReadyFalse
   DisableAutoOpenWizard: 1
   ShowSettings: 0
   DevRegionSetOnce: 1
