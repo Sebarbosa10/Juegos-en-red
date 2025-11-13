@@ -4489,7 +4489,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   readyCountText: {fileID: 421343696}
-  requiredPlayers: 1
+  requiredPlayers: 4
   sceneOrder:
   - Egypt
   - Greece
@@ -4505,6 +4505,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bd364e734f0904c41bdc3c63a102140f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  endRoundKey: 102
 --- !u!114 &2065874071
 MonoBehaviour:
   m_ObjectHideFlags: 0

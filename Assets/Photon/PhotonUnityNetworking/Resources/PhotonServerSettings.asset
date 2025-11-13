@@ -13,10 +13,10 @@ MonoBehaviour:
   m_Name: PhotonServerSettings
   m_EditorClassIdentifier: 
   AppSettings:
-    AppIdRealtime: bb969541-201b-4e27-ab32-27ef8cdad237
+    AppIdRealtime: f070e4d0-bf9f-44e9-8430-fc5d81d73d1d
     AppIdFusion: 
     AppIdChat: 
-    AppIdVoice: 
+    AppIdVoice: 775308c2-7d06-4db2-8c7f-6803815b1543
     AppVersion: 
     UseNameServer: 1
     FixedRegion: 
@@ -28,44 +28,35 @@ MonoBehaviour:
     AuthMode: 0
     EnableLobbyStatistics: 0
     NetworkLogging: 1
-  DevRegion: sa
+  DevRegion: 
   PunLogging: 0
   EnableSupportLogger: 0
   RunInBackground: 1
   StartInOfflineMode: 0
   RpcList:
+  - CantHearYou
+  - ChangeColour
   - ClickRpc
   - DestroyRpc
+  - HeresWhy
   - DestroySpaceship
   - Fire
   - RespawnSpaceship
-  - RpcStartGameForPlayers
-  - RPC_StartMatch
-  - StartMatch
-  - RPC_HandleInteraction
-  - RPC_PlayLid
-  - RPC_RequestClick
-  - RPC_ResetStart
-  - RPC_Solved
-  - RPC_PlayAbsolute
-  - RPC_ApplyPickupAll
-  - RPC_ApplyToggleAll
-  - RPC_RequestPickup
-  - RPC_RequestToggle
-  - RPC_SolvedAll
-  - RPC_RequestComplete
-  - RPC_AssignCard
   - RPC_Backspace
   - RPC_Clear
+  - RPC_ClearSpawnFlag
+  - RPC_HandleInteraction
+  - RPC_PlayAbsolute
   - RPC_PressDigit
+  - RPC_RequestClick
+  - RPC_ResetReadyCycleAll
+  - RPC_ResetStart
+  - RPC_SetTeam
+  - RPC_Solved
+  - RPC_SolvedAll
+  - RPC_StartMatch
   - RPC_Submit
   - RPC_TeleportAll
-  - RPC_ClearSpawnFlag
-  - RPC_SetTeam
-  - RPC_ClearReadyAndSpawn
-  - RPC_ResetReadyCycleAll
-  - RPC_RequestStageEnd
-  - RPC_SetReadyFalse
   DisableAutoOpenWizard: 1
-  ShowSettings: 0
-  DevRegionSetOnce: 1
+  ShowSettings: 1
+  DevRegionSetOnce: 0
