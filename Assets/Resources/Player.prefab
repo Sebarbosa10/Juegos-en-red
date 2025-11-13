@@ -587,6 +587,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4039453dcb8d01844bd68d790fceed7f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  distanceSettings:
+    fullVolumeDistance: 10
+    mediumVolumeDistance: 20
+    maxHearingDistance: 50
 --- !u!1 &1667989650847771911
 GameObject:
   m_ObjectHideFlags: 0

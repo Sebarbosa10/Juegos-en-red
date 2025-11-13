@@ -4434,8 +4434,6 @@ GameObject:
   - component: {fileID: 2065874064}
   - component: {fileID: 2065874066}
   - component: {fileID: 2065874068}
-  - component: {fileID: 2065874072}
-  - component: {fileID: 2065874070}
   - component: {fileID: 2065874071}
   m_Layer: 0
   m_Name: PunConnect
@@ -4489,23 +4487,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   readyCountText: {fileID: 421343696}
-  requiredPlayers: 4
+  requiredPlayers: 1
   sceneOrder:
   - Egypt
   - Greece
---- !u!114 &2065874070
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2065874062}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: bd364e734f0904c41bdc3c63a102140f, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  endRoundKey: 102
 --- !u!114 &2065874071
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4528,18 +4513,6 @@ MonoBehaviour:
   sceneViewId: 29
   InstantiationId: 0
   isRuntimeInstantiated: 0
---- !u!114 &2065874072
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2065874062}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a07b2b719d3dc9349b102dfccba2413d, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!43 &2068667515
 Mesh:
   m_ObjectHideFlags: 0
