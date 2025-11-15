@@ -1,8 +1,8 @@
 using UnityEngine;
 using Photon.Pun;
 using Photon.Realtime;
-using PhotonHashtable = ExitGames.Client.Photon.Hashtable;
 using System.Linq;
+using PhotonHashtable = ExitGames.Client.Photon.Hashtable;
 
 public class LobbyStarter : MonoBehaviourPunCallbacks
 {
@@ -27,37 +27,45 @@ public class LobbyStarter : MonoBehaviourPunCallbacks
 
     public override void OnJoinedRoom()
     {
-        Debug.Log("[Lobby] Entré a la sala, spawneando jugador...");
-
         int blueCount = PhotonNetwork.PlayerList.Count(p =>
-            p.CustomProperties.ContainsKey("team") && (string)p.CustomProperties["team"] == "Blue");
+            p.CustomProperties.ContainsKey(TeamKey) &&
+            (string)p.CustomProperties[TeamKey] == TeamBlue);
 
         int redCount = PhotonNetwork.PlayerList.Count(p =>
-            p.CustomProperties.ContainsKey("team") && (string)p.CustomProperties["team"] == "Red");
+            p.CustomProperties.ContainsKey(TeamKey) &&
+            (string)p.CustomProperties[TeamKey] == TeamRed);
 
         string team;
-        if (blueCount < 2) team = "Blue";
-        else if (redCount < 2) team = "Red";
-        else
-        {
-            Debug.LogWarning("[Lobby] No hay lugar en ningún equipo!");
-            return;
-        }
+        if (blueCount < 2) team = TeamBlue;
+        else if (redCount < 2) team = TeamRed;
+        else return;
 
-        var props = new ExitGames.Client.Photon.Hashtable { { "team", team } };
+        PhotonHashtable props = new PhotonHashtable { { TeamKey, team } };
         PhotonNetwork.LocalPlayer.SetCustomProperties(props);
 
-        Vector3 spawnPos = team == "Blue" ? _spawnPointBlue.position : _spawnPointRed.position;
+        Vector3 spawnPos = team == TeamBlue ? _spawnPointBlue.position : _spawnPointRed.position;
 
         GameObject playerObj = PhotonNetwork.Instantiate(_playerPrefabName, spawnPos, Quaternion.identity);
 
-        var rend = playerObj.GetComponentInChildren<Renderer>();
-        if (rend != null)
+        Renderer coinRenderer = FindChildRendererByName(playerObj, "Coin");
+        if (coinRenderer != null)
         {
-            rend.material = (team == "Blue") ? blueMat : redMat;
+            coinRenderer.material = (team == TeamBlue) ? blueMat : redMat;
         }
 
-        Debug.Log($"[Lobby] Jugador {PhotonNetwork.LocalPlayer.NickName} asignado al equipo {team}.");
+        Debug.Log("[Lobby] Player assigned to: " + team);
     }
 
+    private Renderer FindChildRendererByName(GameObject root, string childName)
+    {
+        Transform[] children = root.GetComponentsInChildren<Transform>(true);
+        foreach (Transform child in children)
+        {
+            if (child.name == childName)
+            {
+                return child.GetComponent<Renderer>();
+            }
+        }
+        return null;
+    }
 }

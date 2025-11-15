@@ -9,9 +9,12 @@ public class PlayerController : MonoBehaviour
 
     private PlayerView _playerView;
     private Rigidbody _rb;
+    private PlayerWiggle _wiggle;
+
 
     private PhotonView _pv;
     private bool _isLocal;
+
 
     private float _xRotation = 0f;
     private float _currentYRotation;
@@ -30,6 +33,7 @@ public class PlayerController : MonoBehaviour
         _playerView = GetComponent<PlayerView>();
         _rb = GetComponent<Rigidbody>();
         _pv = GetComponent<PhotonView>();
+        _wiggle = GetComponentInChildren<PlayerWiggle>();
 
         _isLocal = (_pv == null) ? true : _pv.IsMine;
     }
@@ -112,7 +116,12 @@ public class PlayerController : MonoBehaviour
             float friction = _playerModel.IsSlippery ? 0.99f : 0.5f;
             _currentVelocity *= friction;
         }
+        bool isMoving = moveDir.magnitude > 0.1f;
 
+        if (_wiggle != null)
+        {
+            _wiggle.SetMoving(isMoving);
+        }
         _rb.MovePosition(_rb.position + _currentVelocity);
     }
 

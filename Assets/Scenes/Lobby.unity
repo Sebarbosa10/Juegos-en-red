@@ -53867,8 +53867,8 @@ MonoBehaviour:
   _playerPrefabName: Player
   _spawnPointBlue: {fileID: 1742533711}
   _spawnPointRed: {fileID: 1388042384}
-  blueMat: {fileID: 2100000, guid: 7a61316133be56941b7cdb57c360c7b0, type: 2}
-  redMat: {fileID: 2100000, guid: a2800aedd50d628488403f88419a0ee8, type: 2}
+  blueMat: {fileID: 2100000, guid: d7a0e8b29da139e428c6f676e8a7beba, type: 2}
+  redMat: {fileID: 2100000, guid: 47367eb933a76154ba606d7204c70732, type: 2}
 --- !u!114 &2065874068
 MonoBehaviour:
   m_ObjectHideFlags: 0
