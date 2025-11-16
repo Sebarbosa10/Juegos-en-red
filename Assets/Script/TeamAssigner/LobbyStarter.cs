@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using Photon.Pun;
 using Photon.Realtime;
 using PhotonHashtable = ExitGames.Client.Photon.Hashtable;
@@ -9,6 +9,7 @@ public class LobbyStarter : MonoBehaviourPunCallbacks
     private const string TeamKey = "team";
     private const string TeamBlue = "Blue";
     private const string TeamRed = "Red";
+    private const string MatchStartedKey = "matchStarted";
 
     [SerializeField] private string _playerPrefabName = "Player";
     [SerializeField] private Transform _spawnPointBlue;
@@ -27,37 +28,66 @@ public class LobbyStarter : MonoBehaviourPunCallbacks
 
     public override void OnJoinedRoom()
     {
-        Debug.Log("[Lobby] Entr� a la sala, spawneando jugador...");
+        Debug.Log("[Lobby] Entré a la sala, spawneando jugador...");
 
+        
         int blueCount = PhotonNetwork.PlayerList.Count(p =>
-            p.CustomProperties.ContainsKey("team") && (string)p.CustomProperties["team"] == "Blue");
+            p.CustomProperties != null &&
+            p.CustomProperties.ContainsKey(TeamKey) &&
+            (string)p.CustomProperties[TeamKey] == TeamBlue);
 
         int redCount = PhotonNetwork.PlayerList.Count(p =>
-            p.CustomProperties.ContainsKey("team") && (string)p.CustomProperties["team"] == "Red");
+            p.CustomProperties != null &&
+            p.CustomProperties.ContainsKey(TeamKey) &&
+            (string)p.CustomProperties[TeamKey] == TeamRed);
 
         string team;
-        if (blueCount < 2) team = "Blue";
-        else if (redCount < 2) team = "Red";
+        if (blueCount < 2) team = TeamBlue;
+        else if (redCount < 2) team = TeamRed;
         else
         {
-            Debug.LogWarning("[Lobby] No hay lugar en ning�n equipo!");
+            Debug.LogWarning("[Lobby] No hay lugar en ningún equipo!");
             return;
         }
 
-        var props = new ExitGames.Client.Photon.Hashtable { { "team", team } };
+        
+        var props = new PhotonHashtable { { TeamKey, team } };
         PhotonNetwork.LocalPlayer.SetCustomProperties(props);
 
-        Vector3 spawnPos = team == "Blue" ? _spawnPointBlue.position : _spawnPointRed.position;
+        
+        Vector3 spawnPos = team == TeamBlue ? _spawnPointBlue.position : _spawnPointRed.position;
+        Quaternion spawnRot = team == TeamBlue ? _spawnPointBlue.rotation : _spawnPointRed.rotation;
 
-        GameObject playerObj = PhotonNetwork.Instantiate(_playerPrefabName, spawnPos, Quaternion.identity);
+        GameObject playerObj = PhotonNetwork.Instantiate(_playerPrefabName, spawnPos, spawnRot);
+
+        
+        PhotonNetwork.LocalPlayer.TagObject = playerObj;
 
         var rend = playerObj.GetComponentInChildren<Renderer>();
         if (rend != null)
         {
-            rend.material = (team == "Blue") ? blueMat : redMat;
+            rend.material = (team == TeamBlue) ? blueMat : redMat;
         }
 
         Debug.Log($"[Lobby] Jugador {PhotonNetwork.LocalPlayer.NickName} asignado al equipo {team}.");
-    }
 
+      
+        var roomProps = PhotonNetwork.CurrentRoom?.CustomProperties;
+        if (roomProps != null &&
+            roomProps.ContainsKey(MatchStartedKey) &&
+            (bool)roomProps[MatchStartedKey])
+        {
+            Debug.Log("[Lobby] matchStarted ya es true → mandando al jugador directamente a la zona de puzzle.");
+
+            TeamMapSpawner spawner = FindObjectOfType<TeamMapSpawner>();
+            if (spawner != null)
+            {
+                spawner.RespawnLocalPlayerFromPause();
+            }
+            else
+            {
+                Debug.LogWarning("[Lobby] No encontré TeamMapSpawner en la escena.");
+            }
+        }
+    }
 }

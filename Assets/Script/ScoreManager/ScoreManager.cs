@@ -2,7 +2,6 @@
 using Photon.Pun;
 using Photon.Realtime;
 using ExitGames.Client.Photon;
-using System.Collections;
 
 public class ScoreManager : MonoBehaviourPunCallbacks, IOnEventCallback
 {
@@ -11,7 +10,8 @@ public class ScoreManager : MonoBehaviourPunCallbacks, IOnEventCallback
     private const byte ScoreEventCode = 1;
     private const byte WinEventCode = 2;
 
-    private int maxScore = 1; // Mejor de 3
+    [SerializeField] private int maxScore = 2;
+
     private readonly ExitGames.Client.Photon.Hashtable scores = new ExitGames.Client.Photon.Hashtable();
 
     public event System.Action<int, int> OnScoreUpdated;
@@ -21,14 +21,20 @@ public class ScoreManager : MonoBehaviourPunCallbacks, IOnEventCallback
         if (Instance == null) Instance = this;
     }
 
-    private void OnDestroy()
+    public override void OnEnable()
+    {
+        base.OnEnable();
+        PhotonNetwork.AddCallbackTarget(this);
+    }
+
+    public override void OnDisable()
     {
         PhotonNetwork.RemoveCallbackTarget(this);
+        base.OnDisable();
     }
 
     private void Start()
     {
-        PhotonNetwork.AddCallbackTarget(this);
         scores["Blue"] = 0;
         scores["Red"] = 0;
 
@@ -69,7 +75,6 @@ public class ScoreManager : MonoBehaviourPunCallbacks, IOnEventCallback
 
             CheckWinCondition();
         }
-
     }
 
     private void CheckWinCondition()
@@ -99,5 +104,17 @@ public class ScoreManager : MonoBehaviourPunCallbacks, IOnEventCallback
             new RaiseEventOptions { Receivers = ReceiverGroup.All },
             SendOptions.SendReliable
         );
+    }
+
+    public void ResetScores()
+    {
+        scores["Blue"] = 0;
+        scores["Red"] = 0;
+
+        int blueScore = (int)scores["Blue"];
+        int redScore = (int)scores["Red"];
+
+        OnScoreUpdated?.Invoke(blueScore, redScore);
+        Debug.Log("[ScoreManager] Scores reseteados a 0 - 0");
     }
 }

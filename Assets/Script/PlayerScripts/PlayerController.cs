@@ -21,7 +21,7 @@ public class PlayerController : MonoBehaviour
     private bool _isPaused = false;
     private bool _canMove = true;
 
-    // 🔹 NUEVO: velocidad con inercia
+    
     private Vector3 _currentVelocity;
 
     private void Awake()
@@ -55,6 +55,21 @@ public class PlayerController : MonoBehaviour
     private void Update()
     {
         if (!_isLocal) return;
+
+        
+        if (DisconnectPauseManager.IsPaused)
+        {
+            if (!_isPaused)
+                SetPaused(true);
+
+            return;
+        }
+        else
+        {
+            if (_isPaused)
+                SetPaused(false);
+        }
+
         if (!_canMove) return;
 
         HandleMouseLook();
@@ -64,6 +79,7 @@ public class PlayerController : MonoBehaviour
     private void FixedUpdate()
     {
         if (!_isLocal) return;
+        if (DisconnectPauseManager.IsPaused) return;
         if (!_canMove) return;
 
         HandleMovement();
@@ -135,6 +151,8 @@ public class PlayerController : MonoBehaviour
 
             if (canShowHand && Input.GetMouseButtonDown(0) && interactive != null)
             {
+                if (DisconnectPauseManager.IsPaused) return;
+
                 interactive.Interact();
                 _playerView.ShowHandIcon(false);
             }

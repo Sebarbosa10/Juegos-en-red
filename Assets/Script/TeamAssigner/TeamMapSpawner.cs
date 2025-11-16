@@ -8,76 +8,95 @@ using PUNPlayer = Photon.Realtime.Player;
 
 public class TeamMapSpawner : MonoBehaviourPunCallbacks
 {
-    [Header("Player prefab (Resources)")]
-    [SerializeField] private string playerPrefabName = "Player";
+    public static TeamMapSpawner Instance;
 
-    [Header("Spawn points")]
-    [SerializeField] private Transform[] blueSpawns;
-    [SerializeField] private Transform[] redSpawns;
+    [Header("Puzzle 1 Spawns")]
+    [SerializeField] private Transform[] puzzle1BlueSpawns;
+    [SerializeField] private Transform[] puzzle1RedSpawns;
+
+    [Header("Puzzle 2 Spawns")]
+    [SerializeField] private Transform[] puzzle2BlueSpawns;
+    [SerializeField] private Transform[] puzzle2RedSpawns;
 
     private const string TeamKey = "team";
     private const string TeamBlue = "Blue";
     private const string TeamRed = "Red";
+    private const string MatchStartedKey = "matchStarted";
+    private const string SecondRoundKey = "secondRound";
 
-    private bool _spawned = false;
+    private void Awake()
+    {
+        Instance = this;
+    }
 
     private void Start()
     {
-        TrySpawn();
+        
     }
 
     public override void OnRoomPropertiesUpdate(PhotonHashtable propertiesThatChanged)
     {
         if (propertiesThatChanged == null) return;
 
-        if (propertiesThatChanged.ContainsKey("matchStarted"))
+        if (propertiesThatChanged.ContainsKey(MatchStartedKey))
         {
-            bool matchStarted = (bool)propertiesThatChanged["matchStarted"];
+            bool matchStarted = (bool)propertiesThatChanged[MatchStartedKey];
+            Debug.Log($"[TeamMapSpawner] OnRoomPropertiesUpdate → matchStarted={matchStarted}");
+
             if (matchStarted)
             {
-                Debug.Log("[Spawner] MatchStart detectado → teletransportando jugador a su zona");
                 ForceRespawnAtTeamZone();
             }
         }
     }
 
+  
+    public void RespawnLocalPlayerFromPause()
+    {
+        ForceRespawnAtTeamZone();
+    }
+
+   
+
     private void ForceRespawnAtTeamZone()
     {
         string myTeam = GetMyTeam();
-        if (string.IsNullOrEmpty(myTeam)) return;
+        if (string.IsNullOrEmpty(myTeam))
+        {
+            Debug.LogWarning("[TeamMapSpawner] No tengo team asignado todavía.");
+            return;
+        }
 
-        Transform spawn = PickSpawnFor(PhotonNetwork.LocalPlayer, myTeam);
-        if (spawn == null) return;
+        bool secondRound = IsSecondRound();
+        Debug.Log($"[TeamMapSpawner] ForceRespawnAtTeamZone → team={myTeam}, secondRound={secondRound}");
+
+        Transform spawn = PickSpawnFor(PhotonNetwork.LocalPlayer, myTeam, secondRound);
+        if (spawn == null)
+        {
+            Debug.LogWarning($"[TeamMapSpawner] NO encontré spawn para team={myTeam}, secondRound={secondRound}");
+            return;
+        }
 
         if (PhotonNetwork.LocalPlayer.TagObject is GameObject myPlayer)
         {
             myPlayer.transform.position = spawn.position;
             myPlayer.transform.rotation = spawn.rotation;
-            Debug.Log($"[Spawner] {PhotonNetwork.NickName} movido a {myTeam} spawn {spawn.position}");
+            Debug.Log($"[TeamMapSpawner] {PhotonNetwork.NickName} movido a {myTeam} (secondRound={secondRound}) spawn {spawn.position}");
+        }
+        else
+        {
+            Debug.LogWarning("[TeamMapSpawner] LocalPlayer no tiene TagObject asignado.");
         }
     }
 
-
-    private void TrySpawn()
+    private bool IsSecondRound()
     {
-        if (_spawned) return;
-        if (!PhotonNetwork.InRoom) return;
-
-        string myTeam = GetMyTeam();
-        if (string.IsNullOrEmpty(myTeam)) return; 
-
-        Transform spawn = PickSpawnFor(PhotonNetwork.LocalPlayer, myTeam);
-        Vector3 pos = spawn ? spawn.position : Vector3.zero;
-        Quaternion rot = spawn ? spawn.rotation : Quaternion.identity;
-
-        if (PhotonNetwork.LocalPlayer.TagObject == null)
+        var roomProps = PhotonNetwork.CurrentRoom?.CustomProperties;
+        if (roomProps != null && roomProps.ContainsKey(SecondRoundKey))
         {
-            GameObject go = PhotonNetwork.Instantiate(playerPrefabName, pos, rot);
-            PhotonNetwork.LocalPlayer.TagObject = go;
-            _spawned = true;
-
-            Debug.Log($"[TeamMapSpawner] {PhotonNetwork.NickName} ({myTeam}) spawneado en {pos}");
+            return (bool)roomProps[SecondRoundKey];
         }
+        return false;
     }
 
     private string GetMyTeam()
@@ -87,8 +106,11 @@ public class TeamMapSpawner : MonoBehaviourPunCallbacks
         return PhotonNetwork.LocalPlayer.CustomProperties[TeamKey] as string;
     }
 
-    private Transform PickSpawnFor(PUNPlayer player, string team)
+    private Transform PickSpawnFor(PUNPlayer player, string team, bool secondRound)
     {
+        Transform[] blueArray = secondRound ? puzzle2BlueSpawns : puzzle1BlueSpawns;
+        Transform[] redArray = secondRound ? puzzle2RedSpawns : puzzle1RedSpawns;
+
         var teamPlayers = PhotonNetwork.PlayerList
             .Where(p => p.CustomProperties != null &&
                         p.CustomProperties.ContainsKey(TeamKey) &&
@@ -99,17 +121,17 @@ public class TeamMapSpawner : MonoBehaviourPunCallbacks
         int indexInTeam = System.Array.IndexOf(teamPlayers, player);
         if (indexInTeam < 0) indexInTeam = 0;
 
-        if (team == TeamBlue)
+        Transform[] chosenArray = (team == TeamBlue) ? blueArray : redArray;
+
+        if (chosenArray == null || chosenArray.Length == 0)
         {
-            if (blueSpawns != null && blueSpawns.Length > 0)
-                return blueSpawns[indexInTeam % blueSpawns.Length];
-        }
-        else 
-        {
-            if (redSpawns != null && redSpawns.Length > 0)
-                return redSpawns[indexInTeam % redSpawns.Length];
+            Debug.LogWarning($"[TeamMapSpawner] chosenArray vacío para team={team}, secondRound={secondRound}");
+            return null;
         }
 
-        return null;
+        int spawnIndex = indexInTeam % chosenArray.Length;
+        Debug.Log($"[TeamMapSpawner] PickSpawnFor → team={team}, secondRound={secondRound}, spawnIndex={spawnIndex}, spawnName={chosenArray[spawnIndex].name}");
+
+        return chosenArray[spawnIndex];
     }
 }

@@ -60,6 +60,11 @@ MonoBehaviour:
   - RPC_PressDigit
   - RPC_Submit
   - RPC_TeleportAll
+  - RPC_CancelCountdownUI
+  - RPC_ReturnToMainMenu
+  - RPC_StartCountdownUI
+  - RPC_ResetScores
+  - RPC_RespawnAllPlayersAtPuzzle
   DisableAutoOpenWizard: 1
   ShowSettings: 0
   DevRegionSetOnce: 1
