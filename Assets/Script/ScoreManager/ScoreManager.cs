@@ -10,7 +10,7 @@ public class ScoreManager : MonoBehaviourPunCallbacks, IOnEventCallback
     private const byte ScoreEventCode = 1;
     private const byte WinEventCode = 2;
 
-    [SerializeField] private int maxScore = 2;
+    [SerializeField] private int maxScore = 1;
 
     private readonly Hashtable scores = new Hashtable();
 
