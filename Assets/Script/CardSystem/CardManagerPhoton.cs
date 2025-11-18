@@ -32,11 +32,10 @@ public class CardManagerPhoton : MonoBehaviourPunCallbacks
             }
 
             var props = new ExitGames.Client.Photon.Hashtable {
-                { "cardID", cardId },
+                { CardKey, cardId },
                 { "cardFrom", player.NickName }
             };
             rival.SetCustomProperties(props);
-
 
             Debug.Log($"[CardManager] {player.NickName} robó {cardId}, aplicado a {rival.NickName}");
         }
@@ -44,17 +43,16 @@ public class CardManagerPhoton : MonoBehaviourPunCallbacks
 
     public void ResetCards()
     {
+        
         foreach (Player player in PhotonNetwork.PlayerList)
         {
             var props = new ExitGames.Client.Photon.Hashtable { { CardKey, -1 } };
             player.SetCustomProperties(props);
         }
 
-        // Solo limpiar en local
-        if (CardEffectUI.Instance != null)
-            CardEffectUI.Instance.Clear();
+        Debug.Log("[CardManager] ResetCards → cardID = -1 para todos los jugadores.");
+        
     }
-
 
     private void ShuffleCards(List<int> list)
     {

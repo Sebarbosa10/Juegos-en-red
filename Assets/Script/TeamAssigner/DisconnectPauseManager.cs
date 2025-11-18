@@ -19,16 +19,12 @@ public class DisconnectPauseManager : MonoBehaviourPunCallbacks
     private const string MatchStartedKey = "matchStarted";
     private const string SecondRoundKey = "secondRound";
 
-    
     public static bool IsPaused => false;
-
-    
 
     public override void OnPlayerLeftRoom(Player otherPlayer)
     {
         Debug.Log($"[DisconnectReset] Player left: {otherPlayer.NickName}");
 
-       
         if (!PhotonNetwork.IsMasterClient) return;
 
         if (!IsMatchStarted())
@@ -48,7 +44,6 @@ public class DisconnectPauseManager : MonoBehaviourPunCallbacks
         PhotonNetwork.CurrentRoom.SetCustomProperties(clearProps);
     }
 
-
     private bool IsMatchStarted()
     {
         var props = PhotonNetwork.CurrentRoom?.CustomProperties;
@@ -59,13 +54,26 @@ public class DisconnectPauseManager : MonoBehaviourPunCallbacks
 
     private void ResetMatchAndReturnToLobby()
     {
+       
+        photonView.RPC(nameof(RPC_ResetCardEffects), RpcTarget.All);
+
+        
+        if (PhotonNetwork.IsMasterClient)
+        {
+            var cardManager = FindObjectOfType<CardManagerPhoton>();
+            if (cardManager != null)
+            {
+                cardManager.ResetCards();
+            }
+        }
+
         
         if (ScoreManager.Instance != null)
         {
             photonView.RPC(nameof(RPC_ResetScores), RpcTarget.All);
         }
 
-       
+        
         foreach (var p in PhotonNetwork.PlayerList)
         {
             if (!(p.TagObject is GameObject go)) continue;
@@ -85,7 +93,7 @@ public class DisconnectPauseManager : MonoBehaviourPunCallbacks
             p.SetCustomProperties(props);
         }
 
-        Debug.Log("[DisconnectReset] Todos teletransportados a lobby, ready=false, scores reseteados.");
+        Debug.Log("[DisconnectReset] Todos teletransportados a lobby, ready=false, scores y cartas reseteados.");
     }
 
     [PunRPC]
@@ -95,6 +103,25 @@ public class DisconnectPauseManager : MonoBehaviourPunCallbacks
         {
             ScoreManager.Instance.ResetScores();
         }
+    }
+
+    [PunRPC]
+    private void RPC_ResetCardEffects()
+    {
+        
+        var managers = FindObjectsOfType<CardEffectManager>();
+        foreach (var mgr in managers)
+        {
+            mgr.ResetAllEffects();
+        }
+
+        
+        if (CardEffectUI.Instance != null)
+        {
+            CardEffectUI.Instance.Clear();
+        }
+
+        Debug.Log("[DisconnectReset] RPC_ResetCardEffects → efectos y UI de cartas reseteados en este cliente.");
     }
 
     private string GetTeamOf(Player p)

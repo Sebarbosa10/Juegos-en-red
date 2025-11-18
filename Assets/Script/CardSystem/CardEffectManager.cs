@@ -1,5 +1,4 @@
-using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections;
 using Photon.Pun;
 using UnityEngine;
 
@@ -7,60 +6,85 @@ public class CardEffectManager : MonoBehaviour
 {
     private PlayerController _controller;
     private PlayerModel _model;
+    private PhotonView _pv;
+
+    
+    private float _baseSpeed;
+    private float _baseSprintSpeed;
+    private float _baseMouseX;
+    private float _baseMouseY;
+    private bool _baseIsSlippery;
+
+   
+    private Coroutine _randomSensRoutine;
+    private Coroutine _lightingStopRoutine;
+    private Coroutine _heavyWeightRoutine;
 
     private void Awake()
     {
         _controller = GetComponent<PlayerController>();
         _model = GetComponent<PlayerModel>();
+        _pv = GetComponent<PhotonView>();
+
+        
+        _baseSpeed = _model.Speed;
+        _baseSprintSpeed = _model.SprintSpeed;
+        _baseMouseX = _model.MouseSensivityX;
+        _baseMouseY = _model.MouseSensivityY;
+        _baseIsSlippery = _model.IsSlippery;
     }
 
     public void ActivateEffects(CardData card)
     {
-        PhotonView pv = GetComponent<PhotonView>();
-        if (!pv.IsMine) return;
+        if (_pv != null && !_pv.IsMine) return;
 
         switch (card.cardEffectType)
         {
             case CardEffectType.SlipperyFeet:
                 StartCoroutine(DoSlipperyFeet());
                 break;
+
             case CardEffectType.RandomSensitivity:
-                StartCoroutine(DoRandomSensivity());
+                if (_randomSensRoutine != null)
+                    StopCoroutine(_randomSensRoutine);
+                _randomSensRoutine = StartCoroutine(DoRandomSensivity());
                 break;
+
             case CardEffectType.LightingStop:
-                StartCoroutine(DoLightingStop());
+                if (_lightingStopRoutine != null)
+                    StopCoroutine(_lightingStopRoutine);
+                _lightingStopRoutine = StartCoroutine(DoLightingStop());
                 break;
+
             case CardEffectType.HeavyWeight:
-                StartCoroutine(DoHeavyWeight());
+                if (_heavyWeightRoutine != null)
+                    StopCoroutine(_heavyWeightRoutine);
+                _heavyWeightRoutine = StartCoroutine(DoHeavyWeight());
                 break;
-            //case CardEffectType.Blindness:
-            //    StartCoroutine(DoBlindness());
-            //    break;
         }
     }
 
     private IEnumerator DoSlipperyFeet()
     {
         Debug.Log("[CardEffect] SlipperyFeet activado");
-        _model.IsSlippery = true; // slippery effect activated
+        _model.IsSlippery = true; 
         yield break;
     }
-
 
     private IEnumerator DoRandomSensivity()
     {
         Debug.Log("[CardEffect] RandomSensitivity activado");
-        float origX = _model.MouseSensivityX;
-        float origY = _model.MouseSensivityY;
 
         while (true)
         {
             _model.MouseSensivityX = Random.Range(0.5f, 20f);
             _model.MouseSensivityY = Random.Range(0.5f, 20f);
+
             yield return new WaitForSeconds(25f);
 
-            _model.MouseSensivityX = origX;
-            _model.MouseSensivityY = origY;
+            _model.MouseSensivityX = _baseMouseX;
+            _model.MouseSensivityY = _baseMouseY;
+
             yield return new WaitForSeconds(5f);
         }
     }
@@ -68,6 +92,7 @@ public class CardEffectManager : MonoBehaviour
     private IEnumerator DoLightingStop()
     {
         Debug.Log("[CardEffect] LightingStop activado");
+
         while (true)
         {
             yield return new WaitForSeconds(12.5f);
@@ -81,31 +106,50 @@ public class CardEffectManager : MonoBehaviour
     {
         Debug.Log("[CardEffect] HeavyWeight activado");
 
-        float originalWalk = _model.Speed;
-        float originalSprint = _model.SprintSpeed;
-
         while (true)
         {
-            _model.SetMovementSpeed(originalWalk / 2f, originalWalk / 2f);
+            _model.SetMovementSpeed(_baseSpeed / 2f, _baseSpeed / 2f);
             yield return new WaitForSeconds(20f);
 
-            // restaurar velocidades originales
-            _model.SetMovementSpeed(originalWalk, originalSprint);
+            _model.SetMovementSpeed(_baseSpeed, _baseSprintSpeed);
             yield return new WaitForSeconds(10f);
         }
     }
 
-    //private IEnumerator DoBlindness()
-    //{
-    //    Debug.Log("[CardEffect] Blindness activado");
+  
+    public void ResetAllEffects()
+    {
+        
+        if (_randomSensRoutine != null)
+        {
+            StopCoroutine(_randomSensRoutine);
+            _randomSensRoutine = null;
+        }
 
-    //    while (true)
-    //    {
+        if (_lightingStopRoutine != null)
+        {
+            StopCoroutine(_lightingStopRoutine);
+            _lightingStopRoutine = null;
+        }
 
-    //        yield return new WaitForSeconds(10f);
+        if (_heavyWeightRoutine != null)
+        {
+            StopCoroutine(_heavyWeightRoutine);
+            _heavyWeightRoutine = null;
+        }
 
-    //        yield return new WaitForSeconds(6.5f);
-    //    }
-    //}
+      
+        _model.IsSlippery = _baseIsSlippery;
+        _model.SetMovementSpeed(_baseSpeed, _baseSprintSpeed);
+        _model.MouseSensivityX = _baseMouseX;
+        _model.MouseSensivityY = _baseMouseY;
 
+       
+        if (_controller != null)
+        {
+            _controller.SetCanMove(true);
+        }
+
+        Debug.Log("[CardEffect] ResetAllEffects → stats restaurados");
+    }
 }

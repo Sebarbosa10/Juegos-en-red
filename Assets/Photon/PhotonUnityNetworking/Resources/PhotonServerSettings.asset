@@ -67,6 +67,7 @@ MonoBehaviour:
   - RPC_RespawnAllPlayersAtPuzzle
   - RPC_OnTeamSolved
   - RPC_RegisterPress
+  - RPC_ResetCardEffects
   DisableAutoOpenWizard: 1
   ShowSettings: 0
   DevRegionSetOnce: 1
