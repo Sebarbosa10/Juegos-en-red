@@ -65,6 +65,8 @@ MonoBehaviour:
   - RPC_StartCountdownUI
   - RPC_ResetScores
   - RPC_RespawnAllPlayersAtPuzzle
+  - RPC_OnTeamSolved
+  - RPC_RegisterPress
   DisableAutoOpenWizard: 1
   ShowSettings: 0
   DevRegionSetOnce: 1
