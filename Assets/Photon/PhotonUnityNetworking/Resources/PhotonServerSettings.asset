@@ -46,25 +46,20 @@ MonoBehaviour:
   - RPC_Clear
   - RPC_ClearSpawnFlag
   - RPC_HandleInteraction
+  - RPC_OnTeamSolved
   - RPC_PlayAbsolute
   - RPC_PressDigit
+  - RPC_RegisterPress
   - RPC_RequestClick
+  - RPC_ResetCardEffects
   - RPC_ResetReadyCycleAll
+  - RPC_ResetScores
   - RPC_ResetStart
   - RPC_SetTeam
   - RPC_Solved
   - RPC_SolvedAll
-  - RPC_StartMatch
   - RPC_Submit
   - RPC_TeleportAll
-  - RPC_CancelCountdownUI
-  - RPC_ReturnToMainMenu
-  - RPC_StartCountdownUI
-  - RPC_ResetScores
-  - RPC_RespawnAllPlayersAtPuzzle
-  - RPC_OnTeamSolved
-  - RPC_RegisterPress
-  - RPC_ResetCardEffects
   DisableAutoOpenWizard: 1
   ShowSettings: 1
   DevRegionSetOnce: 0
