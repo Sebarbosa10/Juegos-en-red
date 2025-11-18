@@ -11,15 +11,18 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/Lobby.unity
     guid: 9fc0d4010bbf28b4594072e72b8655ab
+  - enabled: 1
+    path: Assets/Scenes/Egypt.unity
+    guid: 19eabc8f41e87944299bee7210128bad
+  - enabled: 1
+    path: Assets/Scenes/Greece.unity
+    guid: a63b7c667b277334089c23ad3e403ba7
   - enabled: 0
     path: Assets/Scenes/Test.unity
     guid: 34d81c90a1f254e48b0bd10911f3d4ca
   - enabled: 0
     path: Assets/Scenes/EgyptMapBlue.unity
     guid: 29f5331bc121a184f9e8b8d2c62ab0a0
-  - enabled: 0
-    path: Assets/Scenes/EgyptMapRed.unity
-    guid: 697ecfdb67f89544184b38992ee74453
   - enabled: 0
     path: 
     guid: 00000000000000000000000000000000

@@ -1,73 +1,29 @@
-﻿using UnityEngine;
-using UnityEngine.UI;
-using Photon.Pun;
+﻿using Photon.Pun;
+using UnityEngine;
 using PhotonHashtable = ExitGames.Client.Photon.Hashtable;
-
 
 public class LobbyReadyButton : MonoBehaviourPunCallbacks
 {
-    
-    [SerializeField] private Button readyButton;
-    [SerializeField] private GameObject readyIndicator;
-
-   
     [SerializeField] private KeyCode readyKey = KeyCode.R;
 
-    private const string ReadyKey = "ready";
-    private bool isReady = false;
-
-    void Start()
-    {
-        if (readyButton != null)
-            readyButton.onClick.AddListener(SetReady);
-
-        if (PhotonNetwork.LocalPlayer.CustomProperties != null &&
-            PhotonNetwork.LocalPlayer.CustomProperties.ContainsKey(ReadyKey))
-        {
-            isReady = (bool)PhotonNetwork.LocalPlayer.CustomProperties[ReadyKey];
-        }
-
-        RefreshUI();
-    }
+    private const string LobbyCycleKey = "lobbyCycle";
+    private const string ReadyCycleKey = "readyCycle";
 
     void Update()
     {
-        if (!PhotonNetwork.InRoom) return;
-        if (isReady) return;
-
         if (Input.GetKeyDown(readyKey))
         {
-            SetReady();
+            if (!PhotonNetwork.InRoom) return;
+
+            int lobbyCycle = 0;
+            var rp = PhotonNetwork.CurrentRoom.CustomProperties;
+            if (rp != null && rp.ContainsKey(LobbyCycleKey))
+                lobbyCycle = (int)rp[LobbyCycleKey];
+
+            PhotonNetwork.LocalPlayer.SetCustomProperties(
+                new PhotonHashtable { { ReadyCycleKey, lobbyCycle } });
+
+            Debug.Log($"[Ready] {PhotonNetwork.NickName} listo para ciclo {lobbyCycle}");
         }
     }
-
-    private void SetReady()
-    {
-        var props = new PhotonHashtable { { ReadyKey, true } };
-        PhotonNetwork.LocalPlayer.SetCustomProperties(props);
-
-        isReady = true;
-        RefreshUI();
-
-        Debug.Log($"[Lobby] {PhotonNetwork.NickName} está listo (Ready).");
-    }
-
-    private void RefreshUI()
-    {
-        if (readyButton != null) readyButton.interactable = !isReady;
-        if (readyIndicator != null) readyIndicator.SetActive(isReady);
-    }
-
-    public override void OnPlayerPropertiesUpdate(Photon.Realtime.Player target, PhotonHashtable changedProps)
-    {
-        if (changedProps == null) return;
-        if (!changedProps.ContainsKey(ReadyKey)) return;
-
-        if (target.IsLocal)
-        {
-            isReady = (bool)changedProps[ReadyKey];
-            RefreshUI();
-        }
-    }
-
 }

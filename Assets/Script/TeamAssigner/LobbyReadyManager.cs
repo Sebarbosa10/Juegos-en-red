@@ -1,130 +1,139 @@
-﻿using System;
-using System.Linq;
-using UnityEngine;
+﻿using System.Linq;
+using System.Collections;
 using Photon.Pun;
 using Photon.Realtime;
+using TMPro;
+using UnityEngine;
 using PhotonHashtable = ExitGames.Client.Photon.Hashtable;
 
-
+[RequireComponent(typeof(PhotonView))]
 public class LobbyReadyManager : MonoBehaviourPunCallbacks
 {
-    [SerializeField] private byte maxPlayers = 4;
-    [Header("UI (opcional)")]
-    [SerializeField] private TMPro.TMP_Text readyCountText;
+    [SerializeField] private TMP_Text readyCountText;
+    [SerializeField] private int requiredPlayers = 4;
+    [SerializeField] private string[] sceneOrder = new[] { "Egypt", "Greece" };
 
-    private const string ReadyKey = "ready";
+    private const string LobbyCycleKey = "lobbyCycle";
+    private const string ReadyCycleKey = "readyCycle";
     private const string TeamKey = "team";
-    private const string MatchStartedKey = "matchStarted";
-    private const string TeamBlue = "Blue";
-    private const string TeamRed = "Red";
+    private const string SpawnedKey = "spawned";
+    private const string Blue = "Blue";
+    private const string Red = "Red";
+
+    private bool _starting;
+
+    void Awake() { PhotonNetwork.AutomaticallySyncScene = true; }
 
     void Start()
     {
+        EnsureLobbyCycleExists();
         UpdateReadyUI();
-        TryStartIfAllReady();
+        Evaluate();
     }
 
-    public override void OnJoinedRoom()
+    private void EnsureLobbyCycleExists()
     {
-        UpdateReadyUI();
-        TryStartIfAllReady();
+        if (!PhotonNetwork.IsMasterClient) return;
+        var rp = PhotonNetwork.CurrentRoom.CustomProperties;
+        if (rp == null || !rp.ContainsKey(LobbyCycleKey))
+        {
+            PhotonNetwork.CurrentRoom.SetCustomProperties(new PhotonHashtable { { LobbyCycleKey, 0 } });
+            Debug.Log("[Lobby] lobbyCycle inicializado a 0");
+        }
     }
 
-    public override void OnPlayerEnteredRoom(Player newPlayer)
-    {
-        UpdateReadyUI();
-        TryStartIfAllReady();
-    }
+    public override void OnPlayerEnteredRoom(Player newPlayer) { UpdateReadyUI(); Evaluate(); }
+    public override void OnPlayerLeftRoom(Player otherPlayer) { _starting = false; UpdateReadyUI(); Evaluate(); }
 
     public override void OnPlayerPropertiesUpdate(Player target, PhotonHashtable changedProps)
     {
-        if (changedProps != null && changedProps.ContainsKey(ReadyKey))
-        {
-            UpdateReadyUI();
-            TryStartIfAllReady();
-        }
+        if (changedProps == null) return;
+        if (changedProps.ContainsKey(ReadyCycleKey)) { UpdateReadyUI(); Evaluate(); }
+    }
+
+    private int CurrentLobbyCycle()
+    {
+        var rp = PhotonNetwork.CurrentRoom.CustomProperties;
+        if (rp != null && rp.ContainsKey(LobbyCycleKey)) return (int)rp[LobbyCycleKey];
+        return 0;
     }
 
     private void UpdateReadyUI()
     {
-        if (readyCountText == null || !PhotonNetwork.InRoom) return;
-
-        int readyCount = PhotonNetwork.PlayerList.Count(p =>
-            p.CustomProperties != null &&
-            p.CustomProperties.ContainsKey(ReadyKey) &&
-            (bool)p.CustomProperties[ReadyKey]);
-
-        readyCountText.text = $"Ready: {readyCount}/{PhotonNetwork.CurrentRoom.MaxPlayers}";
+        if (!readyCountText) return;
+        int cycle = CurrentLobbyCycle();
+        var players = PhotonNetwork.PlayerList;
+        int ready = players.Count(p => p.CustomProperties != null &&
+                                       p.CustomProperties.ContainsKey(ReadyCycleKey) &&
+                                       (int)p.CustomProperties[ReadyCycleKey] == cycle);
+        readyCountText.text = $"Ready: {ready}/{requiredPlayers} (ciclo {cycle})";
     }
 
-    private void TryStartIfAllReady()
+    private void Evaluate()
     {
-        if (!PhotonNetwork.InRoom) return;
-        if (!PhotonNetwork.IsMasterClient) return;
-        if (PhotonNetwork.CurrentRoom.PlayerCount < maxPlayers) return;
+        if (!PhotonNetwork.IsMasterClient || _starting) return;
 
-        bool allReady = PhotonNetwork.PlayerList.All(p =>
+        int cycle = CurrentLobbyCycle();
+        var players = PhotonNetwork.PlayerList;
+
+        if (players.Length != requiredPlayers) return;
+
+        bool allReadyThisCycle = players.All(p =>
             p.CustomProperties != null &&
-            p.CustomProperties.ContainsKey(ReadyKey) &&
-            (bool)p.CustomProperties[ReadyKey]);
+            p.CustomProperties.ContainsKey(ReadyCycleKey) &&
+            (int)p.CustomProperties[ReadyCycleKey] == cycle);
 
-        if (!allReady) return;
+        if (!allReadyThisCycle) return;
 
-        bool alreadyStarted = PhotonNetwork.CurrentRoom.CustomProperties != null &&
-                              PhotonNetwork.CurrentRoom.CustomProperties.ContainsKey(MatchStartedKey) &&
-                              (bool)PhotonNetwork.CurrentRoom.CustomProperties[MatchStartedKey];
-        if (alreadyStarted) return;
-
-        var players = PhotonNetwork.PlayerList.OrderBy(p => p.ActorNumber).ToArray();
-        for (int i = 0; i < players.Length; i++)
-        {
-            string team = (i < 2) ? TeamBlue : TeamRed;
-            var props = new PhotonHashtable { { TeamKey, team } };
-            players[i].SetCustomProperties(props);
-        }
-
-        StartCoroutine(WaitTeamsPropsAndStart());
+        StartCoroutine(StartMatch(cycle));
     }
 
-    private System.Collections.IEnumerator WaitTeamsPropsAndStart()
+    private IEnumerator StartMatch(int cycle)
     {
-        float t = 0f, timeout = 10f;
-        while (t < timeout)
+        _starting = true;
+
+        
+        var ordered = PhotonNetwork.PlayerList.OrderBy(p => p.ActorNumber).ToArray();
+        int blue = 0, red = 0;
+        foreach (var p in ordered)
         {
-            bool allHaveTeam = PhotonNetwork.PlayerList.All(p =>
-                p.CustomProperties != null &&
-                p.CustomProperties.ContainsKey(TeamKey));
-
-            bool allSpawned = PhotonNetwork.PlayerList.All(p =>
-                p.TagObject is GameObject);
-
-            if (allHaveTeam && allSpawned)
-                break;
-
-            t += Time.deltaTime;
-            yield return null;
+            string team = (p.CustomProperties != null && p.CustomProperties.ContainsKey(TeamKey))
+                          ? (string)p.CustomProperties[TeamKey] : null;
+            if (string.IsNullOrEmpty(team))
+            {
+                team = (blue < requiredPlayers / 2) ? Blue : Red;
+                photonView.RPC(nameof(RPC_SetTeam), p, team);
+            }
+            if (team == Blue) blue++; else if (team == Red) red++;
         }
 
-        var cardManager = FindObjectOfType<CardManagerPhoton>();
-        if (cardManager != null)
+        
+        foreach (var p in PhotonNetwork.PlayerList)
+            photonView.RPC(nameof(RPC_ClearSpawnFlag), p);
+
+        yield return new WaitForSeconds(0.2f);
+
+        
+        if (sceneOrder == null || sceneOrder.Length == 0)
         {
-            TeamManager.Instance.RefreshTeams();
-
-            yield return null;
-
-            cardManager.DealCards();
-            Debug.Log("[Lobby] Cartas repartidas a todos los jugadores.");
+            Debug.LogError("[Lobby] sceneOrder vacío");
+            _starting = false;
+            yield break;
         }
-        else
-        {
-            Debug.LogWarning("[Lobby] No encontré CardManagerPhoton en la escena.");
-        }
+        string sceneToLoad = sceneOrder[cycle % sceneOrder.Length];
+        Debug.Log($"[Lobby] Arrancando ciclo {cycle} → escena '{sceneToLoad}'");
+        PhotonNetwork.LoadLevel(sceneToLoad);
+    }
 
-        yield return new WaitForSeconds(2f);
+    [PunRPC]
+    private void RPC_SetTeam(string team)
+    {
+        PhotonNetwork.LocalPlayer.SetCustomProperties(new PhotonHashtable { { TeamKey, team } });
+    }
 
-        PhotonNetwork.CurrentRoom.SetCustomProperties(
-            new PhotonHashtable { { MatchStartedKey, true } }
-        );
-        Debug.Log("[Lobby] matchStarted = true (misma escena, a spawnear).");
+    [PunRPC]
+    private void RPC_ClearSpawnFlag()
+    {
+        PhotonNetwork.LocalPlayer.SetCustomProperties(new PhotonHashtable { { SpawnedKey, false } });
     }
 }
