@@ -27,8 +27,10 @@ public class MatchEndUI : MonoBehaviourPunCallbacks
     {
         base.OnEnable();
 
+        Debug.Log("Usa el on enable");
         if (ScoreManager.Instance != null)
         {
+            Debug.Log("Existe el score manager e invoca el evento");
             ScoreManager.Instance.OnMatchEnded += HandleMatchEnded;
         }
     }
