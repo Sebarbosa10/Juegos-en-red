@@ -1,23 +1,35 @@
-using LootLocker.Requests;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
+using LootLocker.Requests;
 
-public class LeaderboardService : MonoBehaviour
+public static class LeaderboardService
 {
-    public static void SubmitScore(int score, string leaderboardKey, System.Action<bool> onDone = null)
+    public static void SubmitResult(string leaderboardKey, string playerName, string team, bool playerWon)
     {
-        LootLockerSDKManager.SubmitScore("", score, leaderboardKey, response =>
+        if (!LootLockerBootstrap.SessionStarted)
         {
-            if (!response.success)
-            {
-                Debug.LogError("Fallo el score");
-                onDone?.Invoke(false);
+            Debug.LogError("Cannot submit score: LootLocker session not started.");
+            return;
+        }
 
-                return;
+        string result = playerWon ? "Win" : "Lose";
+
+        string metadata = $"{{\"name\":\"{playerName}\",\"team\":\"{team}\",\"result\":\"{result}\"}}";
+
+        LootLockerSDKManager.SubmitScore(
+            playerName,                 // member_id
+            playerWon ? 1 : 0,          // score: 1 = win, 0 = lose
+            leaderboardKey,             // leaderboard key
+            metadata,
+            response =>
+            {
+                if (!response.success)
+                {
+                    Debug.LogError("Failed to submit leaderboard result.");
+                    return;
+                }
+
+                Debug.Log("Leaderboard result submitted successfully.");
             }
-            Debug.Log("Se envio el score");
-            onDone?.Invoke(true);
-        });
+        );
     }
 }

@@ -28,45 +28,40 @@ public class MatchEndUI : MonoBehaviourPunCallbacks
         base.OnEnable();
 
         if (ScoreManager.Instance != null)
-        {
             ScoreManager.Instance.OnMatchEnded += HandleMatchEnded;
-        }
     }
 
     public override void OnDisable()
     {
         if (ScoreManager.Instance != null)
-        {
             ScoreManager.Instance.OnMatchEnded -= HandleMatchEnded;
-        }
 
         base.OnDisable();
     }
 
     private void HandleMatchEnded(string winningTeam)
     {
-        Debug.Log($"[MatchEndUI] HandleMatchEnded winningTeam='{winningTeam}', winnerText asignado={winnerText != null}");
-
         if (_isCountingDown)
             return;
 
         _isCountingDown = true;
 
         if (endPanel != null)
-        {
             endPanel.SetActive(true);
-            Debug.Log("[MatchEndUI] endPanel activado");
-        }
 
         if (winnerText != null)
-        {
             winnerText.text = $"El equipo {winningTeam} ha ganado";
-            Debug.Log($"[MatchEndUI] winnerText.text seteado a: {winnerText.text}");
-        }
-        else
-        {
-            Debug.LogWarning("[MatchEndUI] winnerText es NULL (no está asignado en el inspector)");
-        }
+
+        // --- NEW: Submit leaderboard data ---
+        string myTeam = (string)PhotonNetwork.LocalPlayer.CustomProperties["team"];
+        bool playerWon = (myTeam == winningTeam);
+
+        LeaderboardService.SubmitResult(
+            "jueveskey",                    // leaderboard key
+            PhotonNetwork.NickName,         // player name
+            myTeam,                         // team
+            playerWon                       // win or lose
+        );
 
         StartCoroutine(CountdownAndExitRoutine());
     }
@@ -80,7 +75,7 @@ public class MatchEndUI : MonoBehaviourPunCallbacks
             if (countdownText != null)
             {
                 int secondsInt = Mathf.CeilToInt(remaining);
-                countdownText.text = $"La sesion se cerrara en {secondsInt}";
+                countdownText.text = $"La sesion se cerrará en {secondsInt}";
             }
 
             remaining -= Time.deltaTime;

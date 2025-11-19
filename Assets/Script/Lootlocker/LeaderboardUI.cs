@@ -1,19 +1,27 @@
-using System.Collections;
-using System.Collections.Generic;
-using System.Text;
 using UnityEngine;
+using TMPro;
+using System.Text;
+using LootLocker.Requests;
+
+[System.Serializable]
+public class LeaderboardMeta
+{
+    public string name;
+    public string team;
+    public string result;
+}
 
 public class LeaderboardUI : MonoBehaviour
 {
-    [SerializeField] string leaderboardKey = "jueveskey";
-    [SerializeField] int count = 10;
-    [SerializeField] TMPro.TextMeshProUGUI tableText;
+    [SerializeField] private string leaderboardKey = "jueveskey";
+    [SerializeField] private int count = 20;
+    [SerializeField] private TextMeshProUGUI tableText;
 
     public void Refresh()
     {
         if (!LootLockerBootstrap.SessionStarted)
         {
-            tableText.text = "Logueando...";
+            tableText.text = "Logging in...";
             return;
         }
 
@@ -21,45 +29,46 @@ public class LeaderboardUI : MonoBehaviour
         {
             if (!response.success)
             {
-                tableText.text = "Error...";
+                tableText.text = "Error loading leaderboard...";
+                return;
             }
 
             StringBuilder sb = new StringBuilder();
-            sb.AppendLine("Rank Name              Score");
-            sb.AppendLine("-----------------------------");
+            sb.AppendLine("Rank   Name          Team     Result");
+            sb.AppendLine("--------------------------------------");
 
-            var items = response.items;
+            foreach (var item in response.items)
+            {
+                // metadata raw JSON string
+                string raw = item.metadata;
 
-            if (items == null || items.Length == 0)
-            {
-                sb.AppendLine("No se registro nada todavia");
-            }
-            else
-            {
-                foreach (var item in items)
+                string name = "Unknown";
+                string team = "-";
+                string result = "-";
+
+                if (!string.IsNullOrEmpty(raw))
                 {
-                    string name = string.IsNullOrEmpty(item.player.name) ? "Player " + item.player.id : item.player.name;
-                    sb.AppendLine($"{item.rank,4}  {name,-16} {item.score,6}");
+                    try
+                    {
+                        LeaderboardMeta meta = JsonUtility.FromJson<LeaderboardMeta>(raw);
+
+                        if (meta != null)
+                        {
+                            if (!string.IsNullOrEmpty(meta.name)) name = meta.name;
+                            if (!string.IsNullOrEmpty(meta.team)) team = meta.team;
+                            if (!string.IsNullOrEmpty(meta.result)) result = meta.result;
+                        }
+                    }
+                    catch
+                    {
+                        Debug.LogWarning("Metadata JSON parse fail: " + raw);
+                    }
                 }
+
+                sb.AppendLine($"{item.rank,2}     {name,-12}  {team,-6}   {result}");
             }
 
             tableText.text = sb.ToString();
         });
     }
-
-    public void OnSubmitScoreTMP(TMPro.TMP_InputField scoreInput)
-    {
-        if (int.TryParse(scoreInput.text, out var score))
-        {
-            LeaderboardService.SubmitScore(score, leaderboardKey, _ => Refresh());
-        }
-    }
-
-    public void OnSetNameTMP(TMPro.TMP_InputField nameInput)
-    {
-        PlayerNameHelper.SetPlayerName(nameInput.text);
-    }
-
-
-
 }
