@@ -68,7 +68,7 @@ public class MatchEndUI : MonoBehaviourPunCallbacks
             if (countdownText != null)
             {
                 int secondsInt = Mathf.CeilToInt(remaining);
-                countdownText.text = $"La sesión se cerrará en {secondsInt} segundos...";
+                countdownText.text = $"La sesión se cerrará en {secondsInt}";
             }
 
             remaining -= Time.deltaTime;
