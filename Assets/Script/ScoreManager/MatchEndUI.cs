@@ -57,7 +57,7 @@ public class MatchEndUI : MonoBehaviourPunCallbacks
         bool playerWon = (myTeam == winningTeam);
 
         LeaderboardService.SubmitResult(
-            "jueveskey",                    // leaderboard key
+            "results",                    // leaderboard key
             PhotonNetwork.NickName,         // player name
             myTeam,                         // team
             playerWon                       // win or lose
