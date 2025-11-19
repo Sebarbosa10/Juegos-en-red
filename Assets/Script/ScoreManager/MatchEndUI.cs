@@ -13,7 +13,7 @@ public class MatchEndUI : MonoBehaviourPunCallbacks
 
     [Header("Settings")]
     public float countdownSeconds = 30f;
-    public string mainMenu = "MainMenu";
+    public string SceneName = "MainMenu";
 
     private bool _isCountingDown;
 
@@ -27,10 +27,8 @@ public class MatchEndUI : MonoBehaviourPunCallbacks
     {
         base.OnEnable();
 
-        Debug.Log("Usa el on enable");
         if (ScoreManager.Instance != null)
         {
-            Debug.Log("Existe el score manager e invoca el evento");
             ScoreManager.Instance.OnMatchEnded += HandleMatchEnded;
         }
     }
@@ -47,16 +45,28 @@ public class MatchEndUI : MonoBehaviourPunCallbacks
 
     private void HandleMatchEnded(string winningTeam)
     {
+        Debug.Log($"[MatchEndUI] HandleMatchEnded winningTeam='{winningTeam}', winnerText asignado={winnerText != null}");
+
         if (_isCountingDown)
             return;
 
         _isCountingDown = true;
 
         if (endPanel != null)
+        {
             endPanel.SetActive(true);
+            Debug.Log("[MatchEndUI] endPanel activado");
+        }
 
         if (winnerText != null)
+        {
             winnerText.text = $"El equipo {winningTeam} ha ganado";
+            Debug.Log($"[MatchEndUI] winnerText.text seteado a: {winnerText.text}");
+        }
+        else
+        {
+            Debug.LogWarning("[MatchEndUI] winnerText es NULL (no está asignado en el inspector)");
+        }
 
         StartCoroutine(CountdownAndExitRoutine());
     }
@@ -70,7 +80,7 @@ public class MatchEndUI : MonoBehaviourPunCallbacks
             if (countdownText != null)
             {
                 int secondsInt = Mathf.CeilToInt(remaining);
-                countdownText.text = $"La sesión se cerrará en {secondsInt}";
+                countdownText.text = $"La sesion se cerrara en {secondsInt}";
             }
 
             remaining -= Time.deltaTime;
@@ -83,12 +93,12 @@ public class MatchEndUI : MonoBehaviourPunCallbacks
         }
         else
         {
-            SceneManager.LoadScene(mainMenu);
+            SceneManager.LoadScene(SceneName);
         }
     }
 
     public override void OnLeftRoom()
     {
-        SceneManager.LoadScene(mainMenu);
+        SceneManager.LoadScene(SceneName);
     }
 }
