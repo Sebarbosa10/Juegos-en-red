@@ -10,11 +10,12 @@ public class ScoreManager : MonoBehaviourPunCallbacks, IOnEventCallback
     private const byte ScoreEventCode = 1;
     private const byte WinEventCode = 2;
 
-    [SerializeField] private int maxScore = 2;
+    [SerializeField] private int maxScore = 1;
 
-    private readonly ExitGames.Client.Photon.Hashtable scores = new ExitGames.Client.Photon.Hashtable();
+    private readonly Hashtable scores = new Hashtable();
 
     public event System.Action<int, int> OnScoreUpdated;
+    public event System.Action<string> OnMatchEnded; 
 
     private void Awake()
     {
@@ -55,25 +56,39 @@ public class ScoreManager : MonoBehaviourPunCallbacks, IOnEventCallback
 
     public void OnEvent(EventData photonEvent)
     {
-        if (photonEvent.Code == ScoreEventCode)
+        switch (photonEvent.Code)
         {
-            object[] data = (object[])photonEvent.CustomData;
-            string team = (string)data[0];
+            case ScoreEventCode:
+                {
+                    object[] data = (object[])photonEvent.CustomData;
+                    string team = (string)data[0];
 
-            if (!scores.ContainsKey(team))
-            {
-                Debug.LogWarning($"[ScoreManager] Equipo {team} no estaba en la tabla, inicializando en 0.");
-                scores[team] = 0;
-            }
+                    if (!scores.ContainsKey(team))
+                    {
+                        Debug.LogWarning($"[ScoreManager] Equipo {team} no estaba en la tabla, inicializando en 0.");
+                        scores[team] = 0;
+                    }
 
-            scores[team] = (int)scores[team] + 1;
-            Debug.Log($"[ScoreManager] Team {team} ahora tiene {scores[team]} puntos");
+                    scores[team] = (int)scores[team] + 1;
+                    Debug.Log($"[ScoreManager] Team {team} ahora tiene {scores[team]} puntos");
 
-            int blueScore = scores.ContainsKey("Blue") ? (int)scores["Blue"] : 0;
-            int redScore = scores.ContainsKey("Red") ? (int)scores["Red"] : 0;
-            OnScoreUpdated?.Invoke(blueScore, redScore);
+                    int blueScore = scores.ContainsKey("Blue") ? (int)scores["Blue"] : 0;
+                    int redScore = scores.ContainsKey("Red") ? (int)scores["Red"] : 0;
+                    OnScoreUpdated?.Invoke(blueScore, redScore);
 
-            CheckWinCondition();
+                    CheckWinCondition();
+                    break;
+                }
+
+            case WinEventCode:
+                {
+                    object[] data = (object[])photonEvent.CustomData;
+                    string winningTeam = (string)data[0];
+
+                    Debug.Log($"[ScoreManager] WinEvent recibido. Ganador: {winningTeam}");
+                    OnMatchEnded?.Invoke(winningTeam);
+                    break;
+                }
         }
     }
 
