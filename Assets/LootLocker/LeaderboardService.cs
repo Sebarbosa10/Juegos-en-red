@@ -20,7 +20,6 @@ public static class LeaderboardService
         int score = playerWon ? 1 : 0;
         string result = playerWon ? "win" : "lose";
 
-        // Create metadata JSON using JsonUtility
         Metadata meta = new Metadata()
         {
             name = playerName,

@@ -18,6 +18,8 @@ public class ScoreManager : MonoBehaviourPunCallbacks, IOnEventCallback
 
     public static string LastWinnerTeam { get; private set; }
 
+    private int playersReported = 0;
+
     public event System.Action<int, int> OnScoreUpdated;
 
     private void Awake()
@@ -48,9 +50,6 @@ public class ScoreManager : MonoBehaviourPunCallbacks, IOnEventCallback
         PhotonNetwork.RemoveCallbackTarget(this);
     }
 
-    // -------------------------
-    // RESET SCORES
-    // -------------------------
     public void ResetScores()
     {
         scores["Blue"] = 0;
@@ -59,9 +58,6 @@ public class ScoreManager : MonoBehaviourPunCallbacks, IOnEventCallback
         OnScoreUpdated?.Invoke(0, 0);
     }
 
-    // -------------------------
-    // CLEAR STATE
-    // -------------------------
     public static void ClearState()
     {
         if (Instance != null)
@@ -70,8 +66,6 @@ public class ScoreManager : MonoBehaviourPunCallbacks, IOnEventCallback
             LastWinnerTeam = null;
         }
     }
-
-    // -------------------------
 
     public void AddPoint(string team)
     {
@@ -104,25 +98,42 @@ public class ScoreManager : MonoBehaviourPunCallbacks, IOnEventCallback
             string winningTeam = (string)((object[])photonEvent.CustomData)[0];
             LastWinnerTeam = winningTeam;
 
-            string myTeam =
-                PhotonNetwork.LocalPlayer.CustomProperties.ContainsKey("team")
-                ? (string)PhotonNetwork.LocalPlayer.CustomProperties["team"]
-                : "Unknown";
+            StartCoroutine(SubmitResultAndNotify(winningTeam));
+        }
+    }
 
-            bool iWon = (myTeam == winningTeam);
+    private System.Collections.IEnumerator SubmitResultAndNotify(string winningTeam)
+    {
+        string myTeam =
+            PhotonNetwork.LocalPlayer.CustomProperties.ContainsKey("team")
+            ? (string)PhotonNetwork.LocalPlayer.CustomProperties["team"]
+            : "Unknown";
 
-            // SUBMIT SCORE FOR ALL PLAYERS BEFORE SCENE CHANGE
-            LeaderboardService.SubmitMatchResult(
-                "matchresults",
-                PhotonNetwork.LocalPlayer.NickName,
-                myTeam,
-                iWon,
-                success =>
-                {
-                    // Only master changes scene AFTER everyone had time to submit
-                    if (PhotonNetwork.IsMasterClient)
-                        StartCoroutine(DelayedSceneLoad());
-                });
+        bool iWon = (myTeam == winningTeam);
+
+        bool done = false;
+
+        LeaderboardService.SubmitMatchResult(
+            "matchresults",
+            PhotonNetwork.LocalPlayer.NickName,
+            myTeam,
+            iWon,
+            _ => { done = true; }
+        );
+
+        while (!done) yield return null;
+
+        photonView.RPC(nameof(RPC_PlayerReported), RpcTarget.MasterClient);
+    }
+
+    [PunRPC]
+    private void RPC_PlayerReported()
+    {
+        playersReported++;
+
+        if (playersReported >= PhotonNetwork.PlayerList.Length)
+        {
+            PhotonNetwork.LoadLevel(endGameSceneName);
         }
     }
 
@@ -152,13 +163,5 @@ public class ScoreManager : MonoBehaviourPunCallbacks, IOnEventCallback
             content,
             new RaiseEventOptions { Receivers = ReceiverGroup.All },
             SendOptions.SendReliable);
-    }
-
-    private System.Collections.IEnumerator DelayedSceneLoad()
-    {
-        // Wait for all 4 players to submit their result (win/lose)
-        yield return new WaitForSeconds(1f);
-
-        PhotonNetwork.LoadLevel(endGameSceneName);
     }
 }
