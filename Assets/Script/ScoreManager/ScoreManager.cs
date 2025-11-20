@@ -18,8 +18,6 @@ public class ScoreManager : MonoBehaviourPunCallbacks, IOnEventCallback
 
     public static string LastWinnerTeam { get; private set; }
 
-    private int playersReported = 0;
-
     public event System.Action<int, int> OnScoreUpdated;
 
     private void Awake()
@@ -54,7 +52,6 @@ public class ScoreManager : MonoBehaviourPunCallbacks, IOnEventCallback
     {
         scores["Blue"] = 0;
         scores["Red"] = 0;
-
         OnScoreUpdated?.Invoke(0, 0);
     }
 
@@ -96,13 +93,20 @@ public class ScoreManager : MonoBehaviourPunCallbacks, IOnEventCallback
         else if (photonEvent.Code == WinEventCode)
         {
             string winningTeam = (string)((object[])photonEvent.CustomData)[0];
+
             LastWinnerTeam = winningTeam;
 
-            StartCoroutine(SubmitResultAndNotify(winningTeam));
+            SubmitMyOwnResult(winningTeam);
+
+            // Master cambia de escena
+            if (PhotonNetwork.IsMasterClient)
+            {
+                PhotonNetwork.LoadLevel(endGameSceneName);
+            }
         }
     }
 
-    private System.Collections.IEnumerator SubmitResultAndNotify(string winningTeam)
+    private void SubmitMyOwnResult(string winningTeam)
     {
         string myTeam =
             PhotonNetwork.LocalPlayer.CustomProperties.ContainsKey("team")
@@ -111,30 +115,12 @@ public class ScoreManager : MonoBehaviourPunCallbacks, IOnEventCallback
 
         bool iWon = (myTeam == winningTeam);
 
-        bool done = false;
-
         LeaderboardService.SubmitMatchResult(
             "matchresults",
             PhotonNetwork.LocalPlayer.NickName,
             myTeam,
-            iWon,
-            _ => { done = true; }
+            iWon
         );
-
-        while (!done) yield return null;
-
-        photonView.RPC(nameof(RPC_PlayerReported), RpcTarget.MasterClient);
-    }
-
-    [PunRPC]
-    private void RPC_PlayerReported()
-    {
-        playersReported++;
-
-        if (playersReported >= PhotonNetwork.PlayerList.Length)
-        {
-            PhotonNetwork.LoadLevel(endGameSceneName);
-        }
     }
 
     private void CheckWinCondition()
