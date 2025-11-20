@@ -2,15 +2,15 @@ using UnityEngine;
 
 public class PlayerModel : MonoBehaviour
 {
-    [Header("Player Speed")]
+    
     [SerializeField] private float _speed = 5f;
     [SerializeField] private float _sprintSpeed = 10f;
 
-    [Header("Mouse Sensitivity")]
+    
     [SerializeField] private float _mouseSensivityX = 10f;
     [SerializeField] private float _mouseSensivityY = 10f;
 
-    [Header("Interaction")]
+   
     [SerializeField] private float _interactionDistance = 1f;
     [SerializeField] private LayerMask _interactableLayer = 1 << 8;
 

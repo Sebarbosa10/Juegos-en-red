@@ -10,11 +10,11 @@ public class TeamMapSpawner : MonoBehaviourPunCallbacks
 {
     public static TeamMapSpawner Instance;
 
-    [Header("Puzzle 1 Spawns")]
+    
     [SerializeField] private Transform[] puzzle1BlueSpawns;
     [SerializeField] private Transform[] puzzle1RedSpawns;
 
-    [Header("Puzzle 2 Spawns")]
+   
     [SerializeField] private Transform[] puzzle2BlueSpawns;
     [SerializeField] private Transform[] puzzle2RedSpawns;
 
@@ -41,7 +41,7 @@ public class TeamMapSpawner : MonoBehaviourPunCallbacks
         if (propertiesThatChanged.ContainsKey(MatchStartedKey))
         {
             bool matchStarted = (bool)propertiesThatChanged[MatchStartedKey];
-            Debug.Log($"[TeamMapSpawner] OnRoomPropertiesUpdate → matchStarted={matchStarted}");
+           
 
             if (matchStarted)
             {
@@ -63,17 +63,17 @@ public class TeamMapSpawner : MonoBehaviourPunCallbacks
         string myTeam = GetMyTeam();
         if (string.IsNullOrEmpty(myTeam))
         {
-            Debug.LogWarning("[TeamMapSpawner] No tengo team asignado todavía.");
+           
             return;
         }
 
         bool secondRound = IsSecondRound();
-        Debug.Log($"[TeamMapSpawner] ForceRespawnAtTeamZone → team={myTeam}, secondRound={secondRound}");
+        
 
         Transform spawn = PickSpawnFor(PhotonNetwork.LocalPlayer, myTeam, secondRound);
         if (spawn == null)
         {
-            Debug.LogWarning($"[TeamMapSpawner] NO encontré spawn para team={myTeam}, secondRound={secondRound}");
+            
             return;
         }
 
@@ -81,12 +81,9 @@ public class TeamMapSpawner : MonoBehaviourPunCallbacks
         {
             myPlayer.transform.position = spawn.position;
             myPlayer.transform.rotation = spawn.rotation;
-            Debug.Log($"[TeamMapSpawner] {PhotonNetwork.NickName} movido a {myTeam} (secondRound={secondRound}) spawn {spawn.position}");
+            
         }
-        else
-        {
-            Debug.LogWarning("[TeamMapSpawner] LocalPlayer no tiene TagObject asignado.");
-        }
+       
     }
 
     private bool IsSecondRound()
@@ -125,13 +122,12 @@ public class TeamMapSpawner : MonoBehaviourPunCallbacks
 
         if (chosenArray == null || chosenArray.Length == 0)
         {
-            Debug.LogWarning($"[TeamMapSpawner] chosenArray vacío para team={team}, secondRound={secondRound}");
+            
             return null;
         }
 
         int spawnIndex = indexInTeam % chosenArray.Length;
-        Debug.Log($"[TeamMapSpawner] PickSpawnFor → team={team}, secondRound={secondRound}, spawnIndex={spawnIndex}, spawnName={chosenArray[spawnIndex].name}");
-
+        
         return chosenArray[spawnIndex];
     }
 }

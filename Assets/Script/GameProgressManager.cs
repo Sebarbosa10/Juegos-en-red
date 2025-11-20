@@ -24,19 +24,19 @@ public class GameProgressManager : MonoBehaviour
         if (value)
         {
             _activeProgressFlags.Add(flag);
-            Debug.Log($"Progreso agregado: {flag}");
+            
         }
         else
         {
             _activeProgressFlags.Remove(flag);
-            Debug.Log($"Progreso removido: {flag}");
+            
         }
     }
 
     public void ResetProgress()
     {
         _activeProgressFlags.Clear();
-        Debug.Log("GameProgressManager: Flags de progreso reseteados.");
+        
     }
 
 

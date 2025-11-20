@@ -26,7 +26,7 @@ public class ConditionalItem : MonoBehaviour, IInteractive
         }
         else
         {
-            Debug.LogError("ConditionalManager no encontrado en escena.");
+            
         }
     }
 }

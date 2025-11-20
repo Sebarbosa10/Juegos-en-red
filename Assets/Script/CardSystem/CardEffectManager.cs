@@ -66,14 +66,14 @@ public class CardEffectManager : MonoBehaviour
 
     private IEnumerator DoSlipperyFeet()
     {
-        Debug.Log("[CardEffect] SlipperyFeet activado");
+        
         _model.IsSlippery = true; 
         yield break;
     }
 
     private IEnumerator DoRandomSensivity()
     {
-        Debug.Log("[CardEffect] RandomSensitivity activado");
+        
 
         while (true)
         {
@@ -91,7 +91,7 @@ public class CardEffectManager : MonoBehaviour
 
     private IEnumerator DoLightingStop()
     {
-        Debug.Log("[CardEffect] LightingStop activado");
+        
 
         while (true)
         {
@@ -104,7 +104,7 @@ public class CardEffectManager : MonoBehaviour
 
     private IEnumerator DoHeavyWeight()
     {
-        Debug.Log("[CardEffect] HeavyWeight activado");
+        
 
         while (true)
         {
@@ -150,6 +150,6 @@ public class CardEffectManager : MonoBehaviour
             _controller.SetCanMove(true);
         }
 
-        Debug.Log("[CardEffect] ResetAllEffects → stats restaurados");
+        
     }
 }

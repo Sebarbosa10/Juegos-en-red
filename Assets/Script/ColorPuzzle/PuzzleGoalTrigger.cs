@@ -23,7 +23,7 @@ public class PuzzleGoalTrigger : MonoBehaviour
         {
             ScoreManager.Instance.AddPoint(team);
             ScoreManager.Instance.AddPoint(team);
-            Debug.Log($"[PuzzleGoalTrigger] Equipo {team} alcanzó el objetivo y recibió +2 puntos.");
+           
         }
 
         alreadyScored = true;

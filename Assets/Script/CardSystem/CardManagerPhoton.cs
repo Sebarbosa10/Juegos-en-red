@@ -12,7 +12,7 @@ public class CardManagerPhoton : MonoBehaviourPunCallbacks
     {
         if (!PhotonNetwork.IsMasterClient) return;
 
-        Debug.Log("[CardManager] Repartiendo cartas...");
+      
 
         List<int> availableCards = new List<int>();
         for (int i = 0; i < cardDatabase.allCards.Count; i++)
@@ -27,7 +27,7 @@ public class CardManagerPhoton : MonoBehaviourPunCallbacks
             var rival = TeamManager.Instance.GetRival(player);
             if (rival == null)
             {
-                Debug.LogWarning($"[CardManager] {player.NickName} no tiene rival, se salta.");
+               
                 continue;
             }
 
@@ -37,7 +37,7 @@ public class CardManagerPhoton : MonoBehaviourPunCallbacks
             };
             rival.SetCustomProperties(props);
 
-            Debug.Log($"[CardManager] {player.NickName} robó {cardId}, aplicado a {rival.NickName}");
+            
         }
     }
 
@@ -50,7 +50,7 @@ public class CardManagerPhoton : MonoBehaviourPunCallbacks
             player.SetCustomProperties(props);
         }
 
-        Debug.Log("[CardManager] ResetCards → cardID = -1 para todos los jugadores.");
+       
         
     }
 

@@ -2,19 +2,19 @@
 
 public class LightSource : MonoBehaviour
 {
-    [Header("Ray")]
+    
     public float maxDistance = 100f;
     public int maxBounces = 8;
     public LayerMask mask = ~0;
 
-    [Header("Behaviour")]
+    
     public bool stopOnReceiver = true;
     public float separationEpsilon = 0.02f;
 
-    [Header("Render")]
+    
     public LightBeamRenderer beamRenderer;
 
-    [Header("Debug")]
+    
     public bool debugDraw = true;
     public Color colIncident = Color.cyan;
     public Color colNormal = Color.yellow;

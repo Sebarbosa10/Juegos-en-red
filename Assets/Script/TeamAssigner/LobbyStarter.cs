@@ -28,7 +28,7 @@ public class LobbyStarter : MonoBehaviourPunCallbacks
 
     public override void OnJoinedRoom()
     {
-        Debug.Log("[Lobby] Entré a la sala, spawneando jugador...");
+       
 
         
         int blueCount = PhotonNetwork.PlayerList.Count(p =>
@@ -46,7 +46,7 @@ public class LobbyStarter : MonoBehaviourPunCallbacks
         else if (redCount < 2) team = TeamRed;
         else
         {
-            Debug.LogWarning("[Lobby] No hay lugar en ningún equipo!");
+            
             return;
         }
 

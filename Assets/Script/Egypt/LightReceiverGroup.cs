@@ -12,20 +12,20 @@ public class LightReceiverGroup : MonoBehaviour
         AtLeast     
     }
 
-    [Header("Receptores que componen el grupo")]
+    
     public LightReceiver[] receivers;
 
-    [Header("Lógica de activación")]
+    
     public Mode mode = Mode.All;
     [Min(1)] public int requiredCount = 2;   
     public bool requireContinuous = true;   
     public bool latchOn = false;             
     public bool allowManualReset = false;   
 
-    [Header("Sincronización (opcional)")]
+    
     public float syncWindowSeconds = 0f;
 
-    [Header("Eventos")]
+   
     public UnityEvent onActivated;
     public UnityEvent onDeactivated;
 

@@ -56,7 +56,7 @@ public class StatuesManager : MonoBehaviour
     {
         if (statues == null || statues.Length == 0)
         {
-            Debug.LogWarning("[Statues] No hay estatuas configuradas.");
+            
             return;
         }
 
@@ -68,7 +68,7 @@ public class StatuesManager : MonoBehaviour
             var s = statues[i];
             if (s == null || s.statue == null)
             {
-                Debug.LogWarning($"[Statues] Falta asignar la estatua en el slot {i}.");
+                
                 return;
             }
 
@@ -136,7 +136,7 @@ public class StatuesManager : MonoBehaviour
                       $"actual={s.lastCurrent:0.0}  objetivo={target:0.0}  ={s.lastDelta:0.00}   {(s.isCorrect ? "OK" : "NO")}");
             if (s.isCorrect) ok++;
         }
-        Debug.Log($"[Statues] Correctas: {ok}/{statues.Length} | solved={solved} | stick={consecutiveAllCorrectFrames}/{Mathf.Max(1, solvedStickyFrames)}");
+        
     }
 
     private static float GetAxisAngle(Transform t, Axis axis, bool useLocal)

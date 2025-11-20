@@ -4,11 +4,11 @@ public class InspectionManager : MonoBehaviour
 {
     public static InspectionManager Instance { get; private set; }
 
-    [Header("Inspection Settings")]
-    [SerializeField] private Transform inspectionAnchor; // in front of camera
+    
+    [SerializeField] private Transform inspectionAnchor; 
     [SerializeField] private float rotationSpeed = 100f;
 
-    private InspectableItem _currentItem; // Item being inspected
+    private InspectableItem _currentItem; 
     private PlayerController _player;
 
     private void Awake()
@@ -39,7 +39,7 @@ public class InspectionManager : MonoBehaviour
 
     public void StartInspection(InspectableItem item)
     {
-        if (_currentItem != null) return; // already one being inspected
+        if (_currentItem != null) return; 
 
         _currentItem = item;
         _currentItem.StartInspection(inspectionAnchor);

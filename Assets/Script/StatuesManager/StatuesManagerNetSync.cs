@@ -4,7 +4,7 @@ using UnityEngine;
 [RequireComponent(typeof(PhotonView))]
 public class StatuesManagerNetSync : MonoBehaviourPun, IPunObservable
 {
-    [Header("Refs")]
+    
     [SerializeField] private StatuesManager statuesManager;
 
     [SerializeField] private Collider[] statueCollidersToDisable;

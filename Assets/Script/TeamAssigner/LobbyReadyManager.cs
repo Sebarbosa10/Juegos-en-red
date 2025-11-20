@@ -8,8 +8,8 @@ using PhotonHashtable = ExitGames.Client.Photon.Hashtable;
 
 public class LobbyReadyManager : MonoBehaviourPunCallbacks
 {
-    [SerializeField] private byte maxPlayers = 4;
-    [Header("UI (opcional)")]
+    [SerializeField] private int maxPlayers = 4;
+    
     [SerializeField] private TMPro.TMP_Text readyCountText;
 
     private const string ReadyKey = "ready";
@@ -115,16 +115,13 @@ public class LobbyReadyManager : MonoBehaviourPunCallbacks
             cardManager.DealCards();
             Debug.Log("[Lobby] Cartas repartidas a todos los jugadores.");
         }
-        else
-        {
-            Debug.LogWarning("[Lobby] No encontré CardManagerPhoton en la escena.");
-        }
+        
 
         yield return new WaitForSeconds(2f);
 
         PhotonNetwork.CurrentRoom.SetCustomProperties(
             new PhotonHashtable { { MatchStartedKey, true } }
         );
-        Debug.Log("[Lobby] matchStarted = true (misma escena, a spawnear).");
+        
     }
 }
