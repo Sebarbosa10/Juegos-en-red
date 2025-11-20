@@ -1,11 +1,13 @@
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class CardEffectUI : MonoBehaviour
 {
     public static CardEffectUI Instance;
 
-    [SerializeField] private TextMeshProUGUI cardText;
+    [SerializeField] private Image cardImage;
+    [SerializeField] private TextMeshProUGUI cardSourceText;
 
     private void Awake()
     {
@@ -14,21 +16,33 @@ public class CardEffectUI : MonoBehaviour
         else
             Destroy(gameObject);
 
-        if (cardText != null)
-            cardText.text = "";
+        if (cardImage != null)
+            cardImage.enabled = false;
+
+        if (cardSourceText != null)
+            cardSourceText.text = "";
     }
 
-    public void ShowCard(string cardName, string fromPlayer)
+    public void ShowCard(CardData cardData, string fromPlayer)
     {
-        if (cardText != null)
-        {
-            cardText.text = $"Te aplicaron: {cardName}\n(from {fromPlayer})";
-        }
+        if (cardData == null || cardImage == null)
+            return;
+
+        // show icon
+        cardImage.sprite = cardData.icon;
+        cardImage.enabled = true;
+
+        // show who applied the card
+        if (cardSourceText != null)
+            cardSourceText.text = "From " + fromPlayer;
     }
 
     public void Clear()
     {
-        if (cardText != null)
-            cardText.text = "";
+        if (cardImage != null)
+            cardImage.enabled = false;
+
+        if (cardSourceText != null)
+            cardSourceText.text = "";
     }
 }

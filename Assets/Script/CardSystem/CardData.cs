@@ -5,6 +5,7 @@ using UnityEngine;
 [System.Serializable]
 public class CardData
 {
+    public Sprite icon;
     public int id;
     public string cardName;
     public string description;

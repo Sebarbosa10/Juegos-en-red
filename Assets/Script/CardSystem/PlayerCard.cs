@@ -20,36 +20,41 @@ public class PlayerCard : MonoBehaviourPunCallbacks
         if (cardId >= 0)
         {
             CurrentCard = cardDatabase.GetCardById(cardId);
-            Debug.Log($"[PlayerCard] {photonView.Owner.NickName} me tocó: {CurrentCard.cardName}");
+            Debug.Log("[PlayerCard] " + photonView.Owner.NickName + " got card: " + CurrentCard.cardName);
 
-            
+            // UI: now uses CardData instead of string
             if (photonView.IsMine && fromPlayer != null && CardEffectUI.Instance != null)
-                CardEffectUI.Instance.ShowCard(CurrentCard.cardName, fromPlayer);
+            {
+                CardEffectUI.Instance.ShowCard(CurrentCard, fromPlayer);
+            }
 
-            
+            // Apply effect logic
             if (photonView.IsMine)
+            {
                 _effectManager?.ActivateEffects(CurrentCard);
+            }
         }
         else
         {
             CurrentCard = null;
             if (photonView.IsMine)
-                Debug.Log("[PlayerCard] Carta reseteada");
+                Debug.Log("[PlayerCard] Card reset");
         }
     }
 
     public override void OnPlayerPropertiesUpdate(Player target, ExitGames.Client.Photon.Hashtable changedProps)
     {
-        
-        if (target != photonView.Owner) return;
+        if (target != photonView.Owner)
+            return;
 
         if (changedProps.ContainsKey(CardKey))
         {
             int cardId = (int)changedProps[CardKey];
-            string fromName = changedProps.ContainsKey("cardFrom") ? changedProps["cardFrom"].ToString() : "???";
+            string fromName = changedProps.ContainsKey("cardFrom")
+                ? changedProps["cardFrom"].ToString()
+                : "???";
 
             ApplyCard(cardId, fromName);
         }
     }
-
 }
