@@ -12,8 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 182cd195a28310e479cddf7ff82822f8, type: 3}
   m_Name: LootLockerConfig
   m_EditorClassIdentifier: 
-  apiKey: https://75k4we8y.api.lootlocker.io/
-  adminToken: 
+  apiKey: dev_8348784e668e45dca395c78ba3bde83a
+  adminToken: 73869b2a93660334aba68606bea88d9c544e617c
   domainKey: 75k4we8y
   game_version: 1.0.0.0
   sdk_version: 6.5.0

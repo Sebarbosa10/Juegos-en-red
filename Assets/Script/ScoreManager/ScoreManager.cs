@@ -2,7 +2,6 @@
 using Photon.Pun;
 using Photon.Realtime;
 using ExitGames.Client.Photon;
-using PhotonHashtable = ExitGames.Client.Photon.Hashtable;
 
 public class ScoreManager : MonoBehaviourPunCallbacks, IOnEventCallback
 {
@@ -11,11 +10,11 @@ public class ScoreManager : MonoBehaviourPunCallbacks, IOnEventCallback
     private const byte ScoreEventCode = 1;
     private const byte WinEventCode = 2;
 
-    
+    private readonly ExitGames.Client.Photon.Hashtable scores =
+        new ExitGames.Client.Photon.Hashtable();
+
     [SerializeField] private int maxScore = 3;
     [SerializeField] private string endGameSceneName = "EndGame";
-
-    private readonly PhotonHashtable scores = new PhotonHashtable();
 
     public static string LastWinnerTeam { get; private set; }
 
@@ -34,96 +33,96 @@ public class ScoreManager : MonoBehaviourPunCallbacks, IOnEventCallback
         }
     }
 
-    private void OnDestroy()
-    {
-        if (PhotonNetwork.NetworkingClient != null)
-            PhotonNetwork.RemoveCallbackTarget(this);
-    }
-
     private void Start()
     {
         PhotonNetwork.AddCallbackTarget(this);
+
         scores["Blue"] = 0;
         scores["Red"] = 0;
 
-        
         OnScoreUpdated?.Invoke(0, 0);
     }
 
+    private void OnDestroy()
+    {
+        PhotonNetwork.RemoveCallbackTarget(this);
+    }
+
+    // -------------------------
+    // RESET SCORES
+    // -------------------------
     public void ResetScores()
     {
         scores["Blue"] = 0;
         scores["Red"] = 0;
+
         OnScoreUpdated?.Invoke(0, 0);
-        
     }
 
+    // -------------------------
+    // CLEAR STATE
+    // -------------------------
     public static void ClearState()
     {
         if (Instance != null)
         {
             Instance.ResetScores();
+            LastWinnerTeam = null;
         }
-        LastWinnerTeam = null;
-        
     }
 
-    public override void OnLeftRoom()
-    {
-       
-        ClearState();
-    }
+    // -------------------------
 
     public void AddPoint(string team)
     {
-        
-        object[] content = new object[] { team };
+        object[] content = { team };
+
         PhotonNetwork.RaiseEvent(
             ScoreEventCode,
             content,
             new RaiseEventOptions { Receivers = ReceiverGroup.All },
-            SendOptions.SendReliable
-        );
+            SendOptions.SendReliable);
     }
 
     public void OnEvent(EventData photonEvent)
     {
         if (photonEvent.Code == ScoreEventCode)
         {
-            object[] data = (object[])photonEvent.CustomData;
-            string team = (string)data[0];
-
-            if (!scores.ContainsKey(team))
-            {
-                
-                scores[team] = 0;
-            }
+            string team = (string)((object[])photonEvent.CustomData)[0];
 
             scores[team] = (int)scores[team] + 1;
-            
 
-            int blueScore = scores.ContainsKey("Blue") ? (int)scores["Blue"] : 0;
-            int redScore = scores.ContainsKey("Red") ? (int)scores["Red"] : 0;
+            int blueScore = (int)scores["Blue"];
+            int redScore = (int)scores["Red"];
+
             OnScoreUpdated?.Invoke(blueScore, redScore);
 
             CheckWinCondition();
         }
         else if (photonEvent.Code == WinEventCode)
         {
-            object[] data = (object[])photonEvent.CustomData;
-            string winningTeam = (string)data[0];
-
-            
-
+            string winningTeam = (string)((object[])photonEvent.CustomData)[0];
             LastWinnerTeam = winningTeam;
 
-            var props = new PhotonHashtable { { "winnerTeam", winningTeam } };
-            PhotonNetwork.CurrentRoom.SetCustomProperties(props);
+            string myTeam =
+                PhotonNetwork.LocalPlayer.CustomProperties.ContainsKey("team")
+                ? (string)PhotonNetwork.LocalPlayer.CustomProperties["team"]
+                : "Unknown";
 
-            if (PhotonNetwork.IsMasterClient)
-            {
-                PhotonNetwork.LoadLevel(endGameSceneName);
-            }
+            bool iWon = (myTeam == winningTeam);
+
+            // SUBMIT SCORE FOR ALL PLAYERS BEFORE SCENE CHANGE
+            LeaderboardService.SubmitMatchResult(
+                "matchresults",
+                PhotonNetwork.LocalPlayer.NickName,
+                myTeam,
+                iWon,
+                success =>
+                {
+                    // Only master changes scene AFTER everyone had time to submit
+                    if (PhotonNetwork.IsMasterClient)
+                        StartCoroutine(DelayedSceneLoad());
+                });
         }
     }
 
@@ -134,15 +133,11 @@ public class ScoreManager : MonoBehaviourPunCallbacks, IOnEventCallback
             string team = key as string;
             int score = (int)scores[key];
 
-            
-
             if (score >= maxScore)
             {
-                
                 if (PhotonNetwork.IsMasterClient)
-                {
                     RaiseWinEvent(team);
-                }
+
                 break;
             }
         }
@@ -150,12 +145,20 @@ public class ScoreManager : MonoBehaviourPunCallbacks, IOnEventCallback
 
     private void RaiseWinEvent(string winningTeam)
     {
-        object[] content = new object[] { winningTeam };
+        object[] content = { winningTeam };
+
         PhotonNetwork.RaiseEvent(
             WinEventCode,
             content,
             new RaiseEventOptions { Receivers = ReceiverGroup.All },
-            SendOptions.SendReliable
-        );
+            SendOptions.SendReliable);
+    }
+
+    private System.Collections.IEnumerator DelayedSceneLoad()
+    {
+        // Wait for all 4 players to submit their result (win/lose)
+        yield return new WaitForSeconds(1f);
+
+        PhotonNetwork.LoadLevel(endGameSceneName);
     }
 }
