@@ -59,7 +59,7 @@ public class TeamColorSyncPuzzle : MonoBehaviourPunCallbacks
         lastPressByActor[actorNumber].ColorIndex = colorIndex;
         lastPressByActor[actorNumber].Time = time;
 
-        Debug.Log($"[ColorSyncPuzzle] Press → Actor {actorNumber}, Team {team}, Color {colorIndex}, t={time}");
+        
 
         CheckTeamSync(team, colorIndex, time);
     }
@@ -98,7 +98,7 @@ public class TeamColorSyncPuzzle : MonoBehaviourPunCallbacks
         double dt = System.Math.Abs(a.Time - b.Time);
         if (dt > syncWindow)
         {
-            Debug.Log($"[ColorSyncPuzzle] Pulsos del equipo {team} fuera de ventana (dt={dt})");
+            
             return;
         }
 
@@ -106,12 +106,12 @@ public class TeamColorSyncPuzzle : MonoBehaviourPunCallbacks
         int currentCubeColorIndex = GetCurrentCubeColorIndex();
         if (currentCubeColorIndex != colorIndex)
         {
-            Debug.Log($"[ColorSyncPuzzle] Equipo {team} pulsó color {colorIndex}, pero cubo está en {currentCubeColorIndex}");
+           
             return;
         }
 
         
-        Debug.Log($"[ColorSyncPuzzle] Equipo {team} sincronizó correctamente con el color {colorIndex}!");
+        
 
         solvedTeams.Add(team);
         photonView.RPC(nameof(RPC_OnTeamSolved), RpcTarget.All, team);
@@ -131,7 +131,7 @@ public class TeamColorSyncPuzzle : MonoBehaviourPunCallbacks
         if (PhotonNetwork.IsMasterClient && ScoreManager.Instance != null)
         {
             ScoreManager.Instance.AddPoint(team);
-            Debug.Log($"[ColorSyncPuzzle] Punto sumado para {team} desde puzzle de colores.");
+            
            
         }
     }

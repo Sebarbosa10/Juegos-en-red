@@ -8,7 +8,7 @@ public class EndGameUI : MonoBehaviourPunCallbacks
     [SerializeField] private GameObject victoryPanel;
     [SerializeField] private GameObject defeatPanel;
 
-    [Header("Escenas")]
+ 
     [SerializeField] private string mainMenuSceneName = "MainMenu";
 
     private const string TeamKey = "team";
@@ -42,7 +42,7 @@ public class EndGameUI : MonoBehaviourPunCallbacks
         bool hasMyTeam = !string.IsNullOrEmpty(myTeam);
         bool iWon = hasWinner && hasMyTeam && winningTeam == myTeam;
 
-        Debug.Log($"[EndGameUI] winnerTeam={winningTeam}, myTeam={myTeam}, iWon={iWon}");
+       
 
         if (!hasWinner || !hasMyTeam) return;
 
@@ -63,7 +63,7 @@ public class EndGameUI : MonoBehaviourPunCallbacks
         if (_goingBackToMenu) return;
         _goingBackToMenu = true;
 
-        Debug.Log("[EndGameUI] Volver al menú → LeaveRoom / Disconnect / MainMenu");
+       
 
         if (PhotonNetwork.InRoom)
         {
@@ -79,7 +79,7 @@ public class EndGameUI : MonoBehaviourPunCallbacks
 
     public override void OnLeftRoom()
     {
-        Debug.Log("[EndGameUI] OnLeftRoom → ahora Disconnect()");
+       
         
         if (PhotonNetwork.IsConnected)
         {
@@ -89,7 +89,7 @@ public class EndGameUI : MonoBehaviourPunCallbacks
 
     public override void OnDisconnected(Photon.Realtime.DisconnectCause cause)
     {
-        Debug.Log($"[EndGameUI] OnDisconnected → cause={cause}, limpiando estado y cargando MainMenu");
+        
 
         
         ScoreManager.ClearState();

@@ -7,7 +7,7 @@ using ExitGames.Client.Photon;
 [RequireComponent(typeof(PhotonView))]
 public class DisconnectPauseManager : MonoBehaviourPunCallbacks
 {
-    [Header("Lobby Spawns")]
+   
     [SerializeField] private Transform lobbyBlueSpawn;
     [SerializeField] private Transform lobbyRedSpawn;
 
@@ -40,17 +40,17 @@ public class DisconnectPauseManager : MonoBehaviourPunCallbacks
 
     public override void OnPlayerLeftRoom(Player otherPlayer)
     {
-        Debug.Log($"[DisconnectReset] Player left: {otherPlayer.NickName}");
+        
 
         if (!PhotonNetwork.IsMasterClient) return;
 
         if (!IsMatchStarted())
         {
-            Debug.Log("[DisconnectReset] La partida no estaba empezada, no hago nada especial.");
+            
             return;
         }
 
-        Debug.Log("[DisconnectReset] Partida en curso y alguien se desconectó → reseteando y volviendo a lobby.");
+        
         ResetMatchAndReturnToLobby();
 
         var clearProps = new PhotonHashtable
@@ -100,7 +100,7 @@ public class DisconnectPauseManager : MonoBehaviourPunCallbacks
             p.SetCustomProperties(props);
         }
 
-        Debug.Log("[DisconnectReset] Todos teletransportados a lobby, ready=false, scores y cartas reseteados.");
+        
     }
 
     [PunRPC]
@@ -128,7 +128,7 @@ public class DisconnectPauseManager : MonoBehaviourPunCallbacks
             CardEffectUI.Instance.Clear();
         }
 
-        Debug.Log("[DisconnectReset] RPC_ResetCardEffects → efectos y UI de cartas reseteados en este cliente.");
+        
     }
 
     private string GetTeamOf(Player p)

@@ -8,7 +8,7 @@ public class CardData
     public int id;
     public string cardName;
     public string description;
-    public CardEffectType cardEffectType; // Buff - Debuff
+    public CardEffectType cardEffectType; 
 
 }
 
@@ -18,5 +18,5 @@ public enum CardEffectType
     RandomSensitivity,
     LightingStop,
     HeavyWeight,
-    //Blindness
+   
 }

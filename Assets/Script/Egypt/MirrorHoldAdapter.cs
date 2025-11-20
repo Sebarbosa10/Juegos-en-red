@@ -5,23 +5,23 @@ using Photon.Pun;
 [DisallowMultipleComponent]
 public class MirrorHoldAdapter : MonoBehaviour, IInteractive
 {
-    [Header("Pivots del rig")]
+    
     public Transform heightPivot;  
     public Transform yawPivot;     
 
-    [Header("Rangos")]
+    
     public Vector2 yawLimits = new Vector2(-90f, 90f);     
     public Vector2 heightLimits = new Vector2(0f, 0.6f);   
 
-    [Header("Sensibilidad (px→unidad)")]
+   
     public float yawSensitivity = 0.25f;       
     public float heightSensitivity = 0.01f;    
 
-    [Header("Comportamiento")]
+    
     public bool returnToOriginOnRelease = false;
     public float returnDuration = 0.25f;
 
-    [Header("Animated Cosas")]
+    
     public AnimatedInteractable animated;   
     public AnimatedNetSync netSync;
     [SerializeField] PhotonView photonViewOverride;

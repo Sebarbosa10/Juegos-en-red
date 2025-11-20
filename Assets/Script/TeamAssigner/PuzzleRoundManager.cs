@@ -35,7 +35,7 @@ public class PuzzleRoundManager : MonoBehaviourPunCallbacks
     {
         if (!PhotonNetwork.IsMasterClient) return; 
 
-        Debug.Log($"[PuzzleRoundManager] Puzzle completado por {winningTeam}");
+       
 
       
         if (ScoreManager.Instance != null)
@@ -58,7 +58,7 @@ public class PuzzleRoundManager : MonoBehaviourPunCallbacks
     {
         if (!PhotonNetwork.IsMasterClient) return;
 
-        Debug.Log($"[PuzzleRoundManager] Enviando a todos al Puzzle {currentPuzzleIndex}");
+       
 
         foreach (var p in PhotonNetwork.PlayerList)
         {
@@ -80,7 +80,7 @@ public class PuzzleRoundManager : MonoBehaviourPunCallbacks
 
     private void TeleportAllPlayersToLobby()
     {
-        Debug.Log("[PuzzleRoundManager] Teletransportando todos a la lobby...");
+        
 
         foreach (var p in PhotonNetwork.PlayerList)
         {
@@ -100,7 +100,7 @@ public class PuzzleRoundManager : MonoBehaviourPunCallbacks
 
     private void ResetAllReadyFlags()
     {
-        Debug.Log("[PuzzleRoundManager] Reseteando flags de Ready...");
+        
 
         foreach (var p in PhotonNetwork.PlayerList)
         {

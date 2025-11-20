@@ -5,11 +5,11 @@ using Photon.Realtime;
 
 public class RoomBrowserUI : MonoBehaviourPunCallbacks
 {
-    [Header("UI")]
+    
     [SerializeField] private Transform content;       
     [SerializeField] private GameObject itemPrefab;   
 
-    [Header("Refs")]
+    
     [SerializeField] private MainMenuLauncher launcher;
 
     private readonly Dictionary<string, RoomInfo> _cache = new Dictionary<string, RoomInfo>();

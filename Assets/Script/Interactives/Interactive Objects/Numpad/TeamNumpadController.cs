@@ -9,22 +9,21 @@ using PhotonHashtable = ExitGames.Client.Photon.Hashtable;
 
 public class TeamNumpadController : MonoBehaviourPun
 {
-    [Header("Config")]
+    
     [SerializeField] private string teamFilter = "Blue";
     [SerializeField] private string correctCode = "1234";
     [SerializeField] private int maxLength = 4;
     [SerializeField] private bool lockAfterSolve = true;
 
-    [Header("UI")]
     [SerializeField] private TMP_Text displayText;
     [SerializeField] private string hiddenChar = "•";
     [SerializeField] private bool hideDigits = false;
 
-    [Header("Lobby Spawns (zona de lobby)")]
+    
     [SerializeField] private Transform lobbyBlueSpawn;
     [SerializeField] private Transform lobbyRedSpawn;
 
-    [Header("Eventos")]
+   
     public UnityEvent onDigit;
     public UnityEvent onClear;
     public UnityEvent onBackspace;
@@ -131,16 +130,16 @@ public class TeamNumpadController : MonoBehaviourPun
 
             if (PhotonNetwork.IsMasterClient)
             {
-                Debug.Log($"[Numpad] Código correcto ({correctCode}) por {senderTeam}. Punto + volver a lobby + habilitar segundo puzzle.");
+                
 
-                // 1) Sumar punto
+                
                 if (ScoreManager.Instance != null)
                     ScoreManager.Instance.AddPoint(senderTeam);
 
-                // 2) Teletransportar todos a la lobby
+                
                 TeleportAllPlayersToLobby();
 
-                // 🔹 2.5) Resetear cartas + efectos al volver a lobby
+                
                 var dp = FindObjectOfType<DisconnectPauseManager>();
                 if (dp != null)
                 {
@@ -151,10 +150,10 @@ public class TeamNumpadController : MonoBehaviourPun
                     Debug.LogWarning("[Numpad] No encontré DisconnectPauseManager para resetear cartas/efectos.");
                 }
 
-                // 3) Resetear flags de Ready
+                
                 ResetAllReadyFlags();
 
-                // 4) Marcar que la ronda terminó y que el próximo ready manda al segundo puzzle
+                
                 var roomProps = new PhotonHashtable
                 {
                     { MatchStartedKey, false },
@@ -168,7 +167,7 @@ public class TeamNumpadController : MonoBehaviourPun
         else
         {
             onWrongCode?.Invoke();
-            Debug.Log($"[Numpad] Código incorrecto ingresado por {senderTeam}. Reset del buffer.");
+            
             _buffer.Clear();
         }
 
@@ -197,7 +196,7 @@ public class TeamNumpadController : MonoBehaviourPun
             }
         }
 
-        Debug.Log("[Numpad] Todos los jugadores teletransportados a la lobby.");
+        
     }
 
     private void ResetAllReadyFlags()
@@ -211,7 +210,7 @@ public class TeamNumpadController : MonoBehaviourPun
             p.SetCustomProperties(props);
         }
 
-        Debug.Log("[Numpad] Flags de Ready reseteados a false para todos.");
+        
     }
 
     private string GetTeamOf(Player p)

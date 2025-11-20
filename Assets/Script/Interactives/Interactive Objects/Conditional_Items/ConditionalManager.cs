@@ -25,9 +25,6 @@ public class ConditionalManager : MonoBehaviour
                 AnimatedManager.Instance.HandleInteraction(anim);
             }
         }
-        else
-        {
-            Debug.Log($"[Conditional] No tienes el requisito: {item.RequiredFlag}");
-        }
+       
     }
 }

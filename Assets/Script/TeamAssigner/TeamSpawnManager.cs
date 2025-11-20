@@ -6,7 +6,7 @@ using PhotonHashtable = ExitGames.Client.Photon.Hashtable;
 
 public class TeamSpawnManager : MonoBehaviourPunCallbacks
 {
-    [Header("Prefab & Tags")]
+   
     [SerializeField] private string playerPrefabName = "Player"; 
     [SerializeField] private string blueSpawnTag = "BlueSpawn";
     [SerializeField] private string redSpawnTag = "RedSpawn";
@@ -114,7 +114,7 @@ public class TeamSpawnManager : MonoBehaviourPunCallbacks
             PhotonNetwork.LocalPlayer.TagObject = existing;
             CleanupExtraLocalPlayers(existing);
             _spawnedLocal = true;
-            Debug.Log($"[Spawn] Reubicado a {team} en {pos}");
+            
             return;
         }
 
@@ -122,7 +122,7 @@ public class TeamSpawnManager : MonoBehaviourPunCallbacks
         PhotonNetwork.LocalPlayer.TagObject = go;
         CleanupExtraLocalPlayers(go);
         _spawnedLocal = true;
-        Debug.Log($"[Spawn] Instanciado {team} en {pos}");
+        
     }
 
     
@@ -135,7 +135,7 @@ public class TeamSpawnManager : MonoBehaviourPunCallbacks
         mine.transform.SetPositionAndRotation(pos, rot);
         PhotonNetwork.LocalPlayer.TagObject = mine;
 
-        Debug.Log($"[Spawn] Movido a Lobby en {pos}");
+        
     }
 
     private void ResetLocalFlagsForMatch()

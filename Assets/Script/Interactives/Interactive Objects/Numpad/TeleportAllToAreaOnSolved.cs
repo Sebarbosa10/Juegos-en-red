@@ -5,10 +5,10 @@ using Photon.Realtime;
 
 public class TeleportAllToAreaOnSolved : MonoBehaviourPun
 {
-    [Header("Spawns in lobby (por índice)")]
+   
     [SerializeField] public Transform[] spawnPoints;
 
-    [Header("Back To Lobby Spawns (por equipo)")]
+    
     [SerializeField] private bool useTeamSlots = false;
     [SerializeField] private Transform[] blueSpawns;
     [SerializeField] private Transform[] redSpawns;
@@ -28,10 +28,7 @@ public class TeleportAllToAreaOnSolved : MonoBehaviourPun
                 {
                     dp.ResetCardsAndEffects();
                 }
-                else
-                {
-                    Debug.LogWarning("[TeleportAllToAreaOnSolved] No encontré DisconnectPauseManager en la escena.");
-                }
+               
             }
         }
         else

@@ -3,11 +3,11 @@ using System.Collections.Generic;
 
 public class LightBeamRenderer : MonoBehaviour
 {
-    [Header("Pool")]
+  
     public GameObject beamPrefab; 
     public int poolSize = 32;
 
-    [Header("Apariencia")]
+   
     public float thickness = 0.05f;
 
     private readonly List<Transform> pool = new();

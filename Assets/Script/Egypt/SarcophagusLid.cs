@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class SarcophagusLid : MonoBehaviour, IInteractive
 {
-    [Header("Refs")]
+    
     public AnimatedInteractable animatedLid;
     public SarcophagusPuzzle puzzle;
     public int index;

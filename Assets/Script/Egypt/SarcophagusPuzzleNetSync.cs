@@ -6,7 +6,7 @@ using UnityEngine;
 [RequireComponent(typeof(PhotonView))]
 public class SarcophagusPuzzleNetSync : MonoBehaviourPun, IPunObservable
 {
-    [Header("Refs")]
+    
     [SerializeField] private SarcophagusPuzzle puzzle;
     [SerializeField] private SarcophagusLid[] lids;
 

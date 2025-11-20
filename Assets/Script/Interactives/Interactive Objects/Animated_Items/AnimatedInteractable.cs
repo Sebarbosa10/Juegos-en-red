@@ -5,7 +5,7 @@ public enum AnimatedType { Rotation, Translation }
 
 public class AnimatedInteractable : MonoBehaviour, IInteractive
 {
-    [Header("Animation Settings")]
+    
     public AnimatedMode mode = AnimatedMode.Toggle;
     public AnimatedType type = AnimatedType.Rotation;
     public Vector3 axis = Vector3.up;

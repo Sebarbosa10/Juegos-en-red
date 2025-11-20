@@ -5,12 +5,12 @@ using System.Collections.Generic;
 
 public class SarcophagusPuzzle : MonoBehaviour
 {
-    [Header("Config")]
+    
     public SarcophagusLid[] lids;
     public int[] correctOrder;
     public bool animatedReset = true;
 
-    [Header("Events")]
+    
     public UnityEvent onSolved;   
 
     private readonly List<int> attemptOrder = new List<int>();
@@ -77,12 +77,12 @@ public class SarcophagusPuzzle : MonoBehaviour
         if (ok)
         {
             solved = true;
-            Debug.Log("VAMOOOOOOOO");
+            
             onSolved?.Invoke();            
         }
         else
         {
-            Debug.Log("ADSASDADSADSADSASDADSADSt");
+            
             StartCoroutine(ResetAttemptRoutine());
         }
     }
@@ -121,6 +121,6 @@ public class SarcophagusPuzzle : MonoBehaviour
         attemptOrder.Clear();
         reserved.Clear();
         resetting = false;
-        Debug.Log("↩NOOOOOOOOOO");
+        
     }
 }

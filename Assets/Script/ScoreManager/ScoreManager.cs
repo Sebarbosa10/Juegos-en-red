@@ -11,7 +11,7 @@ public class ScoreManager : MonoBehaviourPunCallbacks, IOnEventCallback
     private const byte ScoreEventCode = 1;
     private const byte WinEventCode = 2;
 
-    [Header("Config")]
+    
     [SerializeField] private int maxScore = 3;
     [SerializeField] private string endGameSceneName = "EndGame";
 
@@ -46,7 +46,7 @@ public class ScoreManager : MonoBehaviourPunCallbacks, IOnEventCallback
         scores["Blue"] = 0;
         scores["Red"] = 0;
 
-        Debug.Log("[ScoreManager] Iniciado con Blue=0, Red=0");
+        
         OnScoreUpdated?.Invoke(0, 0);
     }
 
@@ -55,7 +55,7 @@ public class ScoreManager : MonoBehaviourPunCallbacks, IOnEventCallback
         scores["Blue"] = 0;
         scores["Red"] = 0;
         OnScoreUpdated?.Invoke(0, 0);
-        Debug.Log("[ScoreManager] ResetScores → Blue=0, Red=0");
+        
     }
 
     public static void ClearState()
@@ -65,7 +65,7 @@ public class ScoreManager : MonoBehaviourPunCallbacks, IOnEventCallback
             Instance.ResetScores();
         }
         LastWinnerTeam = null;
-        Debug.Log("[ScoreManager] ClearState → scores reseteados y LastWinnerTeam=null");
+        
     }
 
     public override void OnLeftRoom()
@@ -76,7 +76,7 @@ public class ScoreManager : MonoBehaviourPunCallbacks, IOnEventCallback
 
     public void AddPoint(string team)
     {
-        Debug.Log($"[ScoreManager] AddPoint recibido → equipo {team}");
+        
         object[] content = new object[] { team };
         PhotonNetwork.RaiseEvent(
             ScoreEventCode,
@@ -95,12 +95,12 @@ public class ScoreManager : MonoBehaviourPunCallbacks, IOnEventCallback
 
             if (!scores.ContainsKey(team))
             {
-                Debug.LogWarning($"[ScoreManager] Equipo {team} no estaba en la tabla, inicializando en 0.");
+                
                 scores[team] = 0;
             }
 
             scores[team] = (int)scores[team] + 1;
-            Debug.Log($"[ScoreManager] Team {team} ahora tiene {scores[team]} puntos");
+            
 
             int blueScore = scores.ContainsKey("Blue") ? (int)scores["Blue"] : 0;
             int redScore = scores.ContainsKey("Red") ? (int)scores["Red"] : 0;
@@ -113,7 +113,7 @@ public class ScoreManager : MonoBehaviourPunCallbacks, IOnEventCallback
             object[] data = (object[])photonEvent.CustomData;
             string winningTeam = (string)data[0];
 
-            Debug.Log($"[ScoreManager] WinEvent recibido → ganador {winningTeam}");
+            
 
             LastWinnerTeam = winningTeam;
 
@@ -134,11 +134,11 @@ public class ScoreManager : MonoBehaviourPunCallbacks, IOnEventCallback
             string team = key as string;
             int score = (int)scores[key];
 
-            Debug.Log($"[ScoreManager] Chequeando condición: {team} tiene {score}/{maxScore}");
+            
 
             if (score >= maxScore)
             {
-                Debug.Log($"[ScoreManager] Equipo {team} alcanzó el puntaje máximo → WIN");
+                
                 if (PhotonNetwork.IsMasterClient)
                 {
                     RaiseWinEvent(team);

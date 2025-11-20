@@ -2,10 +2,10 @@ using TMPro;
 using UnityEngine;
 public class RedBook : MonoBehaviour, IInteractive
 {
-    [Header("UI del prefab")]
+   
     [SerializeField] private GameObject notePanel;  
 
-    [Header("CONTENT")]
+    
     private bool _isOpen = false;
     private CursorLockMode _prevLockMode;
     private bool _prevCursorVisible;

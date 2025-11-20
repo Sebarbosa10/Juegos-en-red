@@ -6,18 +6,18 @@ using Photon.Realtime;
 
 public class MainMenuLauncher : MonoBehaviourPunCallbacks
 {
-    [Header("Auth")]
+   
     public TMP_InputField nicknameInput;
     public Button connectButton;
 
-    [Header("Lobby UI")]
+   
     public GameObject roomsPanel;
 
-    [Header("Create Room")]
+    
     public TMP_InputField roomNameInput;
     public Button createRoomButton;
 
-    [Header("Scenes")]
+    
     [SerializeField] private string lobbySceneName = "Lobby";
     [SerializeField] private byte maxPlayers = 4;
 
@@ -26,7 +26,7 @@ public class MainMenuLauncher : MonoBehaviourPunCallbacks
     void Start()
     {
         PhotonNetwork.AutomaticallySyncScene = true;
-        PhotonNetwork.GameVersion = "0.1";
+        
 
         connectButton.onClick.AddListener(Connect);
         createRoomButton.onClick.AddListener(CreateRoom);

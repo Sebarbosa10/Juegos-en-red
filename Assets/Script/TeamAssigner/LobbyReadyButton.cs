@@ -57,7 +57,7 @@ public class LobbyReadyButton : MonoBehaviourPunCallbacks
         isReady = true;
         RefreshUI();
 
-        Debug.Log($"[Lobby] {PhotonNetwork.NickName} está listo (Ready).");
+       
     }
 
     private void RefreshUI()

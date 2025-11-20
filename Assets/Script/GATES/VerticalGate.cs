@@ -2,10 +2,10 @@ using UnityEngine;
 
 public class VerticalGate : MonoBehaviour
 {
-    [Header("ANIMATED INTERACTIBLE")]
+    
     public AnimatedInteractable mover; 
 
-    [Tooltip("Gate")]
+    
     public bool forceOpen = true;
 
     public void Open()

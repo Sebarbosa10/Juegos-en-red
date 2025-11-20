@@ -5,29 +5,29 @@ public class LightReceiver : MonoBehaviour
 {
     public enum ReceiverRole { None, GateOpener, FinalDoor }
 
-    [Header("Estado")]
+    
     public bool isLit;
     public bool latchOn = false;              
     public bool requireContinuous = true;   
 
-    [Header("Rol")]
+    
     public ReceiverRole role = ReceiverRole.None;
 
-    [Header("GateOpener (Animated)")]
+    
     public AnimatedInteractable gateMover;    
     public bool forceOpen = true;             
     public bool revertOnUnlit = false;        
 
-    [Header("GateOpener (Opcional objetos)")]
+    
     public GameObject objectToEnable;
     public GameObject objectToDisable;
 
-    [Header("FinalDoor")]
+    
     public VerticalGate verticalGate;
 
     public float lastLitTime { get; private set; }
 
-    [Header("Eventos (opcionales)")]
+    
     public UnityEvent onLit;
     public UnityEvent onUnlit;
 
