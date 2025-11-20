@@ -21,6 +21,23 @@ public class DisconnectPauseManager : MonoBehaviourPunCallbacks
 
     public static bool IsPaused => false;
 
+    
+    public void ResetCardsAndEffects()
+    {
+        
+        photonView.RPC(nameof(RPC_ResetCardEffects), RpcTarget.All);
+
+        
+        if (PhotonNetwork.IsMasterClient)
+        {
+            var cardManager = FindObjectOfType<CardManagerPhoton>();
+            if (cardManager != null)
+            {
+                cardManager.ResetCards();
+            }
+        }
+    }
+
     public override void OnPlayerLeftRoom(Player otherPlayer)
     {
         Debug.Log($"[DisconnectReset] Player left: {otherPlayer.NickName}");
@@ -54,18 +71,8 @@ public class DisconnectPauseManager : MonoBehaviourPunCallbacks
 
     private void ResetMatchAndReturnToLobby()
     {
-       
-        photonView.RPC(nameof(RPC_ResetCardEffects), RpcTarget.All);
-
         
-        if (PhotonNetwork.IsMasterClient)
-        {
-            var cardManager = FindObjectOfType<CardManagerPhoton>();
-            if (cardManager != null)
-            {
-                cardManager.ResetCards();
-            }
-        }
+        ResetCardsAndEffects();
 
         
         if (ScoreManager.Instance != null)

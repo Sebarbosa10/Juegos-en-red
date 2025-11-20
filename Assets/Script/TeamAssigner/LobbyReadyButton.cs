@@ -21,14 +21,22 @@ public class LobbyReadyButton : MonoBehaviourPunCallbacks
         if (readyButton != null)
             readyButton.onClick.AddListener(SetReady);
 
-        if (PhotonNetwork.LocalPlayer.CustomProperties != null &&
-            PhotonNetwork.LocalPlayer.CustomProperties.ContainsKey(ReadyKey))
+        
+        if (PhotonNetwork.InRoom)
+        {
+            var props = new PhotonHashtable { { ReadyKey, false } };
+            PhotonNetwork.LocalPlayer.SetCustomProperties(props);
+            isReady = false;
+        }
+        else if (PhotonNetwork.LocalPlayer.CustomProperties != null &&
+                 PhotonNetwork.LocalPlayer.CustomProperties.ContainsKey(ReadyKey))
         {
             isReady = (bool)PhotonNetwork.LocalPlayer.CustomProperties[ReadyKey];
         }
 
         RefreshUI();
     }
+
 
     void Update()
     {

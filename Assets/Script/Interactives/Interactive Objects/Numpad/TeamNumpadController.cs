@@ -47,8 +47,6 @@ public class TeamNumpadController : MonoBehaviourPun
 
     public bool IsSolved => _solved;
 
-   
-
     public void RequestDigit(int d)
     {
         if (d < 0 || d > 9) return;
@@ -79,7 +77,6 @@ public class TeamNumpadController : MonoBehaviourPun
         photonView.RPC(nameof(RPC_Submit), RpcTarget.All, senderTeam);
     }
 
-    
     [PunRPC]
     private void RPC_PressDigit(int d, string senderTeam, PhotonMessageInfo _mi)
     {
@@ -136,17 +133,28 @@ public class TeamNumpadController : MonoBehaviourPun
             {
                 Debug.Log($"[Numpad] Código correcto ({correctCode}) por {senderTeam}. Punto + volver a lobby + habilitar segundo puzzle.");
 
-               
+                // 1) Sumar punto
                 if (ScoreManager.Instance != null)
                     ScoreManager.Instance.AddPoint(senderTeam);
 
-              
+                // 2) Teletransportar todos a la lobby
                 TeleportAllPlayersToLobby();
 
-               
+                // 🔹 2.5) Resetear cartas + efectos al volver a lobby
+                var dp = FindObjectOfType<DisconnectPauseManager>();
+                if (dp != null)
+                {
+                    dp.ResetCardsAndEffects();
+                }
+                else
+                {
+                    Debug.LogWarning("[Numpad] No encontré DisconnectPauseManager para resetear cartas/efectos.");
+                }
+
+                // 3) Resetear flags de Ready
                 ResetAllReadyFlags();
 
-                
+                // 4) Marcar que la ronda terminó y que el próximo ready manda al segundo puzzle
                 var roomProps = new PhotonHashtable
                 {
                     { MatchStartedKey, false },
@@ -166,8 +174,6 @@ public class TeamNumpadController : MonoBehaviourPun
 
         RefreshDisplay();
     }
-
-    
 
     private void TeleportAllPlayersToLobby()
     {
@@ -207,8 +213,6 @@ public class TeamNumpadController : MonoBehaviourPun
 
         Debug.Log("[Numpad] Flags de Ready reseteados a false para todos.");
     }
-
-   
 
     private string GetTeamOf(Player p)
     {

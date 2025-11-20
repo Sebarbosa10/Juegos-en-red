@@ -2,6 +2,7 @@
 using Photon.Pun;
 using Photon.Realtime;
 using ExitGames.Client.Photon;
+using PhotonHashtable = ExitGames.Client.Photon.Hashtable;
 
 public class ScoreManager : MonoBehaviourPunCallbacks, IOnEventCallback
 {
@@ -10,35 +11,67 @@ public class ScoreManager : MonoBehaviourPunCallbacks, IOnEventCallback
     private const byte ScoreEventCode = 1;
     private const byte WinEventCode = 2;
 
-    [SerializeField] private int maxScore = 2;
+    [Header("Config")]
+    [SerializeField] private int maxScore = 3;
+    [SerializeField] private string endGameSceneName = "EndGame";
 
-    private readonly ExitGames.Client.Photon.Hashtable scores = new ExitGames.Client.Photon.Hashtable();
+    private readonly PhotonHashtable scores = new PhotonHashtable();
+
+    public static string LastWinnerTeam { get; private set; }
 
     public event System.Action<int, int> OnScoreUpdated;
 
     private void Awake()
     {
-        if (Instance == null) Instance = this;
+        if (Instance == null)
+        {
+            Instance = this;
+            DontDestroyOnLoad(gameObject);
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
     }
 
-    public override void OnEnable()
+    private void OnDestroy()
     {
-        base.OnEnable();
-        PhotonNetwork.AddCallbackTarget(this);
-    }
-
-    public override void OnDisable()
-    {
-        PhotonNetwork.RemoveCallbackTarget(this);
-        base.OnDisable();
+        if (PhotonNetwork.NetworkingClient != null)
+            PhotonNetwork.RemoveCallbackTarget(this);
     }
 
     private void Start()
     {
+        PhotonNetwork.AddCallbackTarget(this);
         scores["Blue"] = 0;
         scores["Red"] = 0;
 
-        Debug.Log("[ScoreManager] Iniciado con equipos Blue=0, Red=0");
+        Debug.Log("[ScoreManager] Iniciado con Blue=0, Red=0");
+        OnScoreUpdated?.Invoke(0, 0);
+    }
+
+    public void ResetScores()
+    {
+        scores["Blue"] = 0;
+        scores["Red"] = 0;
+        OnScoreUpdated?.Invoke(0, 0);
+        Debug.Log("[ScoreManager] ResetScores → Blue=0, Red=0");
+    }
+
+    public static void ClearState()
+    {
+        if (Instance != null)
+        {
+            Instance.ResetScores();
+        }
+        LastWinnerTeam = null;
+        Debug.Log("[ScoreManager] ClearState → scores reseteados y LastWinnerTeam=null");
+    }
+
+    public override void OnLeftRoom()
+    {
+      
+        ClearState();
     }
 
     public void AddPoint(string team)
@@ -75,6 +108,23 @@ public class ScoreManager : MonoBehaviourPunCallbacks, IOnEventCallback
 
             CheckWinCondition();
         }
+        else if (photonEvent.Code == WinEventCode)
+        {
+            object[] data = (object[])photonEvent.CustomData;
+            string winningTeam = (string)data[0];
+
+            Debug.Log($"[ScoreManager] WinEvent recibido → ganador {winningTeam}");
+
+            LastWinnerTeam = winningTeam;
+
+            var props = new PhotonHashtable { { "winnerTeam", winningTeam } };
+            PhotonNetwork.CurrentRoom.SetCustomProperties(props);
+
+            if (PhotonNetwork.IsMasterClient)
+            {
+                PhotonNetwork.LoadLevel(endGameSceneName);
+            }
+        }
     }
 
     private void CheckWinCondition()
@@ -88,8 +138,11 @@ public class ScoreManager : MonoBehaviourPunCallbacks, IOnEventCallback
 
             if (score >= maxScore)
             {
-                Debug.Log($"[ScoreManager] Equipo {team} alcanzó el puntaje máximo  WIN");
-                RaiseWinEvent(team);
+                Debug.Log($"[ScoreManager] Equipo {team} alcanzó el puntaje máximo → WIN");
+                if (PhotonNetwork.IsMasterClient)
+                {
+                    RaiseWinEvent(team);
+                }
                 break;
             }
         }
@@ -104,17 +157,5 @@ public class ScoreManager : MonoBehaviourPunCallbacks, IOnEventCallback
             new RaiseEventOptions { Receivers = ReceiverGroup.All },
             SendOptions.SendReliable
         );
-    }
-
-    public void ResetScores()
-    {
-        scores["Blue"] = 0;
-        scores["Red"] = 0;
-
-        int blueScore = (int)scores["Blue"];
-        int redScore = (int)scores["Red"];
-
-        OnScoreUpdated?.Invoke(blueScore, redScore);
-        Debug.Log("[ScoreManager] Scores reseteados a 0 - 0");
     }
 }

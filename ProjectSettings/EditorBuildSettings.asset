@@ -20,6 +20,9 @@ EditorBuildSettings:
   - enabled: 0
     path: Assets/Scenes/EgyptMapRed.unity
     guid: 697ecfdb67f89544184b38992ee74453
+  - enabled: 1
+    path: Assets/Scenes/EndGame.unity
+    guid: 14760de05093a964a88069f21f445026
   - enabled: 0
     path: 
     guid: 00000000000000000000000000000000

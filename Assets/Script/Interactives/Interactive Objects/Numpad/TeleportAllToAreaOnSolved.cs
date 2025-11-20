@@ -5,22 +5,38 @@ using Photon.Realtime;
 
 public class TeleportAllToAreaOnSolved : MonoBehaviourPun
 {
-    [Header("Spawns in lobby")]
+    [Header("Spawns in lobby (por índice)")]
     [SerializeField] public Transform[] spawnPoints;
 
-    [Header("Back To Lobby Spawns")]
+    [Header("Back To Lobby Spawns (por equipo)")]
     [SerializeField] private bool useTeamSlots = false;
-    [SerializeField] private Transform[] blueSpawns; 
-    [SerializeField] private Transform[] redSpawns;  
+    [SerializeField] private Transform[] blueSpawns;
+    [SerializeField] private Transform[] redSpawns;
 
     public void TeleportAll()
     {
         if (PhotonNetwork.IsConnected && PhotonNetwork.InRoom)
         {
+            
             photonView.RPC(nameof(RPC_TeleportAll), RpcTarget.All);
+
+            
+            if (PhotonNetwork.IsMasterClient)
+            {
+                var dp = FindObjectOfType<DisconnectPauseManager>();
+                if (dp != null)
+                {
+                    dp.ResetCardsAndEffects();
+                }
+                else
+                {
+                    Debug.LogWarning("[TeleportAllToAreaOnSolved] No encontré DisconnectPauseManager en la escena.");
+                }
+            }
         }
         else
         {
+            
             DoLocalTeleport();
         }
     }
@@ -38,6 +54,7 @@ public class TeleportAllToAreaOnSolved : MonoBehaviourPun
         else
             TeleportLocalByIndex();
     }
+
     private void TeleportLocalByIndex()
     {
         if (spawnPoints == null || spawnPoints.Length == 0) return;
@@ -116,4 +133,3 @@ public class TeleportAllToAreaOnSolved : MonoBehaviourPun
         tr.SetPositionAndRotation(pos, rot);
     }
 }
-
