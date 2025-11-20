@@ -1,13 +1,10 @@
-using LootLocker.Requests;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
+using LootLocker.Requests;
+using Photon.Pun;
 
 public class LootLockerBootstrap : MonoBehaviour
 {
     public static bool SessionStarted { get; private set; }
-
-    [SerializeField] string playerIdentifier = "player_1";
 
     private void Awake()
     {
@@ -17,15 +14,19 @@ public class LootLockerBootstrap : MonoBehaviour
 
     void StartGuest()
     {
+  
+        string playerIdentifier = PhotonNetwork.LocalPlayer.UserId;
+
         LootLockerSDKManager.StartGuestSession(playerIdentifier, response =>
         {
             if (!response.success)
             {
-                Debug.LogError("Fallo");
+                Debug.LogError("LootLocker: Failed to start session");
                 return;
             }
+
             SessionStarted = true;
-            Debug.Log("Conectado");
+            Debug.Log("LootLocker session started: " + playerIdentifier);
         });
     }
 }

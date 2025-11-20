@@ -98,7 +98,6 @@ public class ScoreManager : MonoBehaviourPunCallbacks, IOnEventCallback
 
             SubmitMyOwnResult(winningTeam);
 
-            // Master cambia de escena
             if (PhotonNetwork.IsMasterClient)
             {
                 PhotonNetwork.LoadLevel(endGameSceneName);

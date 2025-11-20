@@ -22,7 +22,7 @@ public class PlayerCard : MonoBehaviourPunCallbacks
             CurrentCard = cardDatabase.GetCardById(cardId);
             Debug.Log("[PlayerCard] " + photonView.Owner.NickName + " got card: " + CurrentCard.cardName);
 
-            // UI: now uses CardData instead of string
+        
             if (photonView.IsMine && fromPlayer != null && CardEffectUI.Instance != null)
             {
                 CardEffectUI.Instance.ShowCard(CurrentCard, fromPlayer);

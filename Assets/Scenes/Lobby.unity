@@ -16539,7 +16539,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   blueDoor: {fileID: 2089110258}
   redDoor: {fileID: 0}
-  syncWindow: 2
+  syncWindow: 0.62
 --- !u!114 &165585587
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -25114,7 +25114,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 258758181}
   m_LocalRotation: {x: -0, y: 0.70710576, z: -0, w: 0.70710784}
-  m_LocalPosition: {x: 6.45, y: 6.615, z: 2.012}
+  m_LocalPosition: {x: 6.45, y: 6.615, z: -3.31}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -48218,7 +48218,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   blueDoor: {fileID: 854905462}
   redDoor: {fileID: 854905462}
-  syncWindow: 2
+  syncWindow: 0.62
 --- !u!114 &463930442
 MonoBehaviour:
   m_ObjectHideFlags: 0
