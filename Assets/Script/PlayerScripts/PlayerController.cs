@@ -9,9 +9,12 @@ public class PlayerController : MonoBehaviour
 
     private PlayerView _playerView;
     private Rigidbody _rb;
+    private PlayerWiggle _wiggle;
+
 
     private PhotonView _pv;
     private bool _isLocal;
+
 
     private float _xRotation = 0f;
     private float _currentYRotation;
@@ -21,7 +24,7 @@ public class PlayerController : MonoBehaviour
     private bool _isPaused = false;
     private bool _canMove = true;
 
-    
+    // 🔹 NUEVO: velocidad con inercia
     private Vector3 _currentVelocity;
 
     private void Awake()
@@ -30,6 +33,7 @@ public class PlayerController : MonoBehaviour
         _playerView = GetComponent<PlayerView>();
         _rb = GetComponent<Rigidbody>();
         _pv = GetComponent<PhotonView>();
+        _wiggle = GetComponentInChildren<PlayerWiggle>();
 
         _isLocal = (_pv == null) ? true : _pv.IsMine;
     }
@@ -55,21 +59,6 @@ public class PlayerController : MonoBehaviour
     private void Update()
     {
         if (!_isLocal) return;
-
-        
-        if (DisconnectPauseManager.IsPaused)
-        {
-            if (!_isPaused)
-                SetPaused(true);
-
-            return;
-        }
-        else
-        {
-            if (_isPaused)
-                SetPaused(false);
-        }
-
         if (!_canMove) return;
 
         HandleMouseLook();
@@ -79,7 +68,6 @@ public class PlayerController : MonoBehaviour
     private void FixedUpdate()
     {
         if (!_isLocal) return;
-        if (DisconnectPauseManager.IsPaused) return;
         if (!_canMove) return;
 
         HandleMovement();
@@ -128,7 +116,12 @@ public class PlayerController : MonoBehaviour
             float friction = _playerModel.IsSlippery ? 0.99f : 0.5f;
             _currentVelocity *= friction;
         }
+        bool isMoving = moveDir.magnitude > 0.1f;
 
+        if (_wiggle != null)
+        {
+            _wiggle.SetMoving(isMoving);
+        }
         _rb.MovePosition(_rb.position + _currentVelocity);
     }
 
@@ -151,8 +144,6 @@ public class PlayerController : MonoBehaviour
 
             if (canShowHand && Input.GetMouseButtonDown(0) && interactive != null)
             {
-                if (DisconnectPauseManager.IsPaused) return;
-
                 interactive.Interact();
                 _playerView.ShowHandIcon(false);
             }
