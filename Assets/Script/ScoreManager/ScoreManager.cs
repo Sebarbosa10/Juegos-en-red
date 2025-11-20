@@ -70,7 +70,7 @@ public class ScoreManager : MonoBehaviourPunCallbacks, IOnEventCallback
 
     public override void OnLeftRoom()
     {
-      
+       
         ClearState();
     }
 

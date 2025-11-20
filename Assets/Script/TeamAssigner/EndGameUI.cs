@@ -12,11 +12,12 @@ public class EndGameUI : MonoBehaviourPunCallbacks
     [SerializeField] private string mainMenuSceneName = "MainMenu";
 
     private const string TeamKey = "team";
+
     private bool _goingBackToMenu = false;
 
     private void Start()
     {
-        
+       
         Cursor.lockState = CursorLockMode.None;
         Cursor.visible = true;
         Time.timeScale = 1f;
@@ -59,23 +60,37 @@ public class EndGameUI : MonoBehaviourPunCallbacks
     
     public void OnClick_BackToMenu()
     {
-        if (_goingBackToMenu) return; 
+        if (_goingBackToMenu) return;
         _goingBackToMenu = true;
 
-        
+        Debug.Log("[EndGameUI] Volver al menú → LeaveRoom / Disconnect / MainMenu");
+
         if (PhotonNetwork.InRoom)
         {
+            
             PhotonNetwork.LeaveRoom();
         }
         else
         {
-            
-            SceneManager.LoadScene(mainMenuSceneName);
+           
+            PhotonNetwork.Disconnect();
         }
     }
 
     public override void OnLeftRoom()
     {
+        Debug.Log("[EndGameUI] OnLeftRoom → ahora Disconnect()");
+        
+        if (PhotonNetwork.IsConnected)
+        {
+            PhotonNetwork.Disconnect();
+        }
+    }
+
+    public override void OnDisconnected(Photon.Realtime.DisconnectCause cause)
+    {
+        Debug.Log($"[EndGameUI] OnDisconnected → cause={cause}, limpiando estado y cargando MainMenu");
+
         
         ScoreManager.ClearState();
 

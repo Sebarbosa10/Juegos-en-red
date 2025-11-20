@@ -11,7 +11,7 @@ public class MainMenuLauncher : MonoBehaviourPunCallbacks
     public Button connectButton;
 
     [Header("Lobby UI")]
-    public GameObject roomsPanel; 
+    public GameObject roomsPanel;
 
     [Header("Create Room")]
     public TMP_InputField roomNameInput;
@@ -31,6 +31,7 @@ public class MainMenuLauncher : MonoBehaviourPunCallbacks
         connectButton.onClick.AddListener(Connect);
         createRoomButton.onClick.AddListener(CreateRoom);
 
+        
         if (PlayerPrefs.HasKey(NickKey))
             nicknameInput.text = PlayerPrefs.GetString(NickKey);
 
@@ -41,6 +42,14 @@ public class MainMenuLauncher : MonoBehaviourPunCallbacks
         });
 
         if (roomsPanel) roomsPanel.SetActive(false);
+
+        
+        if (PhotonNetwork.IsConnectedAndReady)
+        {
+            
+            PhotonNetwork.JoinLobby(TypedLobby.Default);
+            connectButton.interactable = false;
+        }
     }
 
     void Connect()
@@ -58,7 +67,8 @@ public class MainMenuLauncher : MonoBehaviourPunCallbacks
     public override void OnConnectedToMaster()
     {
         bool ok = PhotonNetwork.JoinLobby(TypedLobby.Default);
-        if (!ok) connectButton.interactable = true;
+        if (!ok)
+            connectButton.interactable = true;
     }
 
     public override void OnJoinedLobby()
@@ -71,7 +81,6 @@ public class MainMenuLauncher : MonoBehaviourPunCallbacks
         if (roomsPanel) roomsPanel.SetActive(false);
     }
 
-    
     private void CreateRoom()
     {
         string rn = roomNameInput != null ? roomNameInput.text.Trim() : "";
@@ -96,7 +105,6 @@ public class MainMenuLauncher : MonoBehaviourPunCallbacks
 
     public override void OnCreateRoomFailed(short returnCode, string message)
     {
-        
         connectButton.interactable = true;
     }
 
@@ -113,7 +121,10 @@ public class MainMenuLauncher : MonoBehaviourPunCallbacks
 
     public override void OnDisconnected(DisconnectCause cause)
     {
+      
         connectButton.interactable = true;
-        if (roomsPanel) roomsPanel.SetActive(false);
+
+        if (roomsPanel)
+            roomsPanel.SetActive(false);
     }
 }
