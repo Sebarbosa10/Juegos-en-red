@@ -8295,7 +8295,7 @@ GameObject:
   - component: {fileID: 65284397}
   - component: {fileID: 65284396}
   - component: {fileID: 65284395}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Cube (5)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -16539,7 +16539,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   blueDoor: {fileID: 2089110258}
   redDoor: {fileID: 0}
-  syncWindow: 0.62
+  syncWindow: 2
 --- !u!114 &165585587
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -48218,7 +48218,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   blueDoor: {fileID: 854905462}
   redDoor: {fileID: 854905462}
-  syncWindow: 0.62
+  syncWindow: 2
 --- !u!114 &463930442
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -64947,7 +64947,7 @@ GameObject:
   - component: {fileID: 633987598}
   - component: {fileID: 633987597}
   - component: {fileID: 633987596}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Cube (5)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
