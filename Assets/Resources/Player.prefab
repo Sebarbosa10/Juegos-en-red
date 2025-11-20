@@ -301,14 +301,15 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 659907106617431138}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 5f290a083e5729445af0c9aabf2f80ce, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  blueMat: {fileID: 2100000, guid: 7a61316133be56941b7cdb57c360c7b0, type: 2}
-  redMat: {fileID: 2100000, guid: a2800aedd50d628488403f88419a0ee8, type: 2}
-  renderersToTint: []
+  blueMat: {fileID: 2100000, guid: d11576533511b4f4a954565811de80a0, type: 2}
+  redMat: {fileID: 2100000, guid: 89089f83a86ada64d8648fcf9b201b4a, type: 2}
+  renderersToTint:
+  - {fileID: 5987048091193067924}
 --- !u!114 &913842864554160270
 MonoBehaviour:
   m_ObjectHideFlags: 0

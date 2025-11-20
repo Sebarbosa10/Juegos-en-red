@@ -8,6 +8,8 @@ public class PlayerWiggle : MonoBehaviour
     private Vector3 _initialLocalPos;
     private bool _isMoving;
 
+    public bool IsMoving => _isMoving;
+
     private void Awake()
     {
         _initialLocalPos = transform.localPosition;
