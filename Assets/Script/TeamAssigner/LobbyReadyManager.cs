@@ -1,25 +1,40 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using UnityEngine;
 using Photon.Pun;
 using Photon.Realtime;
 using PhotonHashtable = ExitGames.Client.Photon.Hashtable;
 
-
 public class LobbyReadyManager : MonoBehaviourPunCallbacks
 {
-    [SerializeField] private int maxPlayers = 4;
-    
+    [SerializeField] private byte maxPlayers = 4;
+    [Header("UI (opcional)")]
     [SerializeField] private TMPro.TMP_Text readyCountText;
 
     private const string ReadyKey = "ready";
     private const string TeamKey = "team";
     private const string MatchStartedKey = "matchStarted";
+    private const string RoundIndexKey = "roundIndex";
     private const string TeamBlue = "Blue";
     private const string TeamRed = "Red";
 
     void Start()
     {
+        // Asegurar que exista roundIndex al empezar
+        if (PhotonNetwork.IsMasterClient && PhotonNetwork.InRoom)
+        {
+            var roomProps = PhotonNetwork.CurrentRoom.CustomProperties;
+            if (roomProps == null || !roomProps.ContainsKey(RoundIndexKey))
+            {
+                var props = new PhotonHashtable
+                {
+                    { RoundIndexKey, 1 },
+                    { MatchStartedKey, false }
+                };
+                PhotonNetwork.CurrentRoom.SetCustomProperties(props);
+                Debug.Log("[LobbyReadyManager] roundIndex inicializado a 1.");
+            }
+        }
+
         UpdateReadyUI();
         TryStartIfAllReady();
     }
@@ -70,9 +85,11 @@ public class LobbyReadyManager : MonoBehaviourPunCallbacks
 
         if (!allReady) return;
 
-        bool alreadyStarted = PhotonNetwork.CurrentRoom.CustomProperties != null &&
-                              PhotonNetwork.CurrentRoom.CustomProperties.ContainsKey(MatchStartedKey) &&
-                              (bool)PhotonNetwork.CurrentRoom.CustomProperties[MatchStartedKey];
+        bool alreadyStarted =
+            PhotonNetwork.CurrentRoom.CustomProperties != null &&
+            PhotonNetwork.CurrentRoom.CustomProperties.ContainsKey(MatchStartedKey) &&
+            (bool)PhotonNetwork.CurrentRoom.CustomProperties[MatchStartedKey];
+
         if (alreadyStarted) return;
 
         var players = PhotonNetwork.PlayerList.OrderBy(p => p.ActorNumber).ToArray();
@@ -83,45 +100,10 @@ public class LobbyReadyManager : MonoBehaviourPunCallbacks
             players[i].SetCustomProperties(props);
         }
 
-        StartCoroutine(WaitTeamsPropsAndStart());
-    }
-
-    private System.Collections.IEnumerator WaitTeamsPropsAndStart()
-    {
-        float t = 0f, timeout = 10f;
-        while (t < timeout)
-        {
-            bool allHaveTeam = PhotonNetwork.PlayerList.All(p =>
-                p.CustomProperties != null &&
-                p.CustomProperties.ContainsKey(TeamKey));
-
-            bool allSpawned = PhotonNetwork.PlayerList.All(p =>
-                p.TagObject is GameObject);
-
-            if (allHaveTeam && allSpawned)
-                break;
-
-            t += Time.deltaTime;
-            yield return null;
-        }
-
-        var cardManager = FindObjectOfType<CardManagerPhoton>();
-        if (cardManager != null)
-        {
-            TeamManager.Instance.RefreshTeams();
-
-            yield return null;
-
-            cardManager.DealCards();
-            Debug.Log("[Lobby] Cartas repartidas a todos los jugadores.");
-        }
-        
-
-        yield return new WaitForSeconds(2f);
-
         PhotonNetwork.CurrentRoom.SetCustomProperties(
             new PhotonHashtable { { MatchStartedKey, true } }
         );
-        
+
+        Debug.Log("[LobbyReadyManager] Todos listos → matchStarted = true (TeamMapSpawner decide puzzle por roundIndex).");
     }
 }

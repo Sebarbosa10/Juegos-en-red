@@ -10,19 +10,24 @@ public class TeamMapSpawner : MonoBehaviourPunCallbacks
 {
     public static TeamMapSpawner Instance;
 
-    
+    [Header("Puzzle 1 Spawns")]
     [SerializeField] private Transform[] puzzle1BlueSpawns;
     [SerializeField] private Transform[] puzzle1RedSpawns;
 
-   
+    [Header("Puzzle 2 Spawns")]
     [SerializeField] private Transform[] puzzle2BlueSpawns;
     [SerializeField] private Transform[] puzzle2RedSpawns;
+
+    [Header("Puzzle 3 Spawns")]
+    [SerializeField] private Transform[] puzzle3BlueSpawns;
+    [SerializeField] private Transform[] puzzle3RedSpawns;
 
     private const string TeamKey = "team";
     private const string TeamBlue = "Blue";
     private const string TeamRed = "Red";
+
     private const string MatchStartedKey = "matchStarted";
-    private const string SecondRoundKey = "secondRound";
+    private const string RoundIndexKey = "roundIndex";
 
     private void Awake()
     {
@@ -31,7 +36,7 @@ public class TeamMapSpawner : MonoBehaviourPunCallbacks
 
     private void Start()
     {
-        
+        // Nada especial aquí, esperamos a que la room diga "matchStarted = true"
     }
 
     public override void OnRoomPropertiesUpdate(PhotonHashtable propertiesThatChanged)
@@ -41,39 +46,37 @@ public class TeamMapSpawner : MonoBehaviourPunCallbacks
         if (propertiesThatChanged.ContainsKey(MatchStartedKey))
         {
             bool matchStarted = (bool)propertiesThatChanged[MatchStartedKey];
-           
 
             if (matchStarted)
             {
+                Debug.Log("[TeamMapSpawner] matchStarted = true → respawnear jugador local en puzzle según roundIndex.");
                 ForceRespawnAtTeamZone();
             }
         }
     }
 
-  
+    /// <summary>
+    /// Lo llamas, por ejemplo, desde un menú de pausa para recolocar al player en su spawn actual.
+    /// </summary>
     public void RespawnLocalPlayerFromPause()
     {
         ForceRespawnAtTeamZone();
     }
-
-   
 
     private void ForceRespawnAtTeamZone()
     {
         string myTeam = GetMyTeam();
         if (string.IsNullOrEmpty(myTeam))
         {
-           
+            Debug.LogWarning("[TeamMapSpawner] No tengo team asignado todavía, no puedo respawnear.");
             return;
         }
 
-        bool secondRound = IsSecondRound();
-        
-
-        Transform spawn = PickSpawnFor(PhotonNetwork.LocalPlayer, myTeam, secondRound);
+        int roundIndex = GetRoundIndex();
+        Transform spawn = PickSpawnFor(PhotonNetwork.LocalPlayer, myTeam, roundIndex);
         if (spawn == null)
         {
-            
+            Debug.LogWarning($"[TeamMapSpawner] No encontré spawn para team={myTeam}, roundIndex={roundIndex}");
             return;
         }
 
@@ -81,19 +84,28 @@ public class TeamMapSpawner : MonoBehaviourPunCallbacks
         {
             myPlayer.transform.position = spawn.position;
             myPlayer.transform.rotation = spawn.rotation;
-            
+            Debug.Log($"[TeamMapSpawner] {PhotonNetwork.NickName} ({myTeam}) respawneado en round={roundIndex}, pos={spawn.position}");
         }
-       
+        else
+        {
+            Debug.LogWarning("[TeamMapSpawner] LocalPlayer.TagObject no es un GameObject. ¿Te acordaste de asignarlo cuando instanciaste el Player?");
+        }
     }
 
-    private bool IsSecondRound()
+    private int GetRoundIndex()
     {
         var roomProps = PhotonNetwork.CurrentRoom?.CustomProperties;
-        if (roomProps != null && roomProps.ContainsKey(SecondRoundKey))
+        if (roomProps != null && roomProps.ContainsKey(RoundIndexKey))
         {
-            return (bool)roomProps[SecondRoundKey];
+            object value = roomProps[RoundIndexKey];
+            if (value is int ri)
+                return ri;
+            if (int.TryParse(value.ToString(), out int parsed))
+                return parsed;
         }
-        return false;
+
+        // Si por lo que sea no está seteado, asumimos Puzzle 1
+        return 1;
     }
 
     private string GetMyTeam()
@@ -103,10 +115,27 @@ public class TeamMapSpawner : MonoBehaviourPunCallbacks
         return PhotonNetwork.LocalPlayer.CustomProperties[TeamKey] as string;
     }
 
-    private Transform PickSpawnFor(PUNPlayer player, string team, bool secondRound)
+    private Transform PickSpawnFor(PUNPlayer player, string team, int roundIndex)
     {
-        Transform[] blueArray = secondRound ? puzzle2BlueSpawns : puzzle1BlueSpawns;
-        Transform[] redArray = secondRound ? puzzle2RedSpawns : puzzle1RedSpawns;
+        Transform[] blueArray = null;
+        Transform[] redArray = null;
+
+        switch (roundIndex)
+        {
+            case 1:
+                blueArray = puzzle1BlueSpawns;
+                redArray = puzzle1RedSpawns;
+                break;
+            case 2:
+                blueArray = puzzle2BlueSpawns;
+                redArray = puzzle2RedSpawns;
+                break;
+            case 3:
+            default:
+                blueArray = puzzle3BlueSpawns;
+                redArray = puzzle3RedSpawns;
+                break;
+        }
 
         var teamPlayers = PhotonNetwork.PlayerList
             .Where(p => p.CustomProperties != null &&
@@ -122,12 +151,11 @@ public class TeamMapSpawner : MonoBehaviourPunCallbacks
 
         if (chosenArray == null || chosenArray.Length == 0)
         {
-            
+            Debug.LogWarning($"[TeamMapSpawner] chosenArray vacío para team={team}, roundIndex={roundIndex}");
             return null;
         }
 
         int spawnIndex = indexInTeam % chosenArray.Length;
-        
         return chosenArray[spawnIndex];
     }
 }

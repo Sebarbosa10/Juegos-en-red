@@ -9,21 +9,22 @@ using PhotonHashtable = ExitGames.Client.Photon.Hashtable;
 
 public class TeamNumpadController : MonoBehaviourPun
 {
-    
+    [Header("Config")]
     [SerializeField] private string teamFilter = "Blue";
     [SerializeField] private string correctCode = "1234";
     [SerializeField] private int maxLength = 4;
     [SerializeField] private bool lockAfterSolve = true;
 
+    [Header("UI")]
     [SerializeField] private TMP_Text displayText;
     [SerializeField] private string hiddenChar = "•";
     [SerializeField] private bool hideDigits = false;
 
-    
+    [Header("Lobby Spawns (zona de lobby)")]
     [SerializeField] private Transform lobbyBlueSpawn;
     [SerializeField] private Transform lobbyRedSpawn;
 
-   
+    [Header("Eventos")]
     public UnityEvent onDigit;
     public UnityEvent onClear;
     public UnityEvent onBackspace;
@@ -37,7 +38,7 @@ public class TeamNumpadController : MonoBehaviourPun
     private const string TeamKey = "team";
     private const string ReadyKey = "ready";
     private const string MatchStartedKey = "matchStarted";
-    private const string SecondRoundKey = "secondRound";
+    private const string RoundIndexKey = "roundIndex";
 
     private void Start()
     {
@@ -130,44 +131,28 @@ public class TeamNumpadController : MonoBehaviourPun
 
             if (PhotonNetwork.IsMasterClient)
             {
-                
+                Debug.Log($"[Numpad] Código correcto ({correctCode}) por {senderTeam}. +1 punto y pasar a Puzzle 2.");
 
-                
                 if (ScoreManager.Instance != null)
-                    ScoreManager.Instance.AddPoint(senderTeam);
+                    ScoreManager.Instance.AddPoint(senderTeam);   // Puzzle 1 → +1 punto
 
-                
                 TeleportAllPlayersToLobby();
-
-                
-                var dp = FindObjectOfType<DisconnectPauseManager>();
-                if (dp != null)
-                {
-                    dp.ResetCardsAndEffects();
-                }
-                else
-                {
-                    Debug.LogWarning("[Numpad] No encontré DisconnectPauseManager para resetear cartas/efectos.");
-                }
-
-                
                 ResetAllReadyFlags();
 
-                
                 var roomProps = new PhotonHashtable
                 {
                     { MatchStartedKey, false },
-                    { SecondRoundKey, true }
+                    { RoundIndexKey, 2 }  // siguiente vez que den Ready → Puzzle 2
                 };
                 PhotonNetwork.CurrentRoom.SetCustomProperties(roomProps);
 
-                Debug.Log("[Numpad] SetCustomProperties → matchStarted=false, secondRound=true");
+                Debug.Log("[Numpad] SetCustomProperties → matchStarted=false, roundIndex=2");
             }
         }
         else
         {
             onWrongCode?.Invoke();
-            
+            Debug.Log($"[Numpad] Código incorrecto ingresado por {senderTeam}. Reset del buffer.");
             _buffer.Clear();
         }
 
@@ -196,7 +181,7 @@ public class TeamNumpadController : MonoBehaviourPun
             }
         }
 
-        
+        Debug.Log("[Numpad] Todos los jugadores teletransportados a la lobby.");
     }
 
     private void ResetAllReadyFlags()
@@ -210,7 +195,7 @@ public class TeamNumpadController : MonoBehaviourPun
             p.SetCustomProperties(props);
         }
 
-        
+        Debug.Log("[Numpad] Flags de Ready reseteados a false para todos.");
     }
 
     private string GetTeamOf(Player p)

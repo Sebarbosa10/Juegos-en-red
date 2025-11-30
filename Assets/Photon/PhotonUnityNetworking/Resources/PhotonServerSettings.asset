@@ -57,6 +57,7 @@ MonoBehaviour:
   - RPC_SolvedAll
   - RPC_Submit
   - RPC_TeleportAll
+  - RPC_ClickTile
   DisableAutoOpenWizard: 1
   ShowSettings: 1
   DevRegionSetOnce: 1

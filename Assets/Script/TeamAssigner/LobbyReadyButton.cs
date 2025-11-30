@@ -3,40 +3,36 @@ using UnityEngine.UI;
 using Photon.Pun;
 using PhotonHashtable = ExitGames.Client.Photon.Hashtable;
 
-
 public class LobbyReadyButton : MonoBehaviourPunCallbacks
 {
-    
     [SerializeField] private Button readyButton;
     [SerializeField] private GameObject readyIndicator;
 
-   
     [SerializeField] private KeyCode readyKey = KeyCode.R;
 
-    private const string ReadyKey = "ready";
+    private const string ReadyKeyProp = "ready";
     private bool isReady = false;
 
     void Start()
     {
-        if (readyButton != null)
-            readyButton.onClick.AddListener(SetReady);
-
-        
+        // Siempre arrancar NO listo al entrar a la lobby
         if (PhotonNetwork.InRoom)
         {
-            var props = new PhotonHashtable { { ReadyKey, false } };
+            var props = new PhotonHashtable { { ReadyKeyProp, false } };
             PhotonNetwork.LocalPlayer.SetCustomProperties(props);
             isReady = false;
         }
         else if (PhotonNetwork.LocalPlayer.CustomProperties != null &&
-                 PhotonNetwork.LocalPlayer.CustomProperties.ContainsKey(ReadyKey))
+                 PhotonNetwork.LocalPlayer.CustomProperties.ContainsKey(ReadyKeyProp))
         {
-            isReady = (bool)PhotonNetwork.LocalPlayer.CustomProperties[ReadyKey];
+            isReady = (bool)PhotonNetwork.LocalPlayer.CustomProperties[ReadyKeyProp];
         }
+
+        if (readyButton != null)
+            readyButton.onClick.AddListener(SetReady);
 
         RefreshUI();
     }
-
 
     void Update()
     {
@@ -51,13 +47,13 @@ public class LobbyReadyButton : MonoBehaviourPunCallbacks
 
     private void SetReady()
     {
-        var props = new PhotonHashtable { { ReadyKey, true } };
+        var props = new PhotonHashtable { { ReadyKeyProp, true } };
         PhotonNetwork.LocalPlayer.SetCustomProperties(props);
 
         isReady = true;
         RefreshUI();
 
-       
+        Debug.Log($"[Lobby] {PhotonNetwork.NickName} está listo (Ready).");
     }
 
     private void RefreshUI()
@@ -69,13 +65,12 @@ public class LobbyReadyButton : MonoBehaviourPunCallbacks
     public override void OnPlayerPropertiesUpdate(Photon.Realtime.Player target, PhotonHashtable changedProps)
     {
         if (changedProps == null) return;
-        if (!changedProps.ContainsKey(ReadyKey)) return;
+        if (!changedProps.ContainsKey(ReadyKeyProp)) return;
 
         if (target.IsLocal)
         {
-            isReady = (bool)changedProps[ReadyKey];
+            isReady = (bool)changedProps[ReadyKeyProp];
             RefreshUI();
         }
     }
-
 }
