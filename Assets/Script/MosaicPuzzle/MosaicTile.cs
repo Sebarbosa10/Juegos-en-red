@@ -32,10 +32,10 @@ public class MosaicTile : MonoBehaviour, IInteractive
             tileRenderer = GetComponent<Renderer>();
         }
 
-        // Guardar el color original
+        
         if (tileRenderer != null)
         {
-            // Usar material instanciado para no afectar otros objetos
+            
             _material = tileRenderer.material;
             _originalColor = _material.color;
             _initialized = true;
@@ -44,7 +44,7 @@ public class MosaicTile : MonoBehaviour, IInteractive
 
     private void Update()
     {
-        // Animación suave de escala
+        
         Vector3 targetScale = _isSelected ? _originalScale * selectedScale : _originalScale;
         transform.localScale = Vector3.Lerp(transform.localScale, targetScale, Time.deltaTime * scaleAnimationSpeed);
     }
@@ -67,7 +67,7 @@ public class MosaicTile : MonoBehaviour, IInteractive
         if (!useColorFeedback) return;
         if (!_initialized || _material == null) return;
 
-        // Cambiar color solo si está habilitado
+        
         if (selected)
         {
             _material.color = selectedColor;
@@ -92,7 +92,7 @@ public class MosaicTile : MonoBehaviour, IInteractive
 
     private void OnDestroy()
     {
-        // Limpiar material instanciado
+        
         if (_material != null)
         {
             Destroy(_material);

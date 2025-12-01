@@ -11,8 +11,8 @@ public class ScoreManager : MonoBehaviourPunCallbacks, IOnEventCallback
     private const byte ScoreEventCode = 1;
     private const byte WinEventCode = 2;
 
-    [Header("Config")]
-    [SerializeField] private int maxScore = 3;         
+    
+    [SerializeField] private int totalRounds = 3;
     [SerializeField] private string endGameSceneName = "EndGame";
 
     private readonly PhotonHashtable scores = new PhotonHashtable();
@@ -22,6 +22,7 @@ public class ScoreManager : MonoBehaviourPunCallbacks, IOnEventCallback
     public event System.Action<int, int> OnScoreUpdated;
 
     private const string RoundIndexKey = "roundIndex";
+    private const string PuzzlesCompletedKey = "puzzlesCompletedThisRound";
 
     private void Awake()
     {
@@ -72,7 +73,6 @@ public class ScoreManager : MonoBehaviourPunCallbacks, IOnEventCallback
 
     public override void OnLeftRoom()
     {
-        
         ClearState();
     }
 
@@ -97,7 +97,6 @@ public class ScoreManager : MonoBehaviourPunCallbacks, IOnEventCallback
 
             if (!scores.ContainsKey(team))
             {
-                Debug.LogWarning($"[ScoreManager] Equipo {team} no estaba en la tabla, inicializando en 0.");
                 scores[team] = 0;
             }
 
@@ -141,35 +140,72 @@ public class ScoreManager : MonoBehaviourPunCallbacks, IOnEventCallback
                 return parsed;
         }
 
-        return 1; 
+        return 1;
     }
 
     private void CheckWinCondition()
     {
         int roundIndex = GetRoundIndex();
-        if (roundIndex < 3)
+        int blueScore = scores.ContainsKey("Blue") ? (int)scores["Blue"] : 0;
+        int redScore = scores.ContainsKey("Red") ? (int)scores["Red"] : 0;
+
+        Debug.Log($"[ScoreManager] CheckWin: Round={roundIndex}, Blue={blueScore}, Red={redScore}");
+
+        
+        int roundsRemaining = totalRounds - roundIndex;
+
+        
+        int pointsNeededToWin = (totalRounds / 2) + 1; 
+
+        if (blueScore >= pointsNeededToWin)
         {
-            
-            Debug.Log($"[ScoreManager] roundIndex={roundIndex}, no se evalúa victoria todavía.");
+            Debug.Log($"[ScoreManager] Blue gana con {blueScore} puntos (necesitaba {pointsNeededToWin})");
+            if (PhotonNetwork.IsMasterClient)
+            {
+                RaiseWinEvent("Blue");
+            }
             return;
         }
 
-        foreach (var key in scores.Keys)
+        if (redScore >= pointsNeededToWin)
         {
-            string team = key as string;
-            int score = (int)scores[key];
-
-            Debug.Log($"[ScoreManager] Chequeando condición: {team} tiene {score}/{maxScore} (round={roundIndex})");
-
-            if (score >= maxScore)
+            Debug.Log($"[ScoreManager] Red gana con {redScore} puntos (necesitaba {pointsNeededToWin})");
+            if (PhotonNetwork.IsMasterClient)
             {
-                Debug.Log($"[ScoreManager] Equipo {team} alcanzó el puntaje máximo → WIN (round={roundIndex})");
-                if (PhotonNetwork.IsMasterClient)
-                {
-                    RaiseWinEvent(team);
-                }
-                break;
+                RaiseWinEvent("Red");
             }
+            return;
+        }
+
+        
+        if (roundIndex >= totalRounds)
+        {
+            string winner = DetermineWinner(blueScore, redScore);
+            Debug.Log($"[ScoreManager] Última ronda completada. Ganador: {winner}");
+
+            if (PhotonNetwork.IsMasterClient && !string.IsNullOrEmpty(winner))
+            {
+                RaiseWinEvent(winner);
+            }
+        }
+    }
+
+   
+    private string DetermineWinner(int blueScore, int redScore)
+    {
+        if (blueScore > redScore)
+        {
+            return "Blue";
+        }
+        else if (redScore > blueScore)
+        {
+            return "Red";
+        }
+        else
+        {
+            
+            Debug.Log("[ScoreManager] ¡EMPATE! Declarando Blue como ganador por defecto.");
+            return "Blue"; 
         }
     }
 
@@ -183,4 +219,13 @@ public class ScoreManager : MonoBehaviourPunCallbacks, IOnEventCallback
             SendOptions.SendReliable
         );
     }
+
+    
+    public int GetScore(string team)
+    {
+        return scores.ContainsKey(team) ? (int)scores[team] : 0;
+    }
+
+    public int GetBlueScore() => GetScore("Blue");
+    public int GetRedScore() => GetScore("Red");
 }

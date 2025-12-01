@@ -13,22 +13,22 @@ MonoBehaviour:
   m_Name: CardDataBase
   m_EditorClassIdentifier: 
   allCards:
-  - icon: {fileID: 21300000, guid: 5ff8a9f27978de9408533070d2d24f4e, type: 3}
+  - icon: {fileID: 21300000, guid: 8b70c9f00149bd941bb95587898b032d, type: 3}
     id: 0
     cardName: Ice Born
     description: 
     cardEffectType: 0
-  - icon: {fileID: 21300000, guid: 995de3fadcc77ea4b852b0f4645516fa, type: 3}
+  - icon: {fileID: 21300000, guid: 9f0c945e343652e44b967a224e4ba99e, type: 3}
     id: 1
     cardName: DPI Bot
     description: 
     cardEffectType: 1
-  - icon: {fileID: 21300000, guid: 7ece69dfcd9f84849b1ae04e26bb68b3, type: 3}
+  - icon: {fileID: 21300000, guid: ac87c56c1fe403845adc86afb48d2933, type: 3}
     id: 2
     cardName: Get Shocked
     description: 
     cardEffectType: 2
-  - icon: {fileID: 21300000, guid: afc4d68de12036640bcf2c5881a8acc1, type: 3}
+  - icon: {fileID: 21300000, guid: 0a7ea75fc472b9b4284d209f600e6407, type: 3}
     id: 3
     cardName: Go to the Gym
     description: 

@@ -4,22 +4,22 @@ using Photon.Pun;
 
 public class MosaicPuzzleController : MonoBehaviourPun, IPunObservable
 {
-    [Header("Grid Settings")]
+    
     [SerializeField] private int rows = 3;
     [SerializeField] private int cols = 3;
 
-    [Header("Tiles - Ordenar de arriba a abajo, izquierda a derecha (0,1,2,3,4,5,6,7,8)")]
+    
     [SerializeField] private MosaicTile[] tiles;
 
-    [Header("Animation Settings")]
+    
     [SerializeField] private float animationDuration = 0.3f;
     [SerializeField] private AnimationCurve movementCurve = AnimationCurve.EaseInOut(0, 0, 1, 1);
     [SerializeField] private float arcHeight = 0.3f;
 
-    [Header("Team Filter")]
+    
     [SerializeField] private string teamFilter = "Blue";
 
-    [Header("Events")]
+    
     [SerializeField] private UnityEngine.Events.UnityEvent onSolved;
     [SerializeField] private UnityEngine.Events.UnityEvent onTileSwapped;
 
@@ -137,13 +137,13 @@ public class MosaicPuzzleController : MonoBehaviourPun, IPunObservable
                 int tileA = _selectedTileIndex;
                 int tileB = tileIndex;
 
-                // Intercambiar en el array de slots
+                
                 SwapTilesInSlots(tileA, tileB);
 
-                // Copiar el estado actual de slots para enviarlo
+                
                 int[] currentSlots = (int[])_slots.Clone();
 
-                // Animar y luego verificar si está resuelto
+                
                 photonView.RPC(nameof(RPC_AnimateSwapAndCheck), RpcTarget.All, tileA, tileB, currentSlots);
             }
             else
@@ -196,7 +196,7 @@ public class MosaicPuzzleController : MonoBehaviourPun, IPunObservable
     [PunRPC]
     private void RPC_AnimateSwapAndCheck(int tileIndexA, int tileIndexB, int[] newSlots)
     {
-        // Actualizar slots en todos los clientes
+        
         _slots = newSlots;
 
         StartCoroutine(AnimateSwapAndCheckCoroutine(tileIndexA, tileIndexB));
@@ -206,7 +206,7 @@ public class MosaicPuzzleController : MonoBehaviourPun, IPunObservable
     {
         _isAnimating = true;
 
-        // Deseleccionar todas las tiles
+       
         foreach (var tile in tiles)
         {
             if (tile != null)
@@ -249,7 +249,7 @@ public class MosaicPuzzleController : MonoBehaviourPun, IPunObservable
             yield return null;
         }
 
-        // Posición final exacta
+        
         tileA.transform.position = endPosA;
         tileB.transform.position = endPosB;
 
@@ -257,8 +257,7 @@ public class MosaicPuzzleController : MonoBehaviourPun, IPunObservable
 
         onTileSwapped?.Invoke();
 
-        // VERIFICAR SI ESTÁ RESUELTO DESPUÉS DE LA ANIMACIÓN
-        // Solo el MasterClient verifica y otorga puntos
+        
         if (PhotonNetwork.IsMasterClient)
         {
             CheckSolvedAndAwardPoint();
@@ -270,7 +269,7 @@ public class MosaicPuzzleController : MonoBehaviourPun, IPunObservable
         if (_slots == null) return;
         if (_solved) return;
 
-        // Verificar si está resuelto
+        
         for (int i = 0; i < _slots.Length; i++)
         {
             if (_slots[i] != i)
@@ -280,14 +279,13 @@ public class MosaicPuzzleController : MonoBehaviourPun, IPunObservable
             }
         }
 
-        // ¡ESTÁ RESUELTO!
+        
         _solved = true;
         Debug.Log("[MosaicPuzzle] ========== ¡¡¡PUZZLE RESUELTO!!! ==========");
 
-        // Notificar a todos los clientes
         photonView.RPC(nameof(RPC_PuzzleSolved), RpcTarget.All);
 
-        // Dar el punto al equipo
+        
         if (ScoreManager.Instance != null)
         {
             string team = string.IsNullOrEmpty(teamFilter) ? GetLocalTeam() : teamFilter;

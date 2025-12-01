@@ -3,6 +3,7 @@ using Photon.Pun;
 using Photon.Realtime;
 using System.Collections.Generic;
 using System.Linq;
+using PhotonHashtable = ExitGames.Client.Photon.Hashtable;
 
 public class TeamManager : MonoBehaviourPunCallbacks
 {
@@ -17,6 +18,7 @@ public class TeamManager : MonoBehaviourPunCallbacks
         {
             Instance = this;
             DontDestroyOnLoad(gameObject);
+            Debug.Log("[TeamManager] Instancia creada");
         }
         else
         {
@@ -24,26 +26,59 @@ public class TeamManager : MonoBehaviourPunCallbacks
         }
     }
 
+    // Refrescar cuando cambian las propiedades de un jugador
+    public override void OnPlayerPropertiesUpdate(Player targetPlayer, PhotonHashtable changedProps)
+    {
+        if (changedProps.ContainsKey("team"))
+        {
+            Debug.Log($"[TeamManager] {targetPlayer.NickName} cambió de equipo, refrescando...");
+            RefreshTeams();
+        }
+    }
+
     public void RefreshTeams()
     {
-        blueTeam = PhotonNetwork.PlayerList
-            .Where(p => p.CustomProperties.ContainsKey("team") && (string)p.CustomProperties["team"] == "Blue")
-            .OrderBy(p => p.ActorNumber)
-            .ToList();
+        Debug.Log("[TeamManager] ========== RefreshTeams() ==========");
 
-        redTeam = PhotonNetwork.PlayerList
-            .Where(p => p.CustomProperties.ContainsKey("team") && (string)p.CustomProperties["team"] == "Red")
-            .OrderBy(p => p.ActorNumber)
-            .ToList();
+        blueTeam.Clear();
+        redTeam.Clear();
 
-        Debug.Log($"[TeamManager] Blue: {blueTeam.Count}, Red: {redTeam.Count}");
+        foreach (Player p in PhotonNetwork.PlayerList)
+        {
+            if (p.CustomProperties != null && p.CustomProperties.ContainsKey("team"))
+            {
+                string team = (string)p.CustomProperties["team"];
+                Debug.Log($"[TeamManager] {p.NickName} (Actor {p.ActorNumber}) -> Equipo: {team}");
+
+                if (team == "Blue")
+                    blueTeam.Add(p);
+                else if (team == "Red")
+                    redTeam.Add(p);
+            }
+            else
+            {
+                Debug.LogWarning($"[TeamManager] {p.NickName} NO tiene equipo asignado!");
+            }
+        }
+
+        blueTeam = blueTeam.OrderBy(p => p.ActorNumber).ToList();
+        redTeam = redTeam.OrderBy(p => p.ActorNumber).ToList();
+
+        Debug.Log($"[TeamManager] Equipo Blue ({blueTeam.Count}): {string.Join(", ", blueTeam.Select(p => p.NickName))}");
+        Debug.Log($"[TeamManager] Equipo Red ({redTeam.Count}): {string.Join(", ", redTeam.Select(p => p.NickName))}");
     }
 
     public Player GetRival(Player player)
     {
+        if (player == null)
+        {
+            Debug.LogError("[TeamManager] GetRival: player es NULL!");
+            return null;
+        }
+
         if (!player.CustomProperties.ContainsKey("team"))
         {
-            Debug.LogWarning("[TeamManager] Player has no team assigned.");
+            Debug.LogWarning($"[TeamManager] GetRival: {player.NickName} no tiene equipo");
             return null;
         }
 
@@ -52,16 +87,23 @@ public class TeamManager : MonoBehaviourPunCallbacks
         if (team == "Blue")
         {
             int index = blueTeam.IndexOf(player);
-            return (index >= 0 && index < redTeam.Count) ? redTeam[index] : null;
+            if (index >= 0 && index < redTeam.Count)
+            {
+                return redTeam[index];
+            }
         }
         else if (team == "Red")
         {
             int index = redTeam.IndexOf(player);
-            return (index >= 0 && index < blueTeam.Count) ? blueTeam[index] : null;
+            if (index >= 0 && index < blueTeam.Count)
+            {
+                return blueTeam[index];
+            }
         }
 
+        Debug.LogWarning($"[TeamManager] No se encontró rival para {player.NickName}");
         return null;
     }
-
 }
+
 

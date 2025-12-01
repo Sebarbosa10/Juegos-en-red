@@ -63,6 +63,8 @@ MonoBehaviour:
   - RPC_TileDeselected
   - RPC_TileSelected
   - RPC_AnimateSwapAndCheck
+  - RPC_PlayerReachedGoal
+  - RPC_PuzzleCompleted
   DisableAutoOpenWizard: 1
   ShowSettings: 1
   DevRegionSetOnce: 1

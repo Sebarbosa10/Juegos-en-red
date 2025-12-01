@@ -37996,8 +37996,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 0.5}
   m_AnchorMax: {x: 1, y: 0.5}
-  m_AnchoredPosition: {x: -192, y: -117}
-  m_SizeDelta: {x: 183.42, y: 252.5538}
+  m_AnchoredPosition: {x: -959.97, y: 0.000015259}
+  m_SizeDelta: {x: 1919.9, y: 1080}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &355444147
 GameObject:
@@ -46850,6 +46850,7 @@ GameObject:
   - component: {fileID: 421238917}
   - component: {fileID: 421238919}
   - component: {fileID: 421238918}
+  - component: {fileID: 421238920}
   m_Layer: 0
   m_Name: WIn (1)
   m_TagString: Untagged
@@ -46865,7 +46866,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 421238916}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -23.76, y: 2.01, z: -77.56}
+  m_LocalPosition: {x: 16.15, y: 2.01, z: -115.43}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -46884,8 +46885,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f5b3c2b239679d949a3226bfc7a6684c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  lobbyBlueSpawn: {fileID: 0}
-  lobbyRedSpawn: {fileID: 0}
+  lobbyBlueSpawn: {fileID: 56397925}
+  lobbyRedSpawn: {fileID: 383266423}
+  nextRoundIndex: 3
 --- !u!65 &421238919
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -46899,6 +46901,28 @@ BoxCollider:
   serializedVersion: 2
   m_Size: {x: 3.1806335, y: 2.720342, z: 6.44281}
   m_Center: {x: -0.45906067, y: 0.86017096, z: -0.15579224}
+--- !u!114 &421238920
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 421238916}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aa584fbee541324448dd18d8409c7a41, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ObservedComponentsFoldoutOpen: 1
+  Group: 0
+  prefixField: -1
+  Synchronization: 3
+  OwnershipTransfer: 0
+  observableSearch: 2
+  ObservedComponents: []
+  sceneViewId: 74
+  InstantiationId: 0
+  isRuntimeInstantiated: 0
 --- !u!1 &421343694
 GameObject:
   m_ObjectHideFlags: 0
@@ -53509,7 +53533,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6382091c4101e954e9dcfa9f77654c91, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  maxScore: 2
+  totalRounds: 3
   endGameSceneName: EndGame
 --- !u!4 &494279725
 Transform:
@@ -162995,6 +163019,7 @@ GameObject:
   - component: {fileID: 1554968792}
   - component: {fileID: 1554968794}
   - component: {fileID: 1554968793}
+  - component: {fileID: 1554968795}
   m_Layer: 0
   m_Name: WIn
   m_TagString: Untagged
@@ -163031,6 +163056,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   lobbyBlueSpawn: {fileID: 1104910976}
   lobbyRedSpawn: {fileID: 842627991}
+  nextRoundIndex: 3
 --- !u!65 &1554968794
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -163044,6 +163070,28 @@ BoxCollider:
   serializedVersion: 2
   m_Size: {x: 3.1806335, y: 2.720342, z: 6.44281}
   m_Center: {x: -0.45906067, y: 0.86017096, z: -0.15579224}
+--- !u!114 &1554968795
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1554968791}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aa584fbee541324448dd18d8409c7a41, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ObservedComponentsFoldoutOpen: 1
+  Group: 0
+  prefixField: -1
+  Synchronization: 3
+  OwnershipTransfer: 0
+  observableSearch: 2
+  ObservedComponents: []
+  sceneViewId: 72
+  InstantiationId: 0
+  isRuntimeInstantiated: 0
 --- !u!1 &1558351018
 GameObject:
   m_ObjectHideFlags: 0
@@ -173257,7 +173305,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1641782981}
   m_LocalRotation: {x: -0, y: 0.70710576, z: -0, w: 0.70710784}
-  m_LocalPosition: {x: 6.65, y: 6.769, z: -2.79}
+  m_LocalPosition: {x: 6.65, y: 6.769, z: -9.191}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -214289,6 +214337,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   maxPlayers: 4
   readyCountText: {fileID: 421343696}
+  cardManager: {fileID: 0}
 --- !u!114 &2065874069
 MonoBehaviour:
   m_ObjectHideFlags: 0

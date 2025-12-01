@@ -1,4 +1,5 @@
 ﻿using System.Linq;
+using System.Collections;
 using UnityEngine;
 using Photon.Pun;
 using Photon.Realtime;
@@ -7,8 +8,12 @@ using PhotonHashtable = ExitGames.Client.Photon.Hashtable;
 public class LobbyReadyManager : MonoBehaviourPunCallbacks
 {
     [SerializeField] private byte maxPlayers = 4;
+
     [Header("UI (opcional)")]
     [SerializeField] private TMPro.TMP_Text readyCountText;
+
+    [Header("Card Manager")]
+    [SerializeField] private CardManagerPhoton cardManager;
 
     private const string ReadyKey = "ready";
     private const string TeamKey = "team";
@@ -19,7 +24,6 @@ public class LobbyReadyManager : MonoBehaviourPunCallbacks
 
     void Start()
     {
-        // Asegurar que exista roundIndex al empezar
         if (PhotonNetwork.IsMasterClient && PhotonNetwork.InRoom)
         {
             var roomProps = PhotonNetwork.CurrentRoom.CustomProperties;
@@ -33,6 +37,11 @@ public class LobbyReadyManager : MonoBehaviourPunCallbacks
                 PhotonNetwork.CurrentRoom.SetCustomProperties(props);
                 Debug.Log("[LobbyReadyManager] roundIndex inicializado a 1.");
             }
+        }
+
+        if (cardManager == null)
+        {
+            cardManager = FindObjectOfType<CardManagerPhoton>();
         }
 
         UpdateReadyUI();
@@ -92,18 +101,63 @@ public class LobbyReadyManager : MonoBehaviourPunCallbacks
 
         if (alreadyStarted) return;
 
+        Debug.Log("[LobbyReadyManager] ¡Todos listos! Iniciando partida...");
+
+        
         var players = PhotonNetwork.PlayerList.OrderBy(p => p.ActorNumber).ToArray();
         for (int i = 0; i < players.Length; i++)
         {
-            string team = (i < 2) ? TeamBlue : TeamRed;
-            var props = new PhotonHashtable { { TeamKey, team } };
-            players[i].SetCustomProperties(props);
+            
+            if (!players[i].CustomProperties.ContainsKey(TeamKey) ||
+                string.IsNullOrEmpty(players[i].CustomProperties[TeamKey] as string))
+            {
+                string team = (i < 2) ? TeamBlue : TeamRed;
+                var props = new PhotonHashtable { { TeamKey, team } };
+                players[i].SetCustomProperties(props);
+                Debug.Log($"[LobbyReadyManager] {players[i].NickName} asignado a {team}");
+            }
         }
 
+        
         PhotonNetwork.CurrentRoom.SetCustomProperties(
             new PhotonHashtable { { MatchStartedKey, true } }
         );
 
-        Debug.Log("[LobbyReadyManager] Todos listos → matchStarted = true (TeamMapSpawner decide puzzle por roundIndex).");
+        Debug.Log("[LobbyReadyManager] matchStarted = true");
+
+       
+        StartCoroutine(DealCardsAfterDelay());
+    }
+
+    private IEnumerator DealCardsAfterDelay()
+    {
+        
+        yield return new WaitForSeconds(0.5f);
+
+        
+        if (TeamManager.Instance != null)
+        {
+            TeamManager.Instance.RefreshTeams();
+            Debug.Log("[LobbyReadyManager] TeamManager.RefreshTeams() llamado");
+        }
+        else
+        {
+            Debug.LogError("[LobbyReadyManager] TeamManager.Instance es NULL!");
+            yield break;
+        }
+
+        
+        yield return new WaitForSeconds(0.3f);
+
+        
+        if (cardManager != null)
+        {
+            Debug.Log("[LobbyReadyManager] Repartiendo cartas...");
+            cardManager.DealCards();
+        }
+        else
+        {
+            Debug.LogError("[LobbyReadyManager] cardManager es NULL!");
+        }
     }
 }
