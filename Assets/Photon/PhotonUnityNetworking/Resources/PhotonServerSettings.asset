@@ -58,6 +58,11 @@ MonoBehaviour:
   - RPC_Submit
   - RPC_TeleportAll
   - RPC_ClickTile
+  - RPC_AnimateSwap
+  - RPC_PuzzleSolved
+  - RPC_TileDeselected
+  - RPC_TileSelected
+  - RPC_AnimateSwapAndCheck
   DisableAutoOpenWizard: 1
   ShowSettings: 1
   DevRegionSetOnce: 1
