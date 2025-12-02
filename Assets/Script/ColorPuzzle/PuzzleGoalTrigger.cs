@@ -4,15 +4,16 @@ using Photon.Realtime;
 using ExitGames.Client.Photon;
 using PhotonHashtable = ExitGames.Client.Photon.Hashtable;
 
-public class PuzzleGoalTrigger : MonoBehaviourPunCallbacks, IOnEventCallback
+public class PuzzleGoalTrigger : MonoBehaviourPunCallbacks
 {
-    
+    [Header("Lobby Spawns")]
     [SerializeField] private Transform lobbyBlueSpawn;
     [SerializeField] private Transform lobbyRedSpawn;
 
+    [Header("Settings")]
     [SerializeField] private int nextRoundIndex = 3;
 
-    private bool alreadyScored = false;
+    private bool alreadyTriggered = false;
 
     private const string TeamKey = "team";
     private const string ReadyKey = "ready";
@@ -20,12 +21,9 @@ public class PuzzleGoalTrigger : MonoBehaviourPunCallbacks, IOnEventCallback
     private const string RoundIndexKey = "roundIndex";
     private const string CardKey = "cardID";
 
-    private const byte PuzzleGoalEventCode = 50;
-
-
     private void OnTriggerEnter(Collider other)
     {
-        if (alreadyScored) return;
+        if (alreadyTriggered) return;
 
         var pv = other.GetComponentInParent<PhotonView>();
         if (pv == null) return;
@@ -34,50 +32,96 @@ public class PuzzleGoalTrigger : MonoBehaviourPunCallbacks, IOnEventCallback
         string team = GetTeamOf(pv.Owner);
         if (string.IsNullOrEmpty(team)) return;
 
-        Debug.Log($"[PuzzleGoalTrigger] Jugador {pv.Owner.NickName} (Equipo {team}) llegó a la meta");
+        // Bloquear inmediatamente para este cliente
+        alreadyTriggered = true;
 
-        alreadyScored = true;
+        Debug.Log($"[PuzzleGoalTrigger] {pv.Owner.NickName} ({team}) llegó a la meta");
 
-        object[] content = new object[] { team, nextRoundIndex };
-        RaiseEventOptions options = new RaiseEventOptions { Receivers = ReceiverGroup.All };
-        PhotonNetwork.RaiseEvent(PuzzleGoalEventCode, content, options, SendOptions.SendReliable);
-    }
-
-    public void OnEvent(EventData photonEvent)
-    {
-        if (photonEvent.Code != PuzzleGoalEventCode) return;
-
-        object[] data = (object[])photonEvent.CustomData;
-        string team = (string)data[0];
-        int roundIndex = (int)data[1];
-
-        Debug.Log($"[PuzzleGoalTrigger] Evento recibido: Equipo {team} completó puzzle");
-
-        alreadyScored = true;
-
-        ResetLocalPlayerCardEffects();
-
+        // Si SOY el MasterClient, proceso directamente
         if (PhotonNetwork.IsMasterClient)
         {
-            if (ScoreManager.Instance != null)
-            {
-                ScoreManager.Instance.AddPoint(team);
-                Debug.Log($"[PuzzleGoalTrigger] Equipo {team} +1 punto");
-            }
-
-            TeleportAllPlayersToLobby();
-            ResetAllReadyFlags();
-            ResetAllCards();
-
+            ProcessGoalReached(team);
+        }
+        else
+        {
+            // Si NO soy MasterClient, le aviso al MasterClient via RPC
+            // Pero necesitamos un PhotonView para esto...
+            // Usamos propiedades de room como alternativa
             var props = new PhotonHashtable
             {
-                { MatchStartedKey, false },
-                { RoundIndexKey, roundIndex }
+                { "goalReachedBy", team },
+                { "goalTimestamp", PhotonNetwork.Time }
             };
             PhotonNetwork.CurrentRoom.SetCustomProperties(props);
-
-            Debug.Log($"[PuzzleGoalTrigger] matchStarted=false, roundIndex={roundIndex}");
         }
+    }
+
+    public override void OnRoomPropertiesUpdate(PhotonHashtable propertiesThatChanged)
+    {
+        // Resetear cuando empieza nueva ronda
+        if (propertiesThatChanged.ContainsKey(MatchStartedKey))
+        {
+            bool matchStarted = (bool)propertiesThatChanged[MatchStartedKey];
+            if (matchStarted)
+            {
+                alreadyTriggered = false;
+                Debug.Log("[PuzzleGoalTrigger] Nueva ronda, trigger reseteado");
+            }
+        }
+
+        // MasterClient procesa cuando alguien llega a la meta
+        if (PhotonNetwork.IsMasterClient && propertiesThatChanged.ContainsKey("goalReachedBy"))
+        {
+            if (alreadyTriggered) return; // Ya procesado
+
+            string team = propertiesThatChanged["goalReachedBy"] as string;
+            if (!string.IsNullOrEmpty(team))
+            {
+                alreadyTriggered = true;
+                ProcessGoalReached(team);
+            }
+        }
+    }
+
+    private void ProcessGoalReached(string team)
+    {
+        Debug.Log($"[PuzzleGoalTrigger] Procesando victoria de {team}");
+
+        // 1. Agregar punto
+        if (ScoreManager.Instance != null)
+        {
+            ScoreManager.Instance.AddPoint(team);
+            Debug.Log($"[PuzzleGoalTrigger] {team} +1 punto");
+        }
+
+        // 2. Resetear cartas
+        ResetAllCards();
+
+        // 3. Resetear ready flags
+        ResetAllReadyFlags();
+
+        // 4. Teletransportar a lobby
+        TeleportAllPlayersToLobby();
+
+        // 5. Actualizar propiedades de room (esto notifica a todos)
+        var props = new PhotonHashtable
+        {
+            { MatchStartedKey, false },
+            { RoundIndexKey, nextRoundIndex },
+            { "goalReachedBy", null } // Limpiar
+        };
+        PhotonNetwork.CurrentRoom.SetCustomProperties(props);
+
+        Debug.Log($"[PuzzleGoalTrigger] matchStarted=false, roundIndex={nextRoundIndex}");
+
+        // 6. Resetear efectos locales del MasterClient
+        ResetLocalPlayerCardEffects();
+    }
+
+    // Este método se llama en todos los clientes cuando matchStarted cambia a false
+    private void OnMatchEnded()
+    {
+        ResetLocalPlayerCardEffects();
     }
 
     private void ResetLocalPlayerCardEffects()
@@ -88,7 +132,6 @@ public class PuzzleGoalTrigger : MonoBehaviourPunCallbacks, IOnEventCallback
             if (effectManager != null)
             {
                 effectManager.ResetAllEffects();
-                Debug.Log("[PuzzleGoalTrigger] Efectos de carta reseteados");
             }
         }
 
@@ -100,8 +143,6 @@ public class PuzzleGoalTrigger : MonoBehaviourPunCallbacks, IOnEventCallback
 
     private void ResetAllCards()
     {
-        Debug.Log("[PuzzleGoalTrigger] Reseteando cartas de todos...");
-
         foreach (var p in PhotonNetwork.PlayerList)
         {
             var props = new PhotonHashtable
@@ -111,6 +152,7 @@ public class PuzzleGoalTrigger : MonoBehaviourPunCallbacks, IOnEventCallback
             };
             p.SetCustomProperties(props);
         }
+        Debug.Log("[PuzzleGoalTrigger] Cartas reseteadas");
     }
 
     private void TeleportAllPlayersToLobby()
@@ -129,8 +171,7 @@ public class PuzzleGoalTrigger : MonoBehaviourPunCallbacks, IOnEventCallback
                 go.transform.rotation = targetSpawn.rotation;
             }
         }
-
-        Debug.Log("[PuzzleGoalTrigger] Todos teletransportados a lobby");
+        Debug.Log("[PuzzleGoalTrigger] Jugadores teletransportados");
     }
 
     private void ResetAllReadyFlags()
@@ -140,7 +181,6 @@ public class PuzzleGoalTrigger : MonoBehaviourPunCallbacks, IOnEventCallback
             var props = new PhotonHashtable { { ReadyKey, false } };
             p.SetCustomProperties(props);
         }
-
         Debug.Log("[PuzzleGoalTrigger] Ready flags reseteados");
     }
 
@@ -150,18 +190,5 @@ public class PuzzleGoalTrigger : MonoBehaviourPunCallbacks, IOnEventCallback
         return p.CustomProperties.TryGetValue(TeamKey, out object value)
             ? (value as string ?? "")
             : "";
-    }
-
-    public override void OnRoomPropertiesUpdate(PhotonHashtable propertiesThatChanged)
-    {
-        if (propertiesThatChanged.ContainsKey(MatchStartedKey))
-        {
-            bool matchStarted = (bool)propertiesThatChanged[MatchStartedKey];
-            if (matchStarted)
-            {
-                alreadyScored = false;
-                Debug.Log("[PuzzleGoalTrigger] Nueva ronda, alreadyScored reseteado");
-            }
-        }
     }
 }

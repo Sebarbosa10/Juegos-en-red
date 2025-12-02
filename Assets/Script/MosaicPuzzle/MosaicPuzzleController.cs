@@ -269,7 +269,6 @@ public class MosaicPuzzleController : MonoBehaviourPun, IPunObservable
         if (_slots == null) return;
         if (_solved) return;
 
-        
         for (int i = 0; i < _slots.Length; i++)
         {
             if (_slots[i] != i)
@@ -279,13 +278,12 @@ public class MosaicPuzzleController : MonoBehaviourPun, IPunObservable
             }
         }
 
-        
         _solved = true;
         Debug.Log("[MosaicPuzzle] ========== ¡¡¡PUZZLE RESUELTO!!! ==========");
 
         photonView.RPC(nameof(RPC_PuzzleSolved), RpcTarget.All);
 
-        
+        // Dar el punto - ScoreManager se encarga de verificar victoria
         if (ScoreManager.Instance != null)
         {
             string team = string.IsNullOrEmpty(teamFilter) ? GetLocalTeam() : teamFilter;
@@ -296,7 +294,7 @@ public class MosaicPuzzleController : MonoBehaviourPun, IPunObservable
             }
             else
             {
-                Debug.LogError("[MosaicPuzzle] No se pudo determinar el equipo para dar el punto");
+                Debug.LogError("[MosaicPuzzle] No se pudo determinar el equipo!");
             }
         }
         else
