@@ -273,7 +273,6 @@ public class MosaicPuzzleController : MonoBehaviourPun, IPunObservable
         {
             if (_slots[i] != i)
             {
-                Debug.Log($"[MosaicPuzzle] No resuelto: slot {i} tiene tile {_slots[i]}");
                 return;
             }
         }
@@ -283,7 +282,7 @@ public class MosaicPuzzleController : MonoBehaviourPun, IPunObservable
 
         photonView.RPC(nameof(RPC_PuzzleSolved), RpcTarget.All);
 
-        // Dar el punto - ScoreManager se encarga de verificar victoria
+        // Dar el punto
         if (ScoreManager.Instance != null)
         {
             string team = string.IsNullOrEmpty(teamFilter) ? GetLocalTeam() : teamFilter;
@@ -291,19 +290,32 @@ public class MosaicPuzzleController : MonoBehaviourPun, IPunObservable
             {
                 Debug.Log($"[MosaicPuzzle] Otorgando punto al equipo: {team}");
                 ScoreManager.Instance.AddPoint(team);
-            }
-            else
-            {
-                Debug.LogError("[MosaicPuzzle] No se pudo determinar el equipo!");
+                
             }
         }
-        else
+
+        
+        ResetLocalPlayerCardEffects();
+    }
+
+    private void ResetLocalPlayerCardEffects()
+    {
+        if (PhotonNetwork.LocalPlayer.TagObject is GameObject playerObj)
         {
-            Debug.LogError("[MosaicPuzzle] ScoreManager.Instance es NULL!");
+            var effectManager = playerObj.GetComponent<CardEffectManager>();
+            if (effectManager != null)
+            {
+                effectManager.ResetAllEffects();
+            }
+        }
+
+        if (CardEffectUI.Instance != null)
+        {
+            CardEffectUI.Instance.Clear();
         }
     }
 
-    [PunRPC]
+
     private void RPC_PuzzleSolved()
     {
         _solved = true;

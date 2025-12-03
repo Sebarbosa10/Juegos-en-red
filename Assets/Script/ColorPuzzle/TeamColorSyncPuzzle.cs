@@ -4,13 +4,15 @@ using Photon.Realtime;
 using ExitGames.Client.Photon;
 using System.Collections.Generic;
 
+
 public class TeamColorSyncPuzzle : MonoBehaviourPunCallbacks
 {
     public static TeamColorSyncPuzzle Instance;
 
-    [SerializeField] private GameObject blueDoor;
-    [SerializeField] private GameObject redDoor;
+    [Header("Objetos a desaparecer cuando el equipo resuelve")]
+    [SerializeField] private GameObject[] objectsToDisableOnSolve;
 
+    [Header("Configuración")]
     [SerializeField] private float syncWindow = 0.5f;
 
     private const string TeamKey = "team";
@@ -23,7 +25,7 @@ public class TeamColorSyncPuzzle : MonoBehaviourPunCallbacks
     }
 
     private Dictionary<int, PressInfo> lastPressByActor = new Dictionary<int, PressInfo>();
-    private HashSet<string> solvedTeams = new HashSet<string>();
+    private bool puzzleSolved = false;
 
     private void Awake()
     {
@@ -32,6 +34,8 @@ public class TeamColorSyncPuzzle : MonoBehaviourPunCallbacks
 
     public void RegisterLocalPress(int colorIndex)
     {
+        if (puzzleSolved) return;
+
         var p = PhotonNetwork.LocalPlayer;
         string team = GetTeamOf(p);
         if (string.IsNullOrEmpty(team)) return;
@@ -44,8 +48,7 @@ public class TeamColorSyncPuzzle : MonoBehaviourPunCallbacks
     private void RPC_RegisterPress(int actorNumber, string team, int colorIndex, double time, PhotonMessageInfo info)
     {
         if (!PhotonNetwork.IsMasterClient) return;
-
-        if (solvedTeams.Contains(team)) return;
+        if (puzzleSolved) return;
 
         if (!lastPressByActor.ContainsKey(actorNumber))
             lastPressByActor[actorNumber] = new PressInfo();
@@ -54,74 +57,60 @@ public class TeamColorSyncPuzzle : MonoBehaviourPunCallbacks
         lastPressByActor[actorNumber].ColorIndex = colorIndex;
         lastPressByActor[actorNumber].Time = time;
 
-        CheckTeamSync(team, colorIndex, time);
+        CheckSync(colorIndex, time);
     }
 
-    private void CheckTeamSync(string team, int colorIndex, double time)
+    private void CheckSync(int colorIndex, double time)
     {
-        var teamPlayers = PhotonNetwork.PlayerList;
-        var teamList = new List<Player>();
-
-        foreach (var p in teamPlayers)
-        {
-            if (GetTeamOf(p) == team)
-                teamList.Add(p);
-        }
-
-        if (teamList.Count < 2) return;
-
-        PressInfo a = null;
-        PressInfo b = null;
-
-        foreach (var p in teamList)
-        {
-            if (!lastPressByActor.TryGetValue(p.ActorNumber, out var press))
-                return;
-            if (press.Team != team) return;
-            if (press.ColorIndex != colorIndex) return;
-
-            if (a == null) a = press;
-            else b = press;
-        }
-
-        if (a == null || b == null) return;
-
-        double dt = System.Math.Abs(a.Time - b.Time);
-        if (dt > syncWindow)
-        {
-            return;
-        }
-
-        int currentCubeColorIndex = GetCurrentCubeColorIndex();
-        if (currentCubeColorIndex != colorIndex)
-        {
-            return;
-        }
-
        
-        solvedTeams.Add(team);
-        photonView.RPC(nameof(RPC_OnTeamSolved), RpcTarget.All, team);
+        List<PressInfo> matchingPresses = new List<PressInfo>();
+
+        foreach (var press in lastPressByActor.Values)
+        {
+            if (press.ColorIndex == colorIndex)
+            {
+                matchingPresses.Add(press);
+            }
+        }
+
+        
+        if (matchingPresses.Count < 2) return;
+
+        
+        for (int i = 0; i < matchingPresses.Count; i++)
+        {
+            for (int j = i + 1; j < matchingPresses.Count; j++)
+            {
+                double dt = System.Math.Abs(matchingPresses[i].Time - matchingPresses[j].Time);
+                if (dt > syncWindow) return;
+            }
+        }
+
+        
+        int currentCubeColor = GetCurrentCubeColorIndex();
+        if (currentCubeColor != colorIndex) return;
+
+        
+        puzzleSolved = true;
+        photonView.RPC(nameof(RPC_PuzzleSolved), RpcTarget.All);
     }
 
     [PunRPC]
-    private void RPC_OnTeamSolved(string team)
+    private void RPC_PuzzleSolved()
     {
-        Debug.Log($"[TeamColorSyncPuzzle] Equipo {team} resolvió el puzzle de colores");
+        Debug.Log("[TeamColorSyncPuzzle] ¡Puzzle resuelto! Desapareciendo objetos...");
+
+        puzzleSolved = true;
 
         
-        if (team == "Blue" && blueDoor != null)
+        foreach (var obj in objectsToDisableOnSolve)
         {
-            blueDoor.SetActive(false);
-            Debug.Log("[TeamColorSyncPuzzle] Puerta Blue abierta");
+            if (obj != null)
+            {
+                obj.SetActive(false);
+                Debug.Log($"[TeamColorSyncPuzzle] Objeto desactivado: {obj.name}");
+            }
         }
-
-        if (team == "Red" && redDoor != null)
-        {
-            redDoor.SetActive(false);
-            Debug.Log("[TeamColorSyncPuzzle] Puerta Red abierta");
-        }
-
-
     }
 
     private int GetCurrentCubeColorIndex()
@@ -135,7 +124,7 @@ public class TeamColorSyncPuzzle : MonoBehaviourPunCallbacks
 
     private string GetTeamOf(Player p)
     {
-        if (p.CustomProperties == null) return "";
+        if (p?.CustomProperties == null) return "";
         return p.CustomProperties.TryGetValue(TeamKey, out object t) ? (t as string ?? "") : "";
     }
 }

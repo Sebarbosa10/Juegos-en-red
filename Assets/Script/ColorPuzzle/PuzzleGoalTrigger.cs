@@ -6,11 +6,11 @@ using PhotonHashtable = ExitGames.Client.Photon.Hashtable;
 
 public class PuzzleGoalTrigger : MonoBehaviourPunCallbacks
 {
-    [Header("Lobby Spawns")]
+    
     [SerializeField] private Transform lobbyBlueSpawn;
     [SerializeField] private Transform lobbyRedSpawn;
 
-    [Header("Settings")]
+    
     [SerializeField] private int nextRoundIndex = 3;
 
     private bool alreadyTriggered = false;
@@ -32,21 +32,19 @@ public class PuzzleGoalTrigger : MonoBehaviourPunCallbacks
         string team = GetTeamOf(pv.Owner);
         if (string.IsNullOrEmpty(team)) return;
 
-        // Bloquear inmediatamente para este cliente
+       
         alreadyTriggered = true;
 
         Debug.Log($"[PuzzleGoalTrigger] {pv.Owner.NickName} ({team}) llegó a la meta");
 
-        // Si SOY el MasterClient, proceso directamente
+        
         if (PhotonNetwork.IsMasterClient)
         {
             ProcessGoalReached(team);
         }
         else
         {
-            // Si NO soy MasterClient, le aviso al MasterClient via RPC
-            // Pero necesitamos un PhotonView para esto...
-            // Usamos propiedades de room como alternativa
+            
             var props = new PhotonHashtable
             {
                 { "goalReachedBy", team },
@@ -58,7 +56,7 @@ public class PuzzleGoalTrigger : MonoBehaviourPunCallbacks
 
     public override void OnRoomPropertiesUpdate(PhotonHashtable propertiesThatChanged)
     {
-        // Resetear cuando empieza nueva ronda
+        
         if (propertiesThatChanged.ContainsKey(MatchStartedKey))
         {
             bool matchStarted = (bool)propertiesThatChanged[MatchStartedKey];
@@ -69,10 +67,10 @@ public class PuzzleGoalTrigger : MonoBehaviourPunCallbacks
             }
         }
 
-        // MasterClient procesa cuando alguien llega a la meta
+        
         if (PhotonNetwork.IsMasterClient && propertiesThatChanged.ContainsKey("goalReachedBy"))
         {
-            if (alreadyTriggered) return; // Ya procesado
+            if (alreadyTriggered) return; 
 
             string team = propertiesThatChanged["goalReachedBy"] as string;
             if (!string.IsNullOrEmpty(team))
@@ -82,43 +80,38 @@ public class PuzzleGoalTrigger : MonoBehaviourPunCallbacks
             }
         }
     }
-
     private void ProcessGoalReached(string team)
     {
-        Debug.Log($"[PuzzleGoalTrigger] Procesando victoria de {team}");
+        Debug.LogWarning($"[PuzzleGoalTrigger] ========== GOAL REACHED ==========");
 
-        // 1. Agregar punto
+        
         if (ScoreManager.Instance != null)
         {
+            int blueAntes = ScoreManager.Instance.GetBlueScore();
+            int redAntes = ScoreManager.Instance.GetRedScore();
+            Debug.LogWarning($"[PuzzleGoalTrigger] Marcador ANTES: Blue={blueAntes}, Red={redAntes}");
+
             ScoreManager.Instance.AddPoint(team);
-            Debug.Log($"[PuzzleGoalTrigger] {team} +1 punto");
+            Debug.LogWarning($"[PuzzleGoalTrigger] Punto agregado a {team}");
         }
 
-        // 2. Resetear cartas
         ResetAllCards();
-
-        // 3. Resetear ready flags
         ResetAllReadyFlags();
-
-        // 4. Teletransportar a lobby
         TeleportAllPlayersToLobby();
 
-        // 5. Actualizar propiedades de room (esto notifica a todos)
         var props = new PhotonHashtable
-        {
-            { MatchStartedKey, false },
-            { RoundIndexKey, nextRoundIndex },
-            { "goalReachedBy", null } // Limpiar
-        };
+    {
+        { MatchStartedKey, false },
+        { RoundIndexKey, nextRoundIndex },
+        { "goalReachedBy", null }
+    };
         PhotonNetwork.CurrentRoom.SetCustomProperties(props);
 
-        Debug.Log($"[PuzzleGoalTrigger] matchStarted=false, roundIndex={nextRoundIndex}");
+        Debug.LogWarning($"[PuzzleGoalTrigger] matchStarted=false, roundIndex={nextRoundIndex}");
 
-        // 6. Resetear efectos locales del MasterClient
         ResetLocalPlayerCardEffects();
     }
 
-    // Este método se llama en todos los clientes cuando matchStarted cambia a false
     private void OnMatchEnded()
     {
         ResetLocalPlayerCardEffects();
