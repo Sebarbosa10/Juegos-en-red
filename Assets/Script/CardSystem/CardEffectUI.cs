@@ -6,8 +6,12 @@ public class CardEffectUI : MonoBehaviour
 {
     public static CardEffectUI Instance;
 
-    [SerializeField] private Image cardImage;
+   
+    [SerializeField] private Image cardImage;     
+    [SerializeField] private Image effectImage;   
     [SerializeField] private TextMeshProUGUI cardSourceText;
+
+    private Sprite _currentEffectSprite; 
 
     private void Awake()
     {
@@ -19,22 +23,49 @@ public class CardEffectUI : MonoBehaviour
         if (cardImage != null)
             cardImage.enabled = false;
 
+        if (effectImage != null)
+            effectImage.enabled = false;
+
         if (cardSourceText != null)
             cardSourceText.text = "";
     }
 
     public void ShowCard(CardData cardData, string fromPlayer)
     {
-        if (cardData == null || cardImage == null)
+        if (cardData == null)
             return;
 
-        // show icon
-        cardImage.sprite = cardData.icon;
-        cardImage.enabled = true;
+        
+        if (cardImage != null)
+        {
+            cardImage.sprite = cardData.icon;
+            cardImage.enabled = true;
+        }
 
-        // show who applied the card
+        
+        _currentEffectSprite = cardData.F_UI;
+
         if (cardSourceText != null)
             cardSourceText.text = "From " + fromPlayer;
+    }
+
+    
+    public void ShowEffectActive()
+    {
+        if (effectImage != null && _currentEffectSprite != null)
+        {
+            effectImage.sprite = _currentEffectSprite;
+            effectImage.enabled = true;
+        }
+    }
+
+   
+    public void HideEffectActive()
+    {
+        if (effectImage != null)
+        {
+            effectImage.enabled = false;
+        }
     }
 
     public void Clear()
@@ -42,7 +73,12 @@ public class CardEffectUI : MonoBehaviour
         if (cardImage != null)
             cardImage.enabled = false;
 
+        if (effectImage != null)
+            effectImage.enabled = false;
+
         if (cardSourceText != null)
             cardSourceText.text = "";
+
+        _currentEffectSprite = null;
     }
 }

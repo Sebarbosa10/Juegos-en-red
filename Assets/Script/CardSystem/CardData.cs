@@ -6,6 +6,7 @@ using UnityEngine;
 public class CardData
 {
     public Sprite icon;
+    public Sprite F_UI;
     public int id;
     public string cardName;
     public string description;
