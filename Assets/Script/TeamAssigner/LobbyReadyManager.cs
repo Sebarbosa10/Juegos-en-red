@@ -73,8 +73,10 @@ public class LobbyReadyManager : MonoBehaviourPunCallbacks
         bool alreadyStarted = PhotonNetwork.CurrentRoom.CustomProperties != null &&
                               PhotonNetwork.CurrentRoom.CustomProperties.ContainsKey(MatchStartedKey) &&
                               (bool)PhotonNetwork.CurrentRoom.CustomProperties[MatchStartedKey];
+
         if (alreadyStarted) return;
 
+        // Asignar equipos
         var players = PhotonNetwork.PlayerList.OrderBy(p => p.ActorNumber).ToArray();
         for (int i = 0; i < players.Length; i++)
         {
@@ -83,7 +85,20 @@ public class LobbyReadyManager : MonoBehaviourPunCallbacks
             players[i].SetCustomProperties(props);
         }
 
+        // INICIAR ANIMACIÓN DE BARAJEO EN TODOS
+        photonView.RPC(nameof(RPC_StartShuffleAnimation), RpcTarget.All);
+
         StartCoroutine(WaitTeamsPropsAndStart());
+    }
+
+    [PunRPC]
+    private void RPC_StartShuffleAnimation()
+    {
+        if (CardShuffleAnimation.Instance != null)
+        {
+            CardShuffleAnimation.Instance.StartShuffle();
+            Debug.Log("[LobbyReadyManager] Animación de barajeo iniciada");
+        }
     }
 
     private System.Collections.IEnumerator WaitTeamsPropsAndStart()
