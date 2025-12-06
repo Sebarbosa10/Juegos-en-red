@@ -5,11 +5,10 @@ using Photon.Pun;
 using Photon.Realtime;
 using PhotonHashtable = ExitGames.Client.Photon.Hashtable;
 
-
 public class LobbyReadyManager : MonoBehaviourPunCallbacks
 {
     [SerializeField] private int maxPlayers = 4;
-    
+
     [SerializeField] private TMPro.TMP_Text readyCountText;
 
     private const string ReadyKey = "ready";
@@ -20,12 +19,14 @@ public class LobbyReadyManager : MonoBehaviourPunCallbacks
 
     void Start()
     {
+        CheckMatchState();
         UpdateReadyUI();
         TryStartIfAllReady();
     }
 
     public override void OnJoinedRoom()
     {
+        CheckMatchState();
         UpdateReadyUI();
         TryStartIfAllReady();
     }
@@ -43,6 +44,43 @@ public class LobbyReadyManager : MonoBehaviourPunCallbacks
             UpdateReadyUI();
             TryStartIfAllReady();
         }
+    }
+
+    public override void OnRoomPropertiesUpdate(PhotonHashtable propertiesThatChanged)
+    {
+        if (propertiesThatChanged != null && propertiesThatChanged.ContainsKey(MatchStartedKey))
+        {
+            bool matchStarted = (bool)propertiesThatChanged[MatchStartedKey];
+            SetReadyUIVisible(!matchStarted);
+        }
+    }
+
+    private void CheckMatchState()
+    {
+        bool matchStarted = IsMatchStarted();
+        SetReadyUIVisible(!matchStarted);
+    }
+
+    private bool IsMatchStarted()
+    {
+        if (!PhotonNetwork.InRoom) return false;
+
+        var roomProps = PhotonNetwork.CurrentRoom?.CustomProperties;
+        if (roomProps != null && roomProps.ContainsKey(MatchStartedKey))
+        {
+            return (bool)roomProps[MatchStartedKey];
+        }
+        return false;
+    }
+
+    private void SetReadyUIVisible(bool visible)
+    {
+        if (readyCountText != null)
+        {
+            readyCountText.gameObject.SetActive(visible);
+        }
+
+        Debug.Log($"[LobbyReadyManager] Ready UI visible: {visible}");
     }
 
     private void UpdateReadyUI()
@@ -76,7 +114,6 @@ public class LobbyReadyManager : MonoBehaviourPunCallbacks
 
         if (alreadyStarted) return;
 
-        // Asignar equipos
         var players = PhotonNetwork.PlayerList.OrderBy(p => p.ActorNumber).ToArray();
         for (int i = 0; i < players.Length; i++)
         {
@@ -85,7 +122,6 @@ public class LobbyReadyManager : MonoBehaviourPunCallbacks
             players[i].SetCustomProperties(props);
         }
 
-        // INICIAR ANIMACIÓN DE BARAJEO EN TODOS
         photonView.RPC(nameof(RPC_StartShuffleAnimation), RpcTarget.All);
 
         StartCoroutine(WaitTeamsPropsAndStart());
@@ -130,13 +166,11 @@ public class LobbyReadyManager : MonoBehaviourPunCallbacks
             cardManager.DealCards();
             Debug.Log("[Lobby] Cartas repartidas a todos los jugadores.");
         }
-        
 
         yield return new WaitForSeconds(2f);
 
         PhotonNetwork.CurrentRoom.SetCustomProperties(
             new PhotonHashtable { { MatchStartedKey, true } }
         );
-        
     }
 }
