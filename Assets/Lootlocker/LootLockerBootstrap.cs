@@ -6,7 +6,7 @@ public class LootLockerBootstrap : MonoBehaviour
     public static bool SessionStarted { get; private set; }
     public static event System.Action OnSessionStarted;
 
-    [SerializeField] string playerIdentifier = "1";
+    private const string PlayerIdKey = "LootLockerPlayerId";
 
     private void Awake()
     {
@@ -16,7 +16,9 @@ public class LootLockerBootstrap : MonoBehaviour
 
     void StartGuest()
     {
-        LootLockerSDKManager.StartGuestSession(playerIdentifier, response =>
+        string playerId = GetOrCreatePlayerId();
+
+        LootLockerSDKManager.StartGuestSession(playerId, response =>
         {
             if (!response.success)
             {
@@ -24,8 +26,19 @@ public class LootLockerBootstrap : MonoBehaviour
                 return;
             }
             SessionStarted = true;
-            Debug.Log("LootLocker: Conectado");
+            Debug.Log($"LootLocker: Conectado con ID {playerId}");
             OnSessionStarted?.Invoke();
         });
+    }
+
+    string GetOrCreatePlayerId()
+    {
+        if (!PlayerPrefs.HasKey(PlayerIdKey))
+        {
+            string newId = System.Guid.NewGuid().ToString();
+            PlayerPrefs.SetString(PlayerIdKey, newId);
+            PlayerPrefs.Save();
+        }
+        return PlayerPrefs.GetString(PlayerIdKey);
     }
 }
