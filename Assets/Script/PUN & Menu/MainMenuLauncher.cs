@@ -60,8 +60,23 @@ public class MainMenuLauncher : MonoBehaviourPunCallbacks
         PlayerPrefs.SetString(NickKey, nick);
         PhotonNetwork.NickName = nick.ToUpper();
 
+        SetLootLockerName(nick.ToUpper());
+
         connectButton.interactable = false;
         PhotonNetwork.ConnectUsingSettings();
+    }
+
+    void SetLootLockerName(string name)
+    {
+        if (LootLockerBootstrap.SessionStarted)
+        {
+            PlayerNameHelper.SetPlayerName(name);
+        }
+        else
+        {
+            
+            LootLockerBootstrap.OnSessionStarted += () => PlayerNameHelper.SetPlayerName(name);
+        }
     }
 
     public override void OnConnectedToMaster()
